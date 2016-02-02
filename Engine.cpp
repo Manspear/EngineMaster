@@ -1,12 +1,18 @@
 #include "Engine.h"
 #include "bth_image.h" //This header wouldn't work in Engine.h VS complained
 					   //of one or more multiply defined symbols found
+#include <fbxsdk.h>
+
 Engine::Engine(){
 	//EMPTY
 }
 
+
 void Engine::CreateShaders()
 {
+
+
+
 	//create vertex shader
 	ID3DBlob* pVS = nullptr;
 	D3DCompileFromFile(
