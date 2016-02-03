@@ -25,7 +25,7 @@ public:
 	//FUNCTIONS
 
 	//VEIW
-	void initViewMatrix();
+	
 	void move(XMFLOAT3 direction);
 	void rotate(XMFLOAT3 axis, float degrees);
 	void setPosition(XMFLOAT3& newPosition);
@@ -41,6 +41,8 @@ public:
 	const float& getFrustAngle() const { return frustAngle; }
 	void setNearPlane(float nearest);
 	void setFarPlane(float farthest);
+	void InitProjMatrix(const float angle, const float height, const float width,
+		const float nearest, const float farthest); //initialize the camera projection matrix
 
 	const XMMATRIX getProjMatrix();
 
@@ -60,8 +62,8 @@ public:
 	XMMATRIX cProj;
 
 private:
-	void InitProjMatrix(const float angle, const float height, const float width, 
-		const float nearest, const float farthest); //initialize the camera projection matrix
+	void initViewMatrix();
+
 	
 
 

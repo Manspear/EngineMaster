@@ -49,6 +49,7 @@ public:
 	ID3D11VertexShader* gVertexShader = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;
+	GCamera * camera = nullptr;
 
 	void CreateShaders();
 	void CreateTriangleData();
@@ -60,6 +61,7 @@ public:
 	void Update();
 	void Clean(); //releases all resources
 	void Initialize(HWND wndHandle); //Initializes functions you only call once
+	void InitializeCamera();
 	HRESULT CreateDirect3DContext(HWND wndHandle);
 
 	/*LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
