@@ -48,7 +48,7 @@ void GCamera::setNearPlane(float nearest)
 }
 void GCamera::setFarPlane(float farthest)
 {
-	frustFar = farthest
+	frustFar = farthest;
 }
 
 const XMMATRIX GCamera::getProjMatrix()
