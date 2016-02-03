@@ -16,11 +16,11 @@ void GCamera::rotate(XMFLOAT3 axis, float degrees)
 }
 void GCamera::setPosition(XMFLOAT3& newPosition)
 {
-
+	cPosition = newPosition;
 }
 void GCamera::setTarget(XMFLOAT3 nTarget)
 {
-
+	cTarget = nTarget;
 }
 
 const XMFLOAT3 GCamera::getUp() //returns camera up vector
@@ -40,15 +40,15 @@ const XMMATRIX GCamera::getViewMatrix()
 //PROJECTION
 void GCamera::setFrustAngle(float Angle)
 {
-
+	frustAngle = Angle;
 }
 void GCamera::setNearPlane(float nearest)
 {
-
+	frustNear = nearest;
 }
 void GCamera::setFarPlane(float farthest)
 {
-
+	frustFar = farthest
 }
 
 const XMMATRIX GCamera::getProjMatrix()
