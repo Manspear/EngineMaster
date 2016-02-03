@@ -53,11 +53,15 @@ public:
 	float frustNear;
 	float frustFar;
 
-	XMMATRIX cVeiw;
+	float cHeight;
+	float cWidth;
+
+	XMMATRIX cView;
 	XMMATRIX cProj;
 
 private:
-	void InitProjMatrix(const float angle, const float height, const float width); //initialize the camera projection matrix
+	void InitProjMatrix(const float angle, const float height, const float width, 
+		const float nearest, const float farthest); //initialize the camera projection matrix
 	
 
 
