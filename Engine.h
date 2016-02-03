@@ -8,6 +8,8 @@
 
 #include <directXMath.h>
 
+#include "GCamera.h"
+
 #ifndef ENGINE_H
 #define ENGINE_H
 
