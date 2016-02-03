@@ -248,7 +248,7 @@ void Engine::Render()
 
 void Engine::Update() {
 
-	XMFLOAT4X4 worldMatrix;
+	XMMATRIX worldMatrix;
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
 
@@ -280,7 +280,8 @@ void Engine::Update() {
 	projMat = XMMatrixTranspose(projMat); //Transposes the matrix
 
 
-	XMStoreFloat4x4(&worldMatrix, worMat);
+	//XMStoreFloat4x4(&worldMatrix, worMat);
+	worMat = worldMatrix;
 	XMStoreFloat4x4(&viewMatrix, viewMat); //Stores the view matrix in a Float4x4-type variable. I wonder why.
 	XMStoreFloat4x4(&projectionMatrix, projMat);
 
@@ -291,8 +292,8 @@ void Engine::Update() {
 	dataPtr = (matrixBuffer*)gMappedResource.pData;
 
 	dataPtr->worldMatrix = worldMatrix;
-	dataPtr->viewMatrix = viewMatrix;
-	dataPtr->projectionMatrix = projectionMatrix;
+	dataPtr->viewMatrix = camera->getViewMatrix();
+	dataPtr->projectionMatrix = camera->getProjMatrix();
 
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
@@ -408,6 +409,7 @@ void Engine::Clean() {
 void Engine::InitializeCamera()
 {
 	camera = new GCamera;
+	camera->InitProjMatrix(XM_PI * 0.45, 480, 640, 0.5, 20);
 
 }
 
@@ -423,4 +425,6 @@ void Engine::Initialize(HWND wndHandle) {
 	CreateTexture();
 
 	CreateConstantBuffer();
+
+	InitializeCamera();
 }

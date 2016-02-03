@@ -71,7 +71,7 @@ void GCamera::InitProjMatrix(const float angle, const float height, const float 
 //CON/DESTRUCTOR
 GCamera::GCamera()
 {
-	cPosition = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	cPosition = XMFLOAT3(0.0f, 0.0f, -2.0f);
 	cTarget = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	cUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
