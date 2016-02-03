@@ -25,6 +25,7 @@ public:
 	//FUNCTIONS
 
 	//VEIW
+	void initViewMatrix();
 	void move(XMFLOAT3 direction);
 	void rotate(XMFLOAT3 axis, float degrees);
 	void setPosition(XMFLOAT3& newPosition);
