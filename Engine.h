@@ -28,9 +28,9 @@ private:
 public:
 	Engine();
 	struct matrixBuffer {
-		XMFLOAT4X4 worldMatrix;
-		XMFLOAT4X4 viewMatrix;
-		XMFLOAT4X4 projectionMatrix;
+		XMMATRIX worldMatrix;
+		XMMATRIX viewMatrix;
+		XMMATRIX projectionMatrix;
 	};
 
 	IDXGISwapChain* gSwapChain = nullptr;
