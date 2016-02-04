@@ -27,6 +27,7 @@ private:
 
 public:
 	Engine();
+	~Engine();
 	struct matrixBuffer {
 		XMMATRIX worldMatrix;
 		XMMATRIX viewMatrix;

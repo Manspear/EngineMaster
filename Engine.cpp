@@ -7,6 +7,10 @@ Engine::Engine(){
 	//EMPTY
 }
 
+Engine::~Engine()
+{
+	delete camera;
+}
 
 void Engine::CreateShaders()
 {
