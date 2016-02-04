@@ -30,7 +30,7 @@ struct PS_IN
 
 float4 PS_main(PS_IN input) : SV_Target
 {
-	float4 lightPos = { 0, 0, -0.201, 1 };
+	float4 lightPos = { 0, 0, -2.01, 1 };
 	float4 diffuseLightColor = { 1, 1, 1, 1 };
 	float4 ambientLightColor = { 0.1, 0.1, 0.1, 0 };
 

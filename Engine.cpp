@@ -1,6 +1,12 @@
 #include "Engine.h"
 #include "bth_image.h" //This header wouldn't work in Engine.h VS complained
 					   //of one or more multiply defined symbols found
+#pragma region OskIncludes
+#include "WICTextureLoader.h"
+#include <wincodec.h>
+
+#pragma endregion
+
 Engine::Engine(){
 	//EMPTY
 }
@@ -147,8 +153,17 @@ void Engine::CreateTexture() {
 	resViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	resViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
 	resViewDesc.Texture2D.MostDetailedMip = 0;
-	gDevice->CreateShaderResourceView(pTexture, &resViewDesc, &gTextureView);
+
+	//gDevice->CreateShaderResourceView(pTexture, &resViewDesc, &gTextureView); 
+	#pragma//Import texture from file
+	
+	ID3D11ShaderResourceView * Texture;
+	CoInitialize(NULL);
+
+	hr = CreateWICTextureFromFile(gDevice, L"SexyPic.jpg", NULL, &gTextureView);
+	
 	pTexture->Release();
+	
 }
 
 void Engine::CreateConstantBuffer() {
