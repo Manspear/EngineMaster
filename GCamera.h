@@ -27,13 +27,13 @@ public:
 	//VEIW
 	
 	void move(XMFLOAT3 direction);
-	void rotate(XMFLOAT3 axis, float degrees);
-	void setPosition(XMFLOAT3& newPosition);
-	const XMFLOAT3& getPosition() const { return cPosition; }
-	void setTarget(XMFLOAT3 nTarget);
-	const XMFLOAT3& getTarget() const { return cTarget; }
-	const XMFLOAT3 getUp(); //returns camera up vector
-	const XMFLOAT3 getLookAtTarget(); //returns camera look at target vector
+	void rotate(XMVECTOR axis, float degrees);
+	void setPosition(XMVECTOR& newPosition);
+	const XMVECTOR& getPosition() const { return cPosition; }
+	void setTarget(XMVECTOR nTarget);
+	const XMVECTOR& getTarget() const { return cTarget; }
+	const XMVECTOR getUp(); //returns camera up vector
+	const XMVECTOR getLookAtTarget(); //returns camera look at target vector
 	const XMMATRIX getViewMatrix();
 
 	//PROJECTION
@@ -47,9 +47,9 @@ public:
 	const XMMATRIX getProjMatrix();
 
 	//VARIABLES
-	XMFLOAT3 cPosition;
-	XMFLOAT3 cTarget;
-	XMFLOAT3 cUp;
+	XMVECTOR cPosition;
+	XMVECTOR cTarget;
+	XMVECTOR cUp;
 
 	float frustAngle;
 	float frustNear;

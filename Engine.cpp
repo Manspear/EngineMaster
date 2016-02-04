@@ -7,6 +7,10 @@ Engine::Engine(){
 	//EMPTY
 }
 
+Engine::~Engine()
+{
+	delete camera;
+}
 
 void Engine::CreateShaders()
 {
@@ -248,41 +252,16 @@ void Engine::Render()
 
 void Engine::Update() {
 
-	XMFLOAT4X4 worldMatrix;
-	XMFLOAT4X4 viewMatrix;
-	XMFLOAT4X4 projectionMatrix;
-
-
 	//world matrix
 	static float radianRotation = 0.00;
 	radianRotation += 0.0002;
 	XMMATRIX worMat = XMMatrixRotationY(radianRotation);
 
-
-	//view matrix
-	XMVECTOR camPos = XMVectorSet(0, 0, -2, 1); //Explanation of w: http://gamedev.stackexchange.com/questions/17987/what-does-the-graphics-card-do-with-the-fourth-element-of-a-vector-as-the-final
-	XMVECTOR lookAtVec = XMVectorSet(0, 0, 0, 1);
-	XMVECTOR upVec = XMVectorSet(0, 1, 0, 1);
-	XMMATRIX viewMat = XMMatrixLookAtLH(camPos, lookAtVec, upVec); //Makes a view-matrix <---- tHIS DOESN'T WORK FOR SOME REASON BECAUSE IM FUCKING RETARDED STUPID NIGGA SHIT FAGGS
-
-
-																   //projection matrix
-	float FOV = XM_PI * 0.45;
-	float aspectRatio = 640.f / 480.f; //If you divide int by int, u get an int. Remember floats.
-	float nearPlane = 0.5;
-	float farPlane = 20;
-	XMMATRIX projMat = XMMatrixPerspectiveFovLH(FOV, aspectRatio, nearPlane, farPlane);
-
-
 	//Transpose the matrices. This is a must for DirectX 11
 	worMat = XMMatrixTranspose(worMat);
-	viewMat = XMMatrixTranspose(viewMat); //Transposes it, it's a requirement for DirectX11. You do this b4 sending it into the GPU (the shader)
-	projMat = XMMatrixTranspose(projMat); //Transposes the matrix
 
 
-	XMStoreFloat4x4(&worldMatrix, worMat);
-	XMStoreFloat4x4(&viewMatrix, viewMat); //Stores the view matrix in a Float4x4-type variable. I wonder why.
-	XMStoreFloat4x4(&projectionMatrix, projMat);
+
 
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
 	matrixBuffer* dataPtr;
@@ -290,9 +269,9 @@ void Engine::Update() {
 	gDeviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (matrixBuffer*)gMappedResource.pData;
 
-	dataPtr->worldMatrix = worldMatrix;
-	dataPtr->viewMatrix = viewMatrix;
-	dataPtr->projectionMatrix = projectionMatrix;
+	dataPtr->worldMatrix = worMat;
+	dataPtr->viewMatrix = XMMatrixTranspose(camera->getViewMatrix());
+	dataPtr->projectionMatrix = XMMatrixTranspose(camera->getProjMatrix());
 
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
@@ -404,17 +383,27 @@ void Engine::Clean() {
 
 	depthStencilView->Release();
 	gDepthStencilBuffer->Release();
+
+	delete camera;
+	delete input;
 }
 void Engine::InitializeCamera()
 {
 	camera = new GCamera;
+	camera->InitProjMatrix(XM_PI * 0.45, wHEIGHT, wWIDTH, 0.5, 20);
 
 }
 
-void Engine::Initialize(HWND wndHandle) {
+void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
+	input = new GInput;
+
+
+
 	CreateDirect3DContext(wndHandle);
 
 	SetViewport();
+
+	input->initialize(hinstance, wndHandle, wWIDTH, wHEIGHT);
 
 	CreateShaders();
 
@@ -423,4 +412,6 @@ void Engine::Initialize(HWND wndHandle) {
 	CreateTexture();
 
 	CreateConstantBuffer();
+
+	InitializeCamera();
 }
