@@ -5,6 +5,13 @@ Engine::Engine(){
 	//EMPTY
 }
 
+#pragma region LoadTexture
+void Engine::LoadTexture()
+{
+
+}
+#pragma endregion
+
 void Engine::CreateShaders()
 {
 	//create vertex shader

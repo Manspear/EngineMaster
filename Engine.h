@@ -60,6 +60,8 @@ public:
 	void Initialize(HWND wndHandle); //Initializes functions you only call once
 	HRESULT CreateDirect3DContext(HWND wndHandle);
 
+	void LoadTexture();
+
 	/*LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	HWND InitWindow(HINSTANCE hInstance, Engine* engine);*/
 
