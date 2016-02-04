@@ -383,6 +383,9 @@ void Engine::Clean() {
 
 	depthStencilView->Release();
 	gDepthStencilBuffer->Release();
+
+	delete camera;
+	delete input;
 }
 void Engine::InitializeCamera()
 {
