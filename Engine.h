@@ -10,6 +10,8 @@
 
 #include "GCamera.h"
 
+#include "GInput.h"
+
 #ifndef ENGINE_H
 #define ENGINE_H
 
@@ -27,6 +29,7 @@ private:
 
 public:
 	Engine();
+	~Engine();
 	struct matrixBuffer {
 		XMMATRIX worldMatrix;
 		XMMATRIX viewMatrix;
@@ -50,6 +53,11 @@ public:
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;
 	GCamera * camera = nullptr;
+	GInput * input = nullptr;
+
+	int wHEIGHT = 480;
+	int wWIDTH = 640;
+
 
 	void CreateShaders();
 	void CreateTriangleData();
@@ -60,7 +68,7 @@ public:
 	void Render();
 	void Update();
 	void Clean(); //releases all resources
-	void Initialize(HWND wndHandle); //Initializes functions you only call once
+	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once
 	void InitializeCamera();
 	HRESULT CreateDirect3DContext(HWND wndHandle);
 
