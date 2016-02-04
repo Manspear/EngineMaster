@@ -45,7 +45,7 @@ void GInput::initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scr
 }
 bool GInput::frame()
 {
-
+	return true;
 }
 void GInput::GetMouseLoc(int&, int&)
 {
