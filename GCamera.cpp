@@ -3,31 +3,31 @@
 //VEIW
 void GCamera::initViewMatrix()
 {
-	cView = XMMatrixLookAtLH(XMLoadFloat3(&cPosition), XMLoadFloat3(&cTarget), XMLoadFloat3(&cUp));
+	cView = XMMatrixLookAtLH(cPosition, cTarget, cUp);
 }
 
-void GCamera::move(XMFLOAT3 direction)
+void GCamera::move(XMVECTOR direction)
 {
 
 }
-void GCamera::rotate(XMFLOAT3 axis, float degrees)
+void GCamera::rotate(XMVECTOR axis, float degrees)
 {
 
 }
-void GCamera::setPosition(XMFLOAT3& newPosition)
+void GCamera::setPosition(XMVECTOR& newPosition)
 {
 	cPosition = newPosition;
 }
-void GCamera::setTarget(XMFLOAT3 nTarget)
+void GCamera::setTarget(XMVECTOR nTarget)
 {
 	cTarget = nTarget;
 }
 
-const XMFLOAT3 GCamera::getUp() //returns camera up vector
+const XMVECTOR GCamera::getUp() //returns camera up vector
 {
 	return cUp;
 }
-const XMFLOAT3 GCamera::getLookAtTarget() //returns camera look at target vector
+const XMVECTOR GCamera::getLookAtTarget() //returns camera look at target vector
 {
 	return cTarget;
 }
@@ -65,15 +65,15 @@ void GCamera::InitProjMatrix(const float angle, const float height, const float 
 	frustFar = farthest;
 	frustNear = nearest;
 
-	cProj = XMMatrixPerspectiveFovLH(frustAngle, cHeight / cWidth, frustNear, frustFar);
+	cProj = XMMatrixPerspectiveFovLH(frustAngle, cWidth / cHeight, frustNear, frustFar);
 }
 
 //CON/DESTRUCTOR
 GCamera::GCamera()
 {
-	cPosition = XMFLOAT3(0.0f, 0.0f, -2.0f);
-	cTarget = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	cUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	cPosition = XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f);
+	cTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	cUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 
 	this->initViewMatrix();
 

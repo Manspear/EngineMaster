@@ -281,7 +281,7 @@ void Engine::Update() {
 
 
 	//XMStoreFloat4x4(&worldMatrix, worMat);
-	worMat = worldMatrix;
+	//worMat = worldMatrix;
 	XMStoreFloat4x4(&viewMatrix, viewMat); //Stores the view matrix in a Float4x4-type variable. I wonder why.
 	XMStoreFloat4x4(&projectionMatrix, projMat);
 
@@ -291,9 +291,9 @@ void Engine::Update() {
 	gDeviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (matrixBuffer*)gMappedResource.pData;
 
-	dataPtr->worldMatrix = worldMatrix;
-	dataPtr->viewMatrix = camera->getViewMatrix();
-	dataPtr->projectionMatrix = camera->getProjMatrix();
+	dataPtr->worldMatrix = worMat;
+	dataPtr->viewMatrix = XMMatrixTranspose(camera->getViewMatrix());
+	dataPtr->projectionMatrix = XMMatrixTranspose(camera->getProjMatrix());
 
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
