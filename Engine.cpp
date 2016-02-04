@@ -387,14 +387,20 @@ void Engine::Clean() {
 void Engine::InitializeCamera()
 {
 	camera = new GCamera;
-	camera->InitProjMatrix(XM_PI * 0.45, 480, 640, 0.5, 20);
+	camera->InitProjMatrix(XM_PI * 0.45, wHEIGHT, wWIDTH, 0.5, 20);
 
 }
 
-void Engine::Initialize(HWND wndHandle) {
+void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
+	input = new GInput;
+
+
+
 	CreateDirect3DContext(wndHandle);
 
 	SetViewport();
+
+	input->initialize(hinstance, wndHandle, wWIDTH, wHEIGHT);
 
 	CreateShaders();
 

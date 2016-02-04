@@ -67,7 +67,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	{
 		HRESULT CreateDirect3DContext(HWND wndHandle); //need to type engine.h
 
-		EngineClass.Initialize(wndHandle);
+		EngineClass.Initialize(wndHandle, hInstance);
 
 		ShowWindow(wndHandle, nCmdShow);
 

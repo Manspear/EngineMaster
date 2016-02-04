@@ -27,7 +27,7 @@ public:
 	~GInput();
 
 	void initialize(HINSTANCE, HWND, int, int);
-	bool frame();
+	unsigned char & getKeyboardState();
 	void GetMouseLoc(int&, int&);
 	void kill();
 
