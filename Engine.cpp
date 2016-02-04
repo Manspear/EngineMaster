@@ -405,6 +405,11 @@ void Engine::Clean() {
 	depthStencilView->Release();
 	gDepthStencilBuffer->Release();
 }
+void Engine::InitializeCamera()
+{
+	camera = new GCamera;
+
+}
 
 void Engine::Initialize(HWND wndHandle) {
 	CreateDirect3DContext(wndHandle);
