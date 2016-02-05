@@ -1,7 +1,7 @@
 #include "Engine.h"
 #include "bth_image.h" //This header wouldn't work in Engine.h VS complained
 					   //of one or more multiply defined symbols found
-#pragma region OskIncludes
+#pragma region Texture includes
 #include "WICTextureLoader.h"
 #include <wincodec.h>
 
@@ -11,12 +11,6 @@ Engine::Engine(){
 	//EMPTY
 }
 
-#pragma region LoadTexture
-void Engine::LoadTexture()
-{
-
-}
-#pragma endregion
 
 void Engine::CreateShaders()
 {
@@ -127,8 +121,9 @@ void Engine::CreateTriangleData()
 }
 
 void Engine::CreateTexture() {
+	#pragma region From memory
 	HRESULT hr;
-	D3D11_TEXTURE2D_DESC textureDesc;
+	/*D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
 	textureDesc.Width = BTH_IMAGE_WIDTH;
 	textureDesc.Height = BTH_IMAGE_HEIGHT;
@@ -153,16 +148,18 @@ void Engine::CreateTexture() {
 	resViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	resViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
 	resViewDesc.Texture2D.MostDetailedMip = 0;
-
+	
 	//gDevice->CreateShaderResourceView(pTexture, &resViewDesc, &gTextureView); 
-	#pragma//Import texture from file
+	//pTexture->Release();
+	*/
+	#pragma endregion//Import texture from memory
 	
 	ID3D11ShaderResourceView * Texture;
 	CoInitialize(NULL);
 
-	hr = CreateWICTextureFromFile(gDevice, L"SexyPic.jpg", NULL, &gTextureView);
+	hr = CreateWICTextureFromFile(gDevice, L"./Images/SexyPic.jpg", NULL, &gTextureView);
 	
-	pTexture->Release();
+	
 	
 }
 
