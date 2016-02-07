@@ -40,21 +40,22 @@ void GInput::initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scr
 	hr = DirectInput8Create(hinstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&gDirectInput, NULL);
 	hr = gDirectInput->CreateDevice(GUID_SysKeyboard, &gKeyboard, NULL);
 	hr = gKeyboard->SetDataFormat(&c_dfDIKeyboard);
-	hr = gKeyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
+	hr = gKeyboard->SetCooperativeLevel(hwnd, DISCL_BACKGROUND | DISCL_EXCLUSIVE);
 	hr = gKeyboard->Acquire();
 
 }
-unsigned char & GInput::getKeyboardState()
+void GInput::getKeyboardState()
 {
 	HRESULT hr;
 
-	if (!gKeyboard)
+	
+	hr = gKeyboard->GetDeviceState((sizeof(unsigned char)<<8), (void*)keyState);
+	if (hr != S_OK)
 	{
 		hr = gKeyboard->Acquire();
 	}
-	gKeyboard->GetDeviceState(sizeof(unsigned char), (void*)keyState);
 
-	return *keyState;
+
 }
 void GInput::GetMouseLoc(int&, int&)
 {

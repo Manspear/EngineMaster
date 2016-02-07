@@ -10,7 +10,7 @@ void GCamera::move(XMFLOAT3 direction)
 {
 	cPosition = XMVector4Transform(cPosition, XMMatrixTranslation(direction.x, direction.y, direction.z));
 	cTarget = XMVector4Transform(cTarget, XMMatrixTranslation(direction.x, direction.y, direction.z));
-	cUp = XMVector4Transform(cUp, XMMatrixTranslation(direction.x, direction.y, direction.z));
+	//cUp = XMVector4Transform(cUp, XMMatrixTranslation(direction.x, direction.y, direction.z));
 
 	this->initViewMatrix();
 }

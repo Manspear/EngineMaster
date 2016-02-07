@@ -16,7 +16,7 @@ private:
 	IDirectInputDevice8*gKeyboard;
 	IDirectInputDevice8*gMouse;
 
-	unsigned char keyState[256];
+	
 	DIMOUSESTATE mouseState;
 
 	int gScreenHeight, gScreenWidth;
@@ -26,8 +26,9 @@ public:
 	GInput();
 	~GInput();
 
+	unsigned char keyState[256];
 	void initialize(HINSTANCE, HWND, int, int);
-	unsigned char & getKeyboardState();
+	void getKeyboardState();
 	void GetMouseLoc(int&, int&);
 	void kill();
 
