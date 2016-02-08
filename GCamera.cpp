@@ -118,8 +118,6 @@ GCamera::GCamera()
 
 	cHeight = 0.0f;
 	cWidth = 0.0f;
-
-
 }
 
 XMVECTOR GCamera::FtoV(XMFLOAT4& flo)

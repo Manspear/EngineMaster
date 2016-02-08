@@ -111,10 +111,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bth_image.h" />
-    <ClInclude Include="GCamera.h" />
     <ClInclude Include="Engine.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="GCamera.h" />
     <ClInclude Include="GInput.h" />
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
