@@ -260,7 +260,16 @@ void Engine::Update() {
 	//Transpose the matrices. This is a must for DirectX 11
 	worMat = XMMatrixTranspose(worMat);
 
+	input->getKeyboardState();
 
+	if (input->keyState[DIK_S])
+		camera->move(XMFLOAT3(0, 0, -0.001));
+	if (input->keyState[DIK_A])
+		camera->move(XMFLOAT3(-0.001, 0, 0));
+	if (input->keyState[DIK_D])
+		camera->move(XMFLOAT3(0.001, 0, 0));
+	if (input->keyState[DIK_W])
+		camera->move(XMFLOAT3(0, 0, 0.001));
 
 
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;

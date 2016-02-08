@@ -57,7 +57,7 @@ public:
 
 	int wHEIGHT = 480;
 	int wWIDTH = 640;
-
+	byte * keys;
 
 	void CreateShaders();
 	void CreateTriangleData();
