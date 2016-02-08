@@ -26,9 +26,9 @@ public:
 
 	//VEIW
 	
-	void move(XMFLOAT3 direction);
+	void move(XMFLOAT4 direction);
 	void rotate(XMFLOAT4 axis, float degrees);
-	void setPosition(XMVECTOR& newPosition);
+	void setPosition(XMFLOAT4& newPosition);
 	const XMVECTOR& getPosition() const { return cPosition; }
 	void setTarget(XMFLOAT4 nTarget);
 	const XMVECTOR& getTarget() const { return cTarget; }
