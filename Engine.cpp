@@ -9,7 +9,7 @@ Engine::Engine(){
 
 Engine::~Engine()
 {
-	delete camera;
+
 }
 
 void Engine::CreateShaders()
