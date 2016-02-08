@@ -16,7 +16,6 @@ void Engine::CreateShaders()
 {
 
 
-
 	//create vertex shader
 	ID3DBlob* pVS = nullptr;
 	D3DCompileFromFile(
@@ -261,6 +260,10 @@ void Engine::Update() {
 	worMat = XMMatrixTranspose(worMat);
 
 	input->getKeyboardState();
+	input->GetMouseLoc();
+
+	camera->rotate(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), input->mouseY);
+	camera->rotate(XMFLOAT4(0.0f, -1.0f, 0.0f, 1.0f), -input->mouseX);
 
 	if (input->keyState[DIK_S])
 		camera->move(XMFLOAT4(0, 0, -0.001, 1.0f));

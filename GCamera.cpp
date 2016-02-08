@@ -26,7 +26,7 @@ void GCamera::rotate(XMFLOAT4 axis, float degrees)
 	lookAtUp = VtoF(XMVector4Transform(FtoV(lookAtUp), XMMatrixRotationAxis(FtoV(axis), XMConvertToRadians(degrees))));
 
 	cTarget = (cPosition + FtoV(lookAtTarget));
-	cUp = (cPosition + FtoV(lookAtUp));
+	//cUp = (cPosition + FtoV(lookAtUp));
 
 	this->initViewMatrix();
 

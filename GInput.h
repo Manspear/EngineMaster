@@ -17,16 +17,17 @@ private:
 	IDirectInputDevice8*gMouse;
 
 	int gScreenHeight, gScreenWidth;
-	int mouseX, mouseY;
+	DIMOUSESTATE mouseState;
 
 public:
 	GInput();
 	~GInput();
-	DIMOUSESTATE mouseState;
+	
+	int mouseX, mouseY;
 	unsigned char keyState[256];
 	void initialize(HINSTANCE, HWND, int, int);
 	void getKeyboardState();
-	void GetMouseLoc(int&, int&);
+	void GetMouseLoc();
 	void kill();
 
 };
