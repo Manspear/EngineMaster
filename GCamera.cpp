@@ -14,7 +14,7 @@ void GCamera::move(XMFLOAT3 direction)
 
 	this->initViewMatrix();
 }
-void GCamera::rotate(XMVECTOR axis, float degrees)
+void GCamera::rotate(XMFLOAT4 axis, float degrees)
 {
 
 }
