@@ -3,6 +3,13 @@
 					   //of one or more multiply defined symbols found
 #include <fbxsdk.h>
 
+#pragma region Texture includes
+#include "WICTextureLoader.h"
+#include <wincodec.h>
+
+#pragma endregion
+
+
 Engine::Engine(){
 	//EMPTY
 }
@@ -124,8 +131,9 @@ void Engine::CreateTriangleData()
 }
 
 void Engine::CreateTexture() {
+	#pragma region // Import texture from memory
 	HRESULT hr;
-	D3D11_TEXTURE2D_DESC textureDesc;
+	/*D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
 	textureDesc.Width = BTH_IMAGE_WIDTH;
 	textureDesc.Height = BTH_IMAGE_HEIGHT;
@@ -150,9 +158,22 @@ void Engine::CreateTexture() {
 	resViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	resViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
 	resViewDesc.Texture2D.MostDetailedMip = 0;
+
 	gDevice->CreateShaderResourceView(pTexture, &resViewDesc, &gTextureView);
-	pTexture->Release();
+	pTexture->Release();*/
+	
+	#pragma endregion
+
+	#pragma region //Import from File
+	ID3D11ShaderResourceView * Texture;
+	CoInitialize(NULL);
+
+	hr = CreateWICTextureFromFile(gDevice, L"./Images/SexyPic.jpg", NULL, &gTextureView);
+	#pragma endregion 
+	
+
 }
+
 
 void Engine::CreateConstantBuffer() {
 
