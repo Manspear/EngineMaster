@@ -16,18 +16,32 @@ void GCamera::move(XMFLOAT3 direction)
 }
 void GCamera::rotate(XMFLOAT4 axis, float degrees)
 {
+	if (XMVector4Equal(FtoV(axis), XMVectorZero()) || degrees == 0.0f)
+		return;
 
+	XMFLOAT4 lookAtTarget = VtoF(cTarget - cPosition);
+	XMFLOAT4 lookAtUp = VtoF(cUp - cPosition);
 
+	lookAtTarget = VtoF(XMVector4Transform(FtoV(lookAtTarget), XMMatrixRotationAxis(FtoV(axis), XMConvertToRadians(degrees))));
+	lookAtUp = VtoF(XMVector4Transform(FtoV(lookAtUp), XMMatrixRotationAxis(FtoV(axis), XMConvertToRadians(degrees))));
 
+	cTarget = (cPosition + FtoV(lookAtTarget));
+	cUp = (cPosition + FtoV(lookAtUp));
+
+	this->initViewMatrix();
 
 }
 void GCamera::setPosition(XMVECTOR& newPosition)
 {
 	cPosition = newPosition;
 }
-void GCamera::setTarget(XMVECTOR nTarget)
+void GCamera::setTarget(XMFLOAT4 nTarget)
 {
-	cTarget = nTarget;
+	if (XMVector4Equal(FtoV(nTarget), cTarget) || XMVector4Equal(FtoV(nTarget), cPosition))
+		return;
+
+	//XMFLOAT4 
+
 }
 
 const XMVECTOR GCamera::getUp() //returns camera up vector
@@ -94,12 +108,12 @@ GCamera::GCamera()
 
 }
 
-inline XMVECTOR FtoV(XMFLOAT4& flo)
+XMVECTOR GCamera::FtoV(XMFLOAT4& flo)
 {
 	return XMLoadFloat4(&flo);
 }
 
-inline XMFLOAT4 VtoF(XMVECTOR& vec)
+XMFLOAT4 GCamera::VtoF(XMVECTOR& vec)
 {
 	XMFLOAT4 flo;
 	XMStoreFloat4(&flo, vec);

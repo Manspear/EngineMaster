@@ -30,7 +30,7 @@ public:
 	void rotate(XMFLOAT4 axis, float degrees);
 	void setPosition(XMVECTOR& newPosition);
 	const XMVECTOR& getPosition() const { return cPosition; }
-	void setTarget(XMVECTOR nTarget);
+	void setTarget(XMFLOAT4 nTarget);
 	const XMVECTOR& getTarget() const { return cTarget; }
 	const XMVECTOR getUp(); //returns camera up vector
 	const XMVECTOR getLookAtTarget(); //returns camera look at target vector
@@ -63,8 +63,8 @@ public:
 
 private:
 	void initViewMatrix();
-	inline XMVECTOR FtoV(XMFLOAT4& flo);
-	inline XMFLOAT4 VtoF(XMVECTOR& vec);
+	XMVECTOR FtoV(XMFLOAT4& flo);
+	XMFLOAT4 VtoF(XMVECTOR& vec);
 	
 
 
