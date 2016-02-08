@@ -64,7 +64,7 @@ void GInput::getKeyboardState()
 
 
 }
-void GInput::GetMouseLoc(int& x, int& y)
+void GInput::GetMouseLoc()
 {
 	HRESULT hr;
 	hr = gMouse->GetDeviceState(sizeof(DIMOUSESTATE), (void*)&mouseState);
@@ -74,16 +74,13 @@ void GInput::GetMouseLoc(int& x, int& y)
 	mouseX = mouseState.lX;
 	mouseY = mouseState.lY;
 
-	if (mouseX <= 0)
-		mouseX = 0;
+	//if (mouseX <= 0)
+	//	mouseX = 0;
 	if (mouseX > gScreenWidth)
 		mouseX = gScreenWidth;
-	if (mouseY <= 0)
-		mouseY = 0;
+	//if (mouseY <= 0)
+	//	mouseY = 0;
 	if (mouseY > gScreenHeight)
 		mouseY = gScreenHeight;
-
-	x = mouseX;
-	y = mouseY;
 	
 }
