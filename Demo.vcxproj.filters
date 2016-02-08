@@ -46,10 +46,10 @@
     <ClInclude Include="Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GCamera.h">
+    <ClInclude Include="GInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GInput.h">
+    <ClInclude Include="GCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
