@@ -8,7 +8,7 @@ GInput::GInput()
 }
 GInput::~GInput()
 {
-
+	this->kill();
 }
 
 void GInput::kill()
