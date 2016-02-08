@@ -17,6 +17,9 @@ void GCamera::move(XMFLOAT3 direction)
 void GCamera::rotate(XMFLOAT4 axis, float degrees)
 {
 
+
+
+
 }
 void GCamera::setPosition(XMVECTOR& newPosition)
 {
@@ -90,6 +93,19 @@ GCamera::GCamera()
 
 
 }
+
+inline XMVECTOR FtoV(XMFLOAT4& flo)
+{
+	return XMLoadFloat4(&flo);
+}
+
+inline XMFLOAT4 VtoF(XMVECTOR& vec)
+{
+	XMFLOAT4 flo;
+	XMStoreFloat4(&flo, vec);
+	return flo;
+}
+
 GCamera::~GCamera()
 {
 

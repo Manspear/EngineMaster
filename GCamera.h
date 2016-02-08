@@ -27,7 +27,7 @@ public:
 	//VEIW
 	
 	void move(XMFLOAT3 direction);
-	void rotate(XMVECTOR axis, float degrees);
+	void rotate(XMFLOAT4 axis, float degrees);
 	void setPosition(XMVECTOR& newPosition);
 	const XMVECTOR& getPosition() const { return cPosition; }
 	void setTarget(XMVECTOR nTarget);
@@ -63,7 +63,8 @@ public:
 
 private:
 	void initViewMatrix();
-
+	inline XMVECTOR FtoV(XMFLOAT4& flo);
+	inline XMFLOAT4 VtoF(XMVECTOR& vec);
 	
 
 
