@@ -40,8 +40,18 @@ void GCamera::setTarget(XMFLOAT4 nTarget)
 	if (XMVector4Equal(FtoV(nTarget), cTarget) || XMVector4Equal(FtoV(nTarget), cPosition))
 		return;
 
-	//XMFLOAT4 
+	XMFLOAT4 oldTarget = VtoF(cTarget - cPosition);
+	XMFLOAT4 newTarget = VtoF(FtoV(nTarget) - cPosition);
 
+	float angle = XMConvertToDegrees(XMVectorGetX(XMVector4AngleBetweenNormals(XMVector4Normalize(FtoV(oldTarget)),
+		XMVector4Normalize(FtoV(newTarget)))));
+
+	if (angle != 0.0f && angle != 360.0f && angle != 180.0f)
+	{
+		XMVECTOR axis = XMVector3Cross(FtoV(oldTarget), FtoV(newTarget));
+		rotate(VtoF(axis), angle);
+	}
+	cTarget = FtoV(nTarget);
 }
 
 const XMVECTOR GCamera::getUp() //returns camera up vector
