@@ -6,7 +6,7 @@ void GCamera::initViewMatrix()
 	cView = XMMatrixLookAtLH(cPosition, cTarget, cUp);
 }
 
-void GCamera::move(XMFLOAT3 direction)
+void GCamera::move(XMFLOAT4 direction)
 {
 	cPosition = XMVector4Transform(cPosition, XMMatrixTranslation(direction.x, direction.y, direction.z));
 	cTarget = XMVector4Transform(cTarget, XMMatrixTranslation(direction.x, direction.y, direction.z));
@@ -31,9 +31,13 @@ void GCamera::rotate(XMFLOAT4 axis, float degrees)
 	this->initViewMatrix();
 
 }
-void GCamera::setPosition(XMVECTOR& newPosition)
+void GCamera::setPosition(XMFLOAT4& newPosition)
 {
-	cPosition = newPosition;
+	XMFLOAT4 move = VtoF(FtoV(newPosition) - cPosition);
+	XMFLOAT4 target = VtoF(cTarget);
+
+	this->move(move);
+	this->setTarget(target);
 }
 void GCamera::setTarget(XMFLOAT4 nTarget)
 {
