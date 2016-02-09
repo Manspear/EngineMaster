@@ -3,31 +3,30 @@
 					   //of one or more multiply defined symbols found
 #include <fbxsdk.h>
 
-<<<<<<< HEAD
+
 #pragma region Texture includes
 #include "WICTextureLoader.h"
 #include <wincodec.h>
 
 #pragma endregion
 
-=======
->>>>>>> refs/remotes/origin/superbranch_Jesper
+
+
 
 Engine::Engine(){
 	//EMPTY
 }
 
-<<<<<<< HEAD
+
 Engine::~Engine()
 {
 
 }
 
-void Engine::CreateShaders()
-=======
+
 //Jesper
 void Engine::loadModels(std::vector<MyVertex>* pOutVertexVector)
->>>>>>> refs/remotes/origin/superbranch_Jesper
+
 {
 	FbxManager *SDK_Manager = FbxManager::Create();
 
@@ -38,8 +37,8 @@ void Engine::loadModels(std::vector<MyVertex>* pOutVertexVector)
 	ios->SetBoolProp(IMP_FBX_MATERIAL, true);
 	ios->SetBoolProp(IMP_FBX_TEXTURE, true);
 
-<<<<<<< HEAD
-=======
+
+
 	FbxScene* Fbx_Scene = FbxScene::Create(SDK_Manager, "");
 
 	FbxImporter * Fbx_Importer = FbxImporter::Create(SDK_Manager,"");
@@ -83,7 +82,7 @@ void Engine::loadModels(std::vector<MyVertex>* pOutVertexVector)
 
 void Engine::CreateShaders()
 {
->>>>>>> refs/remotes/origin/superbranch_Jesper
+
 	//create vertex shader
 	ID3DBlob* pVS = nullptr;
 	D3DCompileFromFile(
@@ -333,13 +332,10 @@ void Engine::Render()
 
 void Engine::Update() {
 
-<<<<<<< HEAD
-=======
 	XMFLOAT4X4 worldMatrix;
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
 
->>>>>>> refs/remotes/origin/superbranch_Jesper
 	//world matrix
 	static float radianRotation = 0.00;
 	//radianRotation += 0.0002;

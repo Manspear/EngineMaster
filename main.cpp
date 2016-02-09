@@ -70,12 +70,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 		HRESULT CreateDirect3DContext(HWND wndHandle); //need to type engine.h
 
-<<<<<<< HEAD
+
 		EngineClass.Initialize(wndHandle, hInstance);
 
-=======
-		EngineClass.Initialize(wndHandle);
->>>>>>> refs/remotes/origin/superbranch_Jesper
 		ShowWindow(wndHandle, nCmdShow);
 
 		while (WM_QUIT != msg.message)
