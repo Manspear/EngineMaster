@@ -39,7 +39,6 @@ void FbxDawg::loadModels(std::vector<MyVertex>* pOutVertexVector)
 		for (int i = 0; i < FbxRootNode->GetChildCount(); i++)
 		{
 			FbxNode* FbxChildNode = FbxRootNode->GetChild(i);
-
 			if (FbxChildNode->GetNodeAttribute() == NULL)
 				continue;
 			FbxNodeAttribute::EType AttributeType = FbxChildNode->GetNodeAttribute()->GetAttributeType();
