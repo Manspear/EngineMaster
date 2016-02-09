@@ -3,18 +3,85 @@
 					   //of one or more multiply defined symbols found
 #include <fbxsdk.h>
 
+
+#pragma region Texture includes
+#include "WICTextureLoader.h"
+#include <wincodec.h>
+
+#pragma endregion
+
+
+
+
 Engine::Engine(){
 	//EMPTY
 }
+
 
 Engine::~Engine()
 {
 
 }
 
+
+//Jesper
+void Engine::loadModels(std::vector<MyVertex>* pOutVertexVector)
+
+{
+	FbxManager *SDK_Manager = FbxManager::Create();
+
+	FbxIOSettings *ios = FbxIOSettings::Create(SDK_Manager, IOSROOT);
+	
+	SDK_Manager->SetIOSettings(ios);
+
+	ios->SetBoolProp(IMP_FBX_MATERIAL, true);
+	ios->SetBoolProp(IMP_FBX_TEXTURE, true);
+
+
+
+	FbxScene* Fbx_Scene = FbxScene::Create(SDK_Manager, "");
+
+	FbxImporter * Fbx_Importer = FbxImporter::Create(SDK_Manager,"");
+	Fbx_Importer->Initialize("D:\skolan\3D PROGRAMMERING\Programmering\Projektet\itsBoxxy.fbx",-1, SDK_Manager->GetIOSettings());// eller ios istället för SDK_M
+	Fbx_Importer->Import(Fbx_Scene);
+	Fbx_Importer->Destroy();
+
+	FbxNode* FbxRootNode = Fbx_Scene->GetRootNode();
+
+	if(FbxRootNode)
+	{
+		for (int i = 0; i < FbxRootNode->GetChildCount(); i++)
+		{
+			FbxNode* FbxChildNode = FbxRootNode->GetChild(i);
+
+			if (FbxChildNode->GetNodeAttribute() == NULL)
+				continue;
+			FbxNodeAttribute::EType AttributeType = FbxChildNode->GetNodeAttribute()->GetAttributeType();
+			if (AttributeType != FbxNodeAttribute::eMesh)
+				continue;
+			FbxMesh* mesh = (FbxMesh*)FbxChildNode->GetNodeAttribute();
+			FbxVector4* Vertices = mesh->GetControlPoints();
+
+			for (int j = 0; j < mesh->GetPolygonCount(); j++)
+			{
+				int totalVertices = mesh->GetPolygonSize(j);
+				assert(totalVertices == 3);
+				for (int k = 0; k < totalVertices; k++)
+				{
+					int controlPointIndex = mesh->GetPolygonVertex(j, k);//j = polygon, k = vertex, går igenom en vertex i taget för en triangel.
+					MyVertex vertex;
+					vertex.pos[0] = (float)Vertices[controlPointIndex].mData[0];
+					vertex.pos[1] = (float)Vertices[controlPointIndex].mData[1];
+					vertex.pos[2] = (float)Vertices[controlPointIndex].mData[2];
+					pOutVertexVector->push_back(vertex);
+				}
+			}
+		}
+	}
+}
+
 void Engine::CreateShaders()
 {
-
 
 	//create vertex shader
 	ID3DBlob* pVS = nullptr;
@@ -123,8 +190,9 @@ void Engine::CreateTriangleData()
 }
 
 void Engine::CreateTexture() {
+	#pragma region // Import texture from memory
 	HRESULT hr;
-	D3D11_TEXTURE2D_DESC textureDesc;
+	/*D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
 	textureDesc.Width = BTH_IMAGE_WIDTH;
 	textureDesc.Height = BTH_IMAGE_HEIGHT;
@@ -149,9 +217,22 @@ void Engine::CreateTexture() {
 	resViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	resViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
 	resViewDesc.Texture2D.MostDetailedMip = 0;
+
 	gDevice->CreateShaderResourceView(pTexture, &resViewDesc, &gTextureView);
-	pTexture->Release();
+	pTexture->Release();*/
+	
+	#pragma endregion
+
+	#pragma region //Import from File
+	ID3D11ShaderResourceView * Texture;
+	CoInitialize(NULL);
+
+	hr = CreateWICTextureFromFile(gDevice, L"./Images/SexyPic.jpg", NULL, &gTextureView);
+	#pragma endregion 
+	
+
 }
+
 
 void Engine::CreateConstantBuffer() {
 
@@ -250,6 +331,10 @@ void Engine::Render()
 
 
 void Engine::Update() {
+
+	XMFLOAT4X4 worldMatrix;
+	XMFLOAT4X4 viewMatrix;
+	XMFLOAT4X4 projectionMatrix;
 
 	//world matrix
 	static float radianRotation = 0.00;

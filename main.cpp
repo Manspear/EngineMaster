@@ -59,13 +59,17 @@ HWND InitWindow(HINSTANCE hInstance)
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
+	std::vector<Engine::MyVertex>* pOutVertexVector = new std::vector<Engine::MyVertex>;
 	Engine EngineClass;
+	EngineClass.loadModels(pOutVertexVector);
 	MSG msg = { 0 };
 	HWND wndHandle = InitWindow(hInstance);
 
 	if (wndHandle)
 	{
+
 		HRESULT CreateDirect3DContext(HWND wndHandle); //need to type engine.h
+
 
 		EngineClass.Initialize(wndHandle, hInstance);
 

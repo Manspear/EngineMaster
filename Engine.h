@@ -12,6 +12,13 @@
 
 #include "GInput.h"
 
+#include <assert.h>
+#include <vector>
+
+
+
+
+
 #ifndef ENGINE_H
 #define ENGINE_H
 
@@ -35,6 +42,10 @@ public:
 		XMMATRIX viewMatrix;
 		XMMATRIX projectionMatrix;
 	};
+	struct MyVertex
+	{
+		float pos[3];
+	};
 
 	IDXGISwapChain* gSwapChain = nullptr;
 	ID3D11Device* gDevice = nullptr;
@@ -52,12 +63,16 @@ public:
 	ID3D11VertexShader* gVertexShader = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;
+
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
 
 	int wHEIGHT = 480;
 	int wWIDTH = 640;
 	byte * keys;
+
+
+	void loadModels(std::vector<MyVertex>* pOutVertexVector);
 
 	void CreateShaders();
 	void CreateTriangleData();
