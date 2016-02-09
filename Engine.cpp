@@ -300,26 +300,15 @@ void Engine::Update() {
 
 	// kryssprodukten mellan upp vektor och riktings vektorn ger sidleds vektorn.
 	if (input->keyState[DIK_S])
-	{
 		camera->moveForward(-0.001);
-		//camera->move(XMFLOAT4(0, 0, -0.001, 1.0f));
-	}
-		
-
 	if (input->keyState[DIK_A])
-	{
 		camera->moveStrafe(0.001);
-		//camera->move(XMFLOAT4(-0.001, 0, 0, 1.0f));
-	}
-		
 	if (input->keyState[DIK_D])
-	{
 		camera->moveStrafe(-0.001);
-		//camera->move(XMFLOAT4(0.001, 0, 0, 1.0f));
-	}
-		
 	if (input->keyState[DIK_W])
 		camera->moveForward(0.001);
+	if (input->keyState[DIK_R])
+		camera->reset();
 
 
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
