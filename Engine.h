@@ -8,6 +8,12 @@
 
 #include <directXMath.h>
 
+#include <assert.h>
+#include <vector>
+
+
+
+
 #ifndef ENGINE_H
 #define ENGINE_H
 
@@ -30,6 +36,10 @@ public:
 		XMFLOAT4X4 viewMatrix;
 		XMFLOAT4X4 projectionMatrix;
 	};
+	struct MyVertex
+	{
+		float pos[3];
+	};
 
 	IDXGISwapChain* gSwapChain = nullptr;
 	ID3D11Device* gDevice = nullptr;
@@ -47,7 +57,7 @@ public:
 	ID3D11VertexShader* gVertexShader = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;
-
+	void loadModels(std::vector<MyVertex>* pOutVertexVector);
 	void CreateShaders();
 	void CreateTriangleData();
 	void CreateTexture();
