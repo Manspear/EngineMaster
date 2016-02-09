@@ -23,7 +23,7 @@ public:
 	};
 	struct MyUV
 	{
-		float uvCoord[2];
+		float coord[2];
 		int uvIndex;
 	};
 	
@@ -33,6 +33,7 @@ public:
 		MyNormal norVar;
 		MyUV uvVar;
 	};
+
 	void loadModels(std::vector<MyVertex>* pOutVertexVector);
 };
 #endif
