@@ -292,8 +292,12 @@ void Engine::Update() {
 	input->getKeyboardState();
 	input->GetMouseLoc();
 
-	camera->rotate(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), input->mouseY);
-	camera->rotate(XMFLOAT4(0.0f, -1.0f, 0.0f, 1.0f), -input->mouseX);
+	if (input->keyState[DIK_LALT])
+	{
+		camera->rotate(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), input->mouseY);
+		camera->rotate(XMFLOAT4(0.0f, -1.0f, 0.0f, 1.0f), -input->mouseX);
+	}
+
 	// kryssprodukten mellan upp vektor och riktings vektorn ger sidleds vektorn.
 	if (input->keyState[DIK_S])
 	{
