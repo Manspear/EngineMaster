@@ -8,8 +8,13 @@
 
 #include <directXMath.h>
 
+#include "GCamera.h"
+
+#include "GInput.h"
+
 #include <assert.h>
 #include <vector>
+
 
 
 
@@ -31,10 +36,11 @@ private:
 
 public:
 	Engine();
+	~Engine();
 	struct matrixBuffer {
-		XMFLOAT4X4 worldMatrix;
-		XMFLOAT4X4 viewMatrix;
-		XMFLOAT4X4 projectionMatrix;
+		XMMATRIX worldMatrix;
+		XMMATRIX viewMatrix;
+		XMMATRIX projectionMatrix;
 	};
 	struct MyVertex
 	{
@@ -57,7 +63,17 @@ public:
 	ID3D11VertexShader* gVertexShader = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;
+
+	GCamera * camera = nullptr;
+	GInput * input = nullptr;
+
+	int wHEIGHT = 480;
+	int wWIDTH = 640;
+	byte * keys;
+
+
 	void loadModels(std::vector<MyVertex>* pOutVertexVector);
+
 	void CreateShaders();
 	void CreateTriangleData();
 	void CreateTexture();
@@ -67,7 +83,8 @@ public:
 	void Render();
 	void Update();
 	void Clean(); //releases all resources
-	void Initialize(HWND wndHandle); //Initializes functions you only call once
+	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once
+	void InitializeCamera();
 	HRESULT CreateDirect3DContext(HWND wndHandle);
 
 	/*LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

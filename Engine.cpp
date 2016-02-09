@@ -4,12 +4,29 @@
 #include <fbxsdk.h>
 
 
+#pragma region Texture includes
+#include "WICTextureLoader.h"
+#include <wincodec.h>
+
+#pragma endregion
+
+
+
+
 Engine::Engine(){
 	//EMPTY
 }
 
+
+Engine::~Engine()
+{
+
+}
+
+
 //Jesper
 void Engine::loadModels(std::vector<MyVertex>* pOutVertexVector)
+
 {
 	FbxManager *SDK_Manager = FbxManager::Create();
 
@@ -19,6 +36,8 @@ void Engine::loadModels(std::vector<MyVertex>* pOutVertexVector)
 
 	ios->SetBoolProp(IMP_FBX_MATERIAL, true);
 	ios->SetBoolProp(IMP_FBX_TEXTURE, true);
+
+
 
 	FbxScene* Fbx_Scene = FbxScene::Create(SDK_Manager, "");
 
@@ -63,6 +82,7 @@ void Engine::loadModels(std::vector<MyVertex>* pOutVertexVector)
 
 void Engine::CreateShaders()
 {
+
 	//create vertex shader
 	ID3DBlob* pVS = nullptr;
 	D3DCompileFromFile(
@@ -170,8 +190,9 @@ void Engine::CreateTriangleData()
 }
 
 void Engine::CreateTexture() {
+	#pragma region // Import texture from memory
 	HRESULT hr;
-	D3D11_TEXTURE2D_DESC textureDesc;
+	/*D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
 	textureDesc.Width = BTH_IMAGE_WIDTH;
 	textureDesc.Height = BTH_IMAGE_HEIGHT;
@@ -196,9 +217,22 @@ void Engine::CreateTexture() {
 	resViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	resViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
 	resViewDesc.Texture2D.MostDetailedMip = 0;
+
 	gDevice->CreateShaderResourceView(pTexture, &resViewDesc, &gTextureView);
-	pTexture->Release();
+	pTexture->Release();*/
+	
+	#pragma endregion
+
+	#pragma region //Import from File
+	ID3D11ShaderResourceView * Texture;
+	CoInitialize(NULL);
+
+	hr = CreateWICTextureFromFile(gDevice, L"./Images/SexyPic.jpg", NULL, &gTextureView);
+	#pragma endregion 
+	
+
 }
+
 
 void Engine::CreateConstantBuffer() {
 
@@ -304,34 +338,40 @@ void Engine::Update() {
 
 	//world matrix
 	static float radianRotation = 0.00;
-	radianRotation += 0.0002;
+	//radianRotation += 0.0002;
 	XMMATRIX worMat = XMMatrixRotationY(radianRotation);
-
-
-	//view matrix
-	XMVECTOR camPos = XMVectorSet(0, 0, -2, 1); //Explanation of w: http://gamedev.stackexchange.com/questions/17987/what-does-the-graphics-card-do-with-the-fourth-element-of-a-vector-as-the-final
-	XMVECTOR lookAtVec = XMVectorSet(0, 0, 0, 1);
-	XMVECTOR upVec = XMVectorSet(0, 1, 0, 1);
-	XMMATRIX viewMat = XMMatrixLookAtLH(camPos, lookAtVec, upVec); //Makes a view-matrix <---- tHIS DOESN'T WORK FOR SOME REASON BECAUSE IM FUCKING RETARDED STUPID NIGGA SHIT FAGGS
-
-
-																   //projection matrix
-	float FOV = XM_PI * 0.45;
-	float aspectRatio = 640.f / 480.f; //If you divide int by int, u get an int. Remember floats.
-	float nearPlane = 0.5;
-	float farPlane = 20;
-	XMMATRIX projMat = XMMatrixPerspectiveFovLH(FOV, aspectRatio, nearPlane, farPlane);
-
 
 	//Transpose the matrices. This is a must for DirectX 11
 	worMat = XMMatrixTranspose(worMat);
-	viewMat = XMMatrixTranspose(viewMat); //Transposes it, it's a requirement for DirectX11. You do this b4 sending it into the GPU (the shader)
-	projMat = XMMatrixTranspose(projMat); //Transposes the matrix
 
+	input->getKeyboardState();
+	input->GetMouseLoc();
 
-	XMStoreFloat4x4(&worldMatrix, worMat);
-	XMStoreFloat4x4(&viewMatrix, viewMat); //Stores the view matrix in a Float4x4-type variable. I wonder why.
-	XMStoreFloat4x4(&projectionMatrix, projMat);
+	camera->rotate(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), input->mouseY);
+	camera->rotate(XMFLOAT4(0.0f, -1.0f, 0.0f, 1.0f), -input->mouseX);
+	// kryssprodukten mellan upp vektor och riktings vektorn ger sidleds vektorn.
+	if (input->keyState[DIK_S])
+	{
+		camera->moveForward(-0.001);
+		//camera->move(XMFLOAT4(0, 0, -0.001, 1.0f));
+	}
+		
+
+	if (input->keyState[DIK_A])
+	{
+		camera->moveStrafe(0.001);
+		//camera->move(XMFLOAT4(-0.001, 0, 0, 1.0f));
+	}
+		
+	if (input->keyState[DIK_D])
+	{
+		camera->moveStrafe(-0.001);
+		//camera->move(XMFLOAT4(0.001, 0, 0, 1.0f));
+	}
+		
+	if (input->keyState[DIK_W])
+		camera->moveForward(0.001);
+
 
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
 	matrixBuffer* dataPtr;
@@ -339,9 +379,9 @@ void Engine::Update() {
 	gDeviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (matrixBuffer*)gMappedResource.pData;
 
-	dataPtr->worldMatrix = worldMatrix;
-	dataPtr->viewMatrix = viewMatrix;
-	dataPtr->projectionMatrix = projectionMatrix;
+	dataPtr->worldMatrix = worMat;
+	dataPtr->viewMatrix = XMMatrixTranspose(camera->getViewMatrix());
+	dataPtr->projectionMatrix = XMMatrixTranspose(camera->getProjMatrix());
 
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
@@ -453,12 +493,27 @@ void Engine::Clean() {
 
 	depthStencilView->Release();
 	gDepthStencilBuffer->Release();
+
+	delete camera;
+	delete input;
+}
+void Engine::InitializeCamera()
+{
+	camera = new GCamera;
+	camera->InitProjMatrix(XM_PI * 0.45, wHEIGHT, wWIDTH, 0.5, 20);
+
 }
 
-void Engine::Initialize(HWND wndHandle) {
+void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
+	input = new GInput;
+
+
+
 	CreateDirect3DContext(wndHandle);
 
 	SetViewport();
+
+	input->initialize(hinstance, wndHandle, wWIDTH, wHEIGHT);
 
 	CreateShaders();
 
@@ -467,4 +522,6 @@ void Engine::Initialize(HWND wndHandle) {
 	CreateTexture();
 
 	CreateConstantBuffer();
+
+	InitializeCamera();
 }
