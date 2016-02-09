@@ -1,6 +1,6 @@
 #include "Engine.h"
 #include "bth_image.h" //This header wouldn't work in Engine.h VS complained
-					   //of one or more multiply defined symbols found
+#include "Fbx.h"					   //of one or more multiply defined symbols found
 
 
 
@@ -280,6 +280,10 @@ void Engine::Update() {
 	XMFLOAT4X4 worldMatrix;
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
+	
+	FbxDawg fbxobj;
+	std::vector<FbxDawg::MyVertex>* pOutVertexVector = new std::vector<FbxDawg::MyVertex>;
+	fbxobj.loadModels(pOutVertexVector);
 
 	//world matrix
 	static float radianRotation = 0.00;
