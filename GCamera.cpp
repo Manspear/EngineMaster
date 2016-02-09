@@ -16,9 +16,20 @@ void GCamera::move(XMFLOAT4 direction)
 	this->initViewMatrix();
 }
 
-void GCamera::moveForward(float speed)
+void GCamera::moveForward(float speed) //positive speed is forward, negative is backwards
 {
-	XMFLOAT4 moveVec = VtoF((cPosition - cTarget)*speed);
+	XMFLOAT4 moveVec = VtoF((cTarget - cPosition)*speed);
+
+	cPosition = XMVector4Transform(cPosition, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
+	cTarget = XMVector4Transform(cTarget, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
+	//cUp = XMVector4Transform(cUp, XMMatrixTranslation(direction.x, direction.y, direction.z)); //uncomment for roll instead of jaw
+
+	this->initViewMatrix();
+}
+
+void GCamera::moveStrafe(float speed) //positive speed is forward, negative is backwards
+{
+	XMFLOAT4 moveVec = VtoF((XMVector3Cross((cTarget - cPosition), cUp)*speed));
 
 	cPosition = XMVector4Transform(cPosition, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
 	cTarget = XMVector4Transform(cTarget, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
