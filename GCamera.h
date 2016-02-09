@@ -25,6 +25,7 @@ public:
 	//FUNCTIONS
 
 	//VEIW
+	void reset();
 	void moveForward(float speed);
 	void moveStrafe(float speed);
 	void move(XMFLOAT4 direction);

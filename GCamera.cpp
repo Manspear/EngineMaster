@@ -143,6 +143,15 @@ GCamera::GCamera()
 	cWidth = 0.0f;
 }
 
+void GCamera::reset()
+{
+	cPosition = XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f);
+	cTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	cUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+
+	this->initViewMatrix();
+}
+
 XMVECTOR GCamera::FtoV(XMFLOAT4& flo)
 {
 	return XMLoadFloat4(&flo);
