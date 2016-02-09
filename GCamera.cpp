@@ -4,16 +4,40 @@
 void GCamera::initViewMatrix()
 {
 	cView = XMMatrixLookAtLH(cPosition, cTarget, cUp);
+
 }
 
 void GCamera::move(XMFLOAT4 direction)
 {
 	cPosition = XMVector4Transform(cPosition, XMMatrixTranslation(direction.x, direction.y, direction.z));
 	cTarget = XMVector4Transform(cTarget, XMMatrixTranslation(direction.x, direction.y, direction.z));
-	//cUp = XMVector4Transform(cUp, XMMatrixTranslation(direction.x, direction.y, direction.z));
+	//cUp = XMVector4Transform(cUp, XMMatrixTranslation(direction.x, direction.y, direction.z)); //uncomment for roll instead of jaw
 
 	this->initViewMatrix();
 }
+
+void GCamera::moveForward(float speed) //positive speed is forward, negative is backwards
+{
+	XMFLOAT4 moveVec = VtoF((cTarget - cPosition)*speed);
+
+	cPosition = XMVector4Transform(cPosition, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
+	cTarget = XMVector4Transform(cTarget, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
+	//cUp = XMVector4Transform(cUp, XMMatrixTranslation(direction.x, direction.y, direction.z)); //uncomment for roll instead of jaw
+
+	this->initViewMatrix();
+}
+
+void GCamera::moveStrafe(float speed) //positive speed is forward, negative is backwards
+{
+	XMFLOAT4 moveVec = VtoF((XMVector3Cross((cTarget - cPosition), cUp)*speed));
+
+	cPosition = XMVector4Transform(cPosition, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
+	cTarget = XMVector4Transform(cTarget, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
+	//cUp = XMVector4Transform(cUp, XMMatrixTranslation(direction.x, direction.y, direction.z)); //uncomment for roll instead of jaw
+
+	this->initViewMatrix();
+}
+
 void GCamera::rotate(XMFLOAT4 axis, float degrees)
 {
 	if (XMVector4Equal(FtoV(axis), XMVectorZero()) || degrees == 0.0f)
@@ -26,10 +50,9 @@ void GCamera::rotate(XMFLOAT4 axis, float degrees)
 	lookAtUp = VtoF(XMVector4Transform(FtoV(lookAtUp), XMMatrixRotationAxis(FtoV(axis), XMConvertToRadians(degrees))));
 
 	cTarget = (cPosition + FtoV(lookAtTarget));
-	//cUp = (cPosition + FtoV(lookAtUp));
+	//cUp = (cPosition + FtoV(lookAtUp)); //uncomment for roll instead of jaw
 
 	this->initViewMatrix();
-
 }
 void GCamera::setPosition(XMFLOAT4& newPosition)
 {

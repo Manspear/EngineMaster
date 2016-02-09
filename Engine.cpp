@@ -16,7 +16,7 @@ Engine::Engine(){
 
 Engine::~Engine()
 {
-	delete camera;
+
 }
 
 void Engine::CreateShaders()
@@ -274,7 +274,7 @@ void Engine::Update() {
 
 	//world matrix
 	static float radianRotation = 0.00;
-	radianRotation += 0.0002;
+	//radianRotation += 0.0002;
 	XMMATRIX worMat = XMMatrixRotationY(radianRotation);
 
 	//Transpose the matrices. This is a must for DirectX 11
@@ -285,15 +285,28 @@ void Engine::Update() {
 
 	camera->rotate(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), input->mouseY);
 	camera->rotate(XMFLOAT4(0.0f, -1.0f, 0.0f, 1.0f), -input->mouseX);
-
+	// kryssprodukten mellan upp vektor och riktings vektorn ger sidleds vektorn.
 	if (input->keyState[DIK_S])
-		camera->move(XMFLOAT4(0, 0, -0.001, 1.0f));
+	{
+		camera->moveForward(-0.001);
+		//camera->move(XMFLOAT4(0, 0, -0.001, 1.0f));
+	}
+		
+
 	if (input->keyState[DIK_A])
-		camera->move(XMFLOAT4(-0.001, 0, 0, 1.0f));
+	{
+		camera->moveStrafe(0.001);
+		//camera->move(XMFLOAT4(-0.001, 0, 0, 1.0f));
+	}
+		
 	if (input->keyState[DIK_D])
-		camera->move(XMFLOAT4(0.001, 0, 0, 1.0f));
+	{
+		camera->moveStrafe(-0.001);
+		//camera->move(XMFLOAT4(0.001, 0, 0, 1.0f));
+	}
+		
 	if (input->keyState[DIK_W])
-		camera->move(XMFLOAT4(0, 0, 0.001, 1.0f));
+		camera->moveForward(0.001);
 
 
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
