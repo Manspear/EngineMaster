@@ -25,7 +25,7 @@ public:
 	//FUNCTIONS
 
 	//VEIW
-	
+	void moveForward(float speed);
 	void move(XMFLOAT4 direction);
 	void rotate(XMFLOAT4 axis, float degrees);
 	void setPosition(XMFLOAT4& newPosition);
