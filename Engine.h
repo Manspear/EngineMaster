@@ -12,8 +12,7 @@
 
 #include "GInput.h"
 
-#include <assert.h>
-#include <vector>
+
 
 
 
@@ -42,10 +41,6 @@ public:
 		XMMATRIX viewMatrix;
 		XMMATRIX projectionMatrix;
 	};
-	struct MyVertex
-	{
-		float pos[3];
-	};
 
 	IDXGISwapChain* gSwapChain = nullptr;
 	ID3D11Device* gDevice = nullptr;
@@ -72,7 +67,6 @@ public:
 	byte * keys;
 
 
-	void loadModels(std::vector<MyVertex>* pOutVertexVector);
 
 	void CreateShaders();
 	void CreateTriangleData();
