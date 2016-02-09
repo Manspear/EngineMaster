@@ -3,26 +3,87 @@
 					   //of one or more multiply defined symbols found
 #include <fbxsdk.h>
 
+<<<<<<< HEAD
 #pragma region Texture includes
 #include "WICTextureLoader.h"
 #include <wincodec.h>
 
 #pragma endregion
 
+=======
+>>>>>>> refs/remotes/origin/superbranch_Jesper
 
 Engine::Engine(){
 	//EMPTY
 }
 
+<<<<<<< HEAD
 Engine::~Engine()
 {
 
 }
 
 void Engine::CreateShaders()
+=======
+//Jesper
+void Engine::loadModels(std::vector<MyVertex>* pOutVertexVector)
+>>>>>>> refs/remotes/origin/superbranch_Jesper
 {
+	FbxManager *SDK_Manager = FbxManager::Create();
 
+	FbxIOSettings *ios = FbxIOSettings::Create(SDK_Manager, IOSROOT);
+	
+	SDK_Manager->SetIOSettings(ios);
 
+	ios->SetBoolProp(IMP_FBX_MATERIAL, true);
+	ios->SetBoolProp(IMP_FBX_TEXTURE, true);
+
+<<<<<<< HEAD
+=======
+	FbxScene* Fbx_Scene = FbxScene::Create(SDK_Manager, "");
+
+	FbxImporter * Fbx_Importer = FbxImporter::Create(SDK_Manager,"");
+	Fbx_Importer->Initialize("D:\skolan\3D PROGRAMMERING\Programmering\Projektet\itsBoxxy.fbx",-1, SDK_Manager->GetIOSettings());// eller ios istället för SDK_M
+	Fbx_Importer->Import(Fbx_Scene);
+	Fbx_Importer->Destroy();
+
+	FbxNode* FbxRootNode = Fbx_Scene->GetRootNode();
+
+	if(FbxRootNode)
+	{
+		for (int i = 0; i < FbxRootNode->GetChildCount(); i++)
+		{
+			FbxNode* FbxChildNode = FbxRootNode->GetChild(i);
+
+			if (FbxChildNode->GetNodeAttribute() == NULL)
+				continue;
+			FbxNodeAttribute::EType AttributeType = FbxChildNode->GetNodeAttribute()->GetAttributeType();
+			if (AttributeType != FbxNodeAttribute::eMesh)
+				continue;
+			FbxMesh* mesh = (FbxMesh*)FbxChildNode->GetNodeAttribute();
+			FbxVector4* Vertices = mesh->GetControlPoints();
+
+			for (int j = 0; j < mesh->GetPolygonCount(); j++)
+			{
+				int totalVertices = mesh->GetPolygonSize(j);
+				assert(totalVertices == 3);
+				for (int k = 0; k < totalVertices; k++)
+				{
+					int controlPointIndex = mesh->GetPolygonVertex(j, k);//j = polygon, k = vertex, går igenom en vertex i taget för en triangel.
+					MyVertex vertex;
+					vertex.pos[0] = (float)Vertices[controlPointIndex].mData[0];
+					vertex.pos[1] = (float)Vertices[controlPointIndex].mData[1];
+					vertex.pos[2] = (float)Vertices[controlPointIndex].mData[2];
+					pOutVertexVector->push_back(vertex);
+				}
+			}
+		}
+	}
+}
+
+void Engine::CreateShaders()
+{
+>>>>>>> refs/remotes/origin/superbranch_Jesper
 	//create vertex shader
 	ID3DBlob* pVS = nullptr;
 	D3DCompileFromFile(
@@ -272,6 +333,13 @@ void Engine::Render()
 
 void Engine::Update() {
 
+<<<<<<< HEAD
+=======
+	XMFLOAT4X4 worldMatrix;
+	XMFLOAT4X4 viewMatrix;
+	XMFLOAT4X4 projectionMatrix;
+
+>>>>>>> refs/remotes/origin/superbranch_Jesper
 	//world matrix
 	static float radianRotation = 0.00;
 	//radianRotation += 0.0002;
