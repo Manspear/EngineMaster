@@ -14,7 +14,7 @@
 #include "Engine.h"
 
 using namespace DirectX;
-//Didn't know how to put WndProc and initWindow in Engine. VS complained too much.
+//Didn't know how to put WndProc and initWindow in Engine. VS complained too much
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)

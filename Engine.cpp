@@ -1,6 +1,6 @@
 #include "Engine.h"
 #include "bth_image.h" //This header wouldn't work in Engine.h VS complained
-					   //of one or more multiply defined symbols found
+#include "Fbx.h"					   //of one or more multiply defined symbols found
 
 
 
@@ -172,7 +172,9 @@ void Engine::CreateTexture() {
 	ID3D11ShaderResourceView * Texture;
 	CoInitialize(NULL);
 
-	hr = CreateWICTextureFromFile(gDevice, L"./Images/SexyPic.jpg", NULL, &gTextureView);
+	hr = CreateWICTextureFromFile(gDevice, L"./Images/SexyPic.jpg", NULL, &gTextureView[0]);
+	hr = CreateWICTextureFromFile(gDevice, L"./Images/Chesterfield - (Normal Map_2).png", NULL, &gTextureView[1]);
+	//(d3d11DeviceInterface, d3d11DeviceContextInterface, L"test.bmp", 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0, &pTex2D, NULL);
 	#pragma endregion 
 	
 
@@ -259,7 +261,7 @@ void Engine::Render()
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-	gDeviceContext->PSSetShaderResources(0, 1, &gTextureView);
+	gDeviceContext->PSSetShaderResources(0, 2, gTextureView);
 	UINT32 vertexSize = sizeof(float) * 5;
 	UINT32 offset = 0;
 	gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
@@ -280,6 +282,11 @@ void Engine::Update() {
 	XMFLOAT4X4 worldMatrix;
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
+	
+	//JESPER FIXA MINNESLÄCKAN 3 rader framåt
+	//FbxDawg fbxobj;
+	//std::vector<FbxDawg::MyVertex>* pOutVertexVector = new std::vector<FbxDawg::MyVertex>;
+	//fbxobj.loadModels(pOutVertexVector);
 
 	//world matrix
 	static float radianRotation = 0.00;
