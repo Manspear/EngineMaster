@@ -21,25 +21,25 @@ void FbxDawg::loadModels(const char* filePath)
 	ios->SetBoolProp(IMP_FBX_MATERIAL, true);
 	ios->SetBoolProp(IMP_FBX_TEXTURE, true);
 	//FbxScene contains all the nodes, materials, textures, poses, characters
-	FbxScene* Fbx_Scene = FbxScene::Create(SDK_Manager, "");
+	FbxScene* Fbx_Scene = FbxScene::Create(SDK_Manager, "myScene");
 	//FbxImporter is to import an FBX file into SDK objects.
 	FbxImporter * Fbx_Importer = FbxImporter::Create(SDK_Manager, "");
 	Fbx_Importer->Initialize(filePath, -1, SDK_Manager->GetIOSettings());// eller ios istället för SDK_M
 	Fbx_Importer->Import(Fbx_Scene);
 	Fbx_Importer->Destroy();
 	// FbxCamera, FbxLight, FbxMesh, etc... elements organized in a hierarchical tree. Root is the mother and by FbxNode::GetChild() we work our way down
-	FbxNode* FbxRootNode = Fbx_Scene->GetRootNode();
+	FbxNode* FBXRootNode = Fbx_Scene->GetRootNode();
 
-	std::vector<MyVertex> pOutVertexVector;
-	std::vector<MyNormal> normalVector;
-	std::vector<MyUV> uvVector;
-	std::vector<vertexStruct> vertexVector;
-
-	if (FbxRootNode)
+	std::vector<MyPosition> MyPositionVector;//MyPositionVector
+	std::vector<MyNormal> MyNormalVector;//MyNormalVector
+	std::vector<MyUV> MyUVVector;//MyUVVector
+	std::vector<MyVertexStruct> MyVertexStructVector;//vertexVector
+	//MyVertexStruct
+	if (FBXRootNode)
 	{
-		for (int i = 0; i < FbxRootNode->GetChildCount(); i++)//For each and every childnode...
+		for (int i = 0; i < FBXRootNode->GetChildCount(); i++)//For each and every childnode...
 		{
-			FbxNode* FbxChildNode = FbxRootNode->GetChild(i);//... initialize the childnode we are at
+			FbxNode* FbxChildNode = FBXRootNode->GetChild(i);//... initialize the childnode we are at
 			if (FbxChildNode->GetNodeAttribute() == NULL)//... and then check if its an unset attribute. (special node that we dont want now) (A NULL node attribute is set by calling function FbxNode::SetNodeAttribute() with a NULL pointer)
 				continue;//tar nästa child istället
 			FbxNodeAttribute::EType AttributeType = FbxChildNode->GetNodeAttribute()->GetAttributeType();//... But if its not unset, we check what type the content is, FbxCamera, FbxSkeleton, FbxMesh, etc...
@@ -58,11 +58,11 @@ void FbxDawg::loadModels(const char* filePath)
 				for (int v = 0; v < totalVertices; v++)//... for every vertex in that TRI
 				{
 					int controlPointIndex = mesh->GetPolygonVertex(t, v);//t = TRI, v = VERTEX, går igenom en vertex i taget för en triangel.
-					MyVertex vertex;
+					MyPosition vertex;
 					vertex.pos[0] = (float)Vertices[controlPointIndex].mData[0];
 					vertex.pos[1] = (float)Vertices[controlPointIndex].mData[1];
 					vertex.pos[2] = (float)Vertices[controlPointIndex].mData[2];
-					pOutVertexVector.push_back(vertex);
+					MyPositionVector.push_back(vertex);
 				}
 			}//end vertex
 
@@ -95,10 +95,10 @@ void FbxDawg::loadModels(const char* filePath)
 						temp.direction[1] = normals[1];
 						temp.direction[2] = normals[2];
 
-						normalVector.push_back(temp);
+						MyNormalVector.push_back(temp);
 
 						//printf("\nNormalz: %f %f %f %f %f %f %f %f %f Number of Vertices: %d", normals[0], normals[1], normals[2], normals[3],normals[4], normals[5], normals[6], normals[7], normals[8], , mesh->GetControlPointsCount());
-						//printf("number of normals: %d\n", normalVector.size());
+						//printf("number of normals: %d\n", MyNormalVector.size());
 						indexByPolygonVertex++;
 					}
 				}
@@ -130,7 +130,7 @@ void FbxDawg::loadModels(const char* filePath)
 
 				int polyCount = mesh->GetPolygonCount();
 
-				MyUV temp; //fill this, and then append to normalVector
+				MyUV temp; //fill this, and then append to MyNormalVector
 
 				if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
 				{
@@ -150,7 +150,7 @@ void FbxDawg::loadModels(const char* filePath)
 							temp.uvIndex = UVIndex;
 							temp.uvCoord[0] = UVValue[0];
 							temp.uvCoord[1] = UVValue[1];
-							uvVector.push_back(temp);
+							MyUVVector.push_back(temp);
 						}
 					}
 				}
@@ -173,7 +173,7 @@ void FbxDawg::loadModels(const char* filePath)
 								temp.uvIndex = UVIndex;
 								temp.uvCoord[0] = UVValue[0];
 								temp.uvCoord[1] = UVValue[1];
-								uvVector.push_back(temp);
+								MyUVVector.push_back(temp);
 
 								polyIndexCounter++;
 							}
@@ -183,15 +183,27 @@ void FbxDawg::loadModels(const char* filePath)
 
 			}//uv
 			 //>>>>>>>>>ASSEMBLY OF VERTEXDATA<<<<<<<<<<<<<<<
-			vertexStruct tempVertex;
-			for (int vertex = 0; vertex < pOutVertexVector.size(); vertex++)//for every vertex in mesh, over 300 000 for a character
+			MyVertexStruct tempVertex;
+			for (int vertex = 0; vertex < MyPositionVector.size(); vertex++)//for every vertex in mesh, over 300 000 for a character
 			{
-				tempVertex.vertVar = pOutVertexVector[vertex];
-				tempVertex.norVar = normalVector[vertex];
-				tempVertex.uvVar = uvVector[vertex];
-				vertexVector.push_back(tempVertex);
+				tempVertex.x = MyPositionVector[vertex].pos[0];//v x
+				tempVertex.y = MyPositionVector[vertex].pos[1];//v y
+				tempVertex.z = MyPositionVector[vertex].pos[2];//v z
+				
+				tempVertex.norX = MyNormalVector[vertex].direction[0];//v x
+				tempVertex.norY = MyNormalVector[vertex].direction[1];//v y
+				tempVertex.norZ = MyNormalVector[vertex].direction[2];//v z
+		
+				tempVertex.u = MyUVVector[vertex].uvCoord[0];// u
+				tempVertex.v = MyUVVector[vertex].uvCoord[1];// v
+
+				//tempVertex.vertVar = MyPositionVector[vertex];
+				//tempVertex.norVar = MyNormalVector[vertex];
+				//tempVertex.uvVar = MyUVVector[vertex];
+				this->modelVertexList.push_back(tempVertex);
 			}
-			modelVertexList.push_back(vertexVector); //Here the class-variable meshVertices 
+
+			 //Here the class-variable meshVertices 
 		}//inside this put code yes
 	}
 	SDK_Manager->Destroy();

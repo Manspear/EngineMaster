@@ -10,9 +10,6 @@
 
 #pragma endregion
 
-
-
-
 Engine::Engine(){
 	//EMPTY
 }
@@ -20,10 +17,16 @@ Engine::Engine(){
 
 Engine::~Engine()
 {
+	if (fbxobj != nullptr)
+	{
+		delete fbxobj;
+		//for every new, have a delete.
+		//the destructor of FbxDawg is called before this destructor is called.
+		//Destructors are called every time a variable runs out of scope.
+		//Delete removes the memory allocated.
+	}
 
 }
-
-
 
 void Engine::CreateShaders()
 {
@@ -95,42 +98,25 @@ void Engine::CreateShaders()
 
 void Engine::CreateTriangleData()
 {
-	struct TriangleVertex
-	{
-		float x, y, z;
-		float u, v;
-	};
+	//struct TriangleVertex
+	//{
+	//	float x, y, z;
+	//	float u, v;
+	//};
+	//TriangleVertex poop[6]{
+	//
+	//};
 
-	TriangleVertex triangleVertices[6] =
-	{
-		-0.5f, 0.5f, 0.0f,	//v0 pos
-		0.0f, 0.0f,	//v0 uv
-
-		0.5f, -0.5f, 0.0f,	//v1
-		1.0f, 1.0f, 	//v1 uv
-
-		-0.5f, -0.5f, 0.0f, //v2
-		0.0f, 1.0f, 	//v2 uv
-
-		-0.5f, 0.5f, 0.0f,	//v3 pos
-		0.0f, 0.0f,	//v3 uv
-
-		0.5f, 0.5f, 0.0f, //v4
-		1.0f, 0.0f,	//v4 uv
-
-		0.5f, -0.5f, 0.0f,	//v5
-		1.0f, 1.0f	//v5 uv	
-
-	};
-
+	//std::vector<MyVertexStruct> templist = fbxobj->modelVertexList;
+	int shit = fbxobj->modelVertexList.size();
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(triangleVertices);
+	bufferDesc.ByteWidth = sizeof(fbxobj->modelVertexList);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
 
 	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = triangleVertices;
+	data.pSysMem = fbxobj->modelVertexList.data();
 	gDevice->CreateBuffer(&bufferDesc, &data, &gVertexBuffer);
 }
 
@@ -272,7 +258,7 @@ void Engine::Render()
 
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
-	gDeviceContext->Draw(12, 0);
+	gDeviceContext->Draw(fbxobj->modelVertexList.size(), 0);
 }
 
 
@@ -285,8 +271,8 @@ void Engine::Update() {
 	
 	//JESPER FIXA MINNESLÄCKAN 3 rader framåt
 	//FbxDawg fbxobj;
-	//std::vector<FbxDawg::MyVertex>* pOutVertexVector = new std::vector<FbxDawg::MyVertex>;
-	//fbxobj.loadModels(pOutVertexVector);
+	//std::vector<FbxDawg::MyPosition>* MyPositionVector = new std::vector<FbxDawg::MyPosition>;
+	//fbxobj.loadModels(MyPositionVector);
 
 	//world matrix
 	static float radianRotation = 0.00;
@@ -452,7 +438,8 @@ void Engine::InitializeCamera()
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
 
-	const char* filePath = "\.itsBoxxy.fbx";
+	const char* filePath = "F:\\skolan\\3D PROGRAMMERING\\Programmering\\Projektet\\itsBoxxy.fbx";
+	fbxobj = new FbxDawg();
 	fbxobj->loadModels(filePath);
 
 	CreateDirect3DContext(wndHandle);
