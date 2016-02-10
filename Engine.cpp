@@ -281,9 +281,10 @@ void Engine::Update() {
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
 	
-	FbxDawg fbxobj;
-	std::vector<FbxDawg::MyVertex>* pOutVertexVector = new std::vector<FbxDawg::MyVertex>;
-	fbxobj.loadModels(pOutVertexVector);
+	//JESPER FIXA MINNESLÄCKAN 3 rader framåt
+	//FbxDawg fbxobj;
+	//std::vector<FbxDawg::MyVertex>* pOutVertexVector = new std::vector<FbxDawg::MyVertex>;
+	//fbxobj.loadModels(pOutVertexVector);
 
 	//world matrix
 	static float radianRotation = 0.00;
