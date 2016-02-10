@@ -33,6 +33,7 @@ float4 PS_main(PS_IN input) : SV_Target
 	float3 lightPos = float3 (0, 0, -3) - input.worldPosition; //Vector from worldPosition to camera. This is correct.
 	float4 ambientLightColor = { 0.2, 0.2, 0.2, 0 };
 	float4 diffuseColor = float4(1,1,1,1);
+	float lightIntensity;
 
 	float3 color, textureColor, bumpMap;
 	color = textureColor = float3 (txDiffuse[0].Sample(sampAni, input.UV).xyz);
@@ -41,8 +42,7 @@ float4 PS_main(PS_IN input) : SV_Target
 	bumpMap = (bumpMap * 2.0f) - 1.0f;
 	input.normal = (bumpMap.x * input.tangent) + (bumpMap.y * input.biTangent) + (bumpMap.z * input.normal);
 	input.normal = normalize(input.normal);
-	float lightIntensity;
-
+	
 
 
 

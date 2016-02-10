@@ -173,7 +173,7 @@ void Engine::CreateTexture() {
 	CoInitialize(NULL);
 
 	hr = CreateWICTextureFromFile(gDevice, L"./Images/SexyPic.jpg", NULL, &gTextureView[0]);
-	hr = CreateWICTextureFromFile(gDevice, L"./Images/Chesterfield - (Normal Map_2).png", NULL, &gTextureView[1]);
+	hr = CreateWICTextureFromFile(gDevice, L"./Images/Chesterfield - (Normal Map_2)_NOsRGB.png", NULL, &gTextureView[1]);
 	//(d3d11DeviceInterface, d3d11DeviceContextInterface, L"test.bmp", 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0, &pTex2D, NULL);
 	#pragma endregion 
 	
