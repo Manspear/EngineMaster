@@ -1,6 +1,6 @@
 #include "Engine.h"
 #include "bth_image.h" //This header wouldn't work in Engine.h VS complained
-#include "Fbx.h"					   //of one or more multiply defined symbols found
+#include "FbxDawg.h"					   //of one or more multiply defined symbols found
 
 
 
@@ -452,7 +452,8 @@ void Engine::InitializeCamera()
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
 
-
+	const char* filePath = "\.itsBoxxy.fbx";
+	fbxobj->loadModels(filePath);
 
 	CreateDirect3DContext(wndHandle);
 

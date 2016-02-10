@@ -70,7 +70,7 @@
     <ClInclude Include="bth_image.h">
       <Filter>Source Files\Texture</Filter>
     </ClInclude>
-    <ClInclude Include="Fbx.h">
+    <ClInclude Include="FbxDawg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
