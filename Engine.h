@@ -52,7 +52,7 @@ public:
 											
 	ID3D11Texture2D* gDepthStencilBuffer = nullptr;
 	ID3D11DepthStencilView* depthStencilView = nullptr;
-	ID3D11ShaderResourceView* gTextureView = nullptr;
+	ID3D11ShaderResourceView* gTextureView[2];
 
 	ID3D11InputLayout* gVertexLayout = nullptr;
 	ID3D11VertexShader* gVertexShader = nullptr;

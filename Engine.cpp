@@ -172,7 +172,8 @@ void Engine::CreateTexture() {
 	ID3D11ShaderResourceView * Texture;
 	CoInitialize(NULL);
 
-	hr = CreateWICTextureFromFile(gDevice, L"./Images/SexyPic.jpg", NULL, &gTextureView);
+	hr = CreateWICTextureFromFile(gDevice, L"./Images/SexyPic.jpg", NULL, &gTextureView[0]);
+	hr = CreateWICTextureFromFile(gDevice, L"./Images/Chesterfield - (Normal Map_2).png", NULL, &gTextureView[1]);
 	#pragma endregion 
 	
 
@@ -259,7 +260,7 @@ void Engine::Render()
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-	gDeviceContext->PSSetShaderResources(0, 1, &gTextureView);
+	gDeviceContext->PSSetShaderResources(0, 2, gTextureView);
 	UINT32 vertexSize = sizeof(float) * 5;
 	UINT32 offset = 0;
 	gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);

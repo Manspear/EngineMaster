@@ -1,21 +1,12 @@
-//Gotta remember to make a shader
-//struct GSOutput
-//{
-//	float4 pos : SV_POSITION;
-//};
-
-struct GS_Input //Input. Must match output of vertex shader. 
+struct GSOutput
 {
-	float4 Pos : SV_POSITION;
-	float2 uv : TEXCOORD;
-};
+	float4 Pos : SV_Position;
+	float2 UV  : TEXCOORD;
+	float3 normal : NORMAL;
+	float4 worldPosition : WORLDSPACE;
 
-struct GS_Output //Output. Must match input of fragment shader. 
-{
-	float4 wPos : POSITION0;
-	float4 Pos : SV_POSITION;
-	float2 uv : UV;
-	float4 normal : NORMAL;
+	//float3 tangent : TANGENT;
+	//float3 biTanget : BITANGENT;
 };
 
 cbuffer matrixBuffer:register(b0) {
@@ -28,96 +19,72 @@ cbuffer matrixBuffer:register(b0) {
 	matrix projectionMatrix;
 };
 
-[maxvertexcount(6)] //says geometry shader will shit out 6 vertices
+[maxvertexcount(6)] //geometry shader will return X vertex
 
 
-void GS_main(
-	triangle GS_Input input[3] : SV_POSITION, //Three vertices in list 
-	inout TriangleStream< GS_Output > output //The output where they are reinterpreted as primitives
-	)
+void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSOutput > output)
 {
-	//Making matrix containing all transform-matrices
-	matrix transformMatrix; 
-	transformMatrix = mul(worldMatrix, viewMatrix);
-	transformMatrix = mul(transformMatrix, projectionMatrix); //wvp
+	GSOutput element = (GSOutput)0;
+	matrix allMatrix = mul(mul(worldMatrix, viewMatrix), projectionMatrix);
 
-	//Calculating the normal of the face
-	float4 triangleSide1 = input[1].Pos - input[0].Pos;
-	float4 triangleSide2 = input[2].Pos - input[0].Pos;
-	float4 normal = float4(cross((float3) triangleSide1, (float3) triangleSide2), 0);
-	normal = normalize(normal); 
+	//Normal
+	float3 edge1 = input[1].Pos - input[0].Pos;
+	float3 edge2 = input[2].Pos - input[0].Pos;
+	float2 uvEdge1 = input[1].UV - input[0].UV;
+	float2 uvEdge2 = input[2].UV - input[0].UV;
 
-	//declaring the variable that we append to the Trianglestream 
-	GS_Output element;
+	float3 normal = normalize(cross(edge1, edge2));
 
-	//Here the normal I calculated is multiplied with the "Transformmatrix"
-	//This is done so that the same transformations made on the face 
-	//are applied to the normal. The main part of the transformmatrix
-	//is the world-matrix. This contains the rotation.
-	//It's important that the normal of the face rotates as much as the face itself.
-	element.normal = mul(normal, worldMatrix);                       
-	element.normal = normalize(element.normal);
+	float3 tangent = uvEdge1[1] * edge1 - uvEdge2[1] * edge2 *(1 / (uvEdge1[0] * uvEdge2[1] - uvEdge2[0] * uvEdge1[1]));
+	//tangent[0] = (uvEdge1[1] * edge1[0] - uvEdge2[1] * edge2[0]) * (1.0f / (uvEdge1[0] * uvEdge2[1] - uvEdge2[0] * uvEdge1[1]));
+	//tangent[1] = (uvEdge1[1] * edge1[1] - uvEdge2[1] * edge2[1]) * (1.0f / (uvEdge1[0] * uvEdge2[1] - uvEdge2[0] * uvEdge1[1]));
+	//tangent[2] = (uvEdge1[1] * edge1[2] - uvEdge2[1] * edge2[2]) * (1.0f / (uvEdge1[0] * uvEdge2[1] - uvEdge2[0] * uvEdge1[1]));
 
-	//In this loop I apply the matrixtransformation.
+	float3 biTangent = cross(normal, tangent);
+	//tangent = (2, 321231, 4);
+	//biTangent = (1, 14, 245);
+
+	normalize(tangent); normalize(biTangent); //This should be done before sending to GPU
+
+	tangent = mul(float4(tangent, 1), worldMatrix).xyz;
+	biTangent = mul(float4(biTangent, 1), worldMatrix).xyz;
+
+	//End of Normal
+
+
+
+
+
+
+
 	for (uint i = 0; i < 3; i++)
-	{
-		element.wPos = mul(input[i].Pos, worldMatrix);
-		element.Pos = mul(input[i].Pos, transformMatrix);
-		element.uv = input[i].uv;
-		output.Append(element); //my TriangleStream called output will create a triangle for every 3 vertex it receives
+	{ //First loop
+		element.Pos = mul(input[i].Pos, allMatrix);
+		element.UV = input[i].UV;
+		element.normal = mul(float4(normal, 0), worldMatrix).xyz; //get the normal into worldspace
+
+		element.worldPosition = mul(input[i].Pos, worldMatrix);
+
+
+		output.Append(element);
+
+	}
+
+	output.RestartStrip();
+
+	for (uint i = 0; i < 3; i++)
+	{ //2nd Loop
+		element.Pos = mul((input[i].Pos + float4(normal, 0.0)), allMatrix);
+		element.UV = input[i].UV;
+		element.normal = mul(float4(normal, 0), worldMatrix).xyz;
+		element.worldPosition = mul(input[i].Pos + float4(normal, 0.0), worldMatrix);
+
+
+		output.Append(element);
+
+
+
 	}
 	output.RestartStrip();
-	for (uint z = 0; z < 3; z++) { //This triangle isn't showing...
-								   //and now to make the "moved" quad:
-
-								   //element.Pos = input[z].Pos; //Hmm... The second quad created here is much larger than the other quad.
-
-								   //normal = mul(normal, transformMatrix);
-
-		element.wPos = mul((input[z].Pos + normal), worldMatrix);
-		element.Pos = mul((input[z].Pos + normal), transformMatrix); //this doesn't work for some reason as I think.
-		element.uv = input[z].uv;
-		output.Append(element);
-	}
 }
 
-//void GS_main(
-	//	triangle GS_Input input[3] : SV_POSITION, //Three vertices in list 
-	//	inout TriangleStream< GS_Output > output //The output where they are reinterpreted as primitives
-	//)
-	//{	
-	//	matrix transformMatrix; //My complete transformationmatrix!
-	//	transformMatrix = mul(worldMatrix, viewMatrix);
-	//	transformMatrix = mul(transformMatrix, projectionMatrix);
-	//
-	//	
-	//
-	//	input[0].Pos = mul(input[0].Pos, transformMatrix);
-	//	input[1].Pos = mul(input[1].Pos, transformMatrix);
-	//	input[2].Pos = mul(input[2].Pos, transformMatrix); //transformMatrix is a matrix holding the info relative to the camera.
-	//
-	//	float4 triangleSide1 = input[1].Pos - input[0].Pos;
-	//	float4 triangleSide2 = input[2].Pos - input[0].Pos;
-	//	float4 normal = float4(cross((float3) triangleSide1, (float3) triangleSide2), 0); //Changed the w-value to 0 in anticipation of the addition l8er on.
-	//	normal = normalize(normal);
-	//
-	//	GS_Output element;
-	//	for (uint i = 0; i < 3; i++)
-	//	{
-	//		element.Pos = input[i].Pos;
-	//		element.Color = input[i].Color;
-	//		output.Append(element); //my TriangleStream called output will create a triangle for every 3 vertex it receives
-	//	}
-	//	output.RestartStrip();
-	//	for (uint z = 0; z < 3; z++) { //This triangle isn't showing...
-	//		//and now to make the "moved" quad:
-	//
-	//		//element.Pos = input[z].Pos; //Hmm... The second quad created here is much larger than the other quad.
-	//		
-	//		//normal = mul(normal, transformMatrix);
-	//
-	//		element.Pos = input[z].Pos + normal; //this doesn't work for some reason as I think.
-	//		element.Color = input[z].Color;      
-	//		output.Append(element);            
-	//	}
-	//}
