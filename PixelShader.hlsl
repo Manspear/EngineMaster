@@ -40,7 +40,7 @@ float4 PS_main(PS_IN input) : SV_Target
 	bumpMap = float3 (txDiffuse[1].Sample(sampAni, input.UV).xyz);
 	bumpMap = (bumpMap * 2.0f) - 1.0f;
 	input.normal = (bumpMap.x * input.tangent) + (bumpMap.y * input.biTangent) + (bumpMap.z * input.normal);
-	//input.normal = normalize(input.normal);
+	input.normal = normalize(input.normal);
 	float lightIntensity;
 
 

@@ -5,8 +5,8 @@ struct GSOutput
 	float3 normal : NORMAL;
 	float4 worldPosition : WORLDSPACE;
 
-	//float3 tangent : TANGENT;
-	//float3 biTanget : BITANGENT;
+	float3 tangent : TANGENT;
+	float3 biTanget : BITANGENT;
 };
 
 cbuffer matrixBuffer:register(b0) {
@@ -30,17 +30,32 @@ void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSO
 	//Normal
 	float3 edge1 = input[1].Pos - input[0].Pos;
 	float3 edge2 = input[2].Pos - input[0].Pos;
+	
+	
+	
+	
 	float2 uvEdge1 = input[1].UV - input[0].UV;
 	float2 uvEdge2 = input[2].UV - input[0].UV;
 
 	float3 normal = normalize(cross(edge1, edge2));
+	//float3 tangent;
 
-	float3 tangent = uvEdge1[1] * edge1 - uvEdge2[1] * edge2 *(1 / (uvEdge1[0] * uvEdge2[1] - uvEdge2[0] * uvEdge1[1]));
+
+
+
+
+	float3 tangent = (uvEdge2[1] * edge1 - uvEdge1[1] * edge2) *(1 / (uvEdge1[0] * uvEdge2[1] - uvEdge2[0] * uvEdge1[1]));
+	
+	
+	
+	
+	
 	//tangent[0] = (uvEdge1[1] * edge1[0] - uvEdge2[1] * edge2[0]) * (1.0f / (uvEdge1[0] * uvEdge2[1] - uvEdge2[0] * uvEdge1[1]));
 	//tangent[1] = (uvEdge1[1] * edge1[1] - uvEdge2[1] * edge2[1]) * (1.0f / (uvEdge1[0] * uvEdge2[1] - uvEdge2[0] * uvEdge1[1]));
 	//tangent[2] = (uvEdge1[1] * edge1[2] - uvEdge2[1] * edge2[2]) * (1.0f / (uvEdge1[0] * uvEdge2[1] - uvEdge2[0] * uvEdge1[1]));
 
-	float3 biTangent = cross(normal, tangent);
+	float3 biTangent = -cross(normal, tangent);
+	
 	//tangent = (2, 321231, 4);
 	//biTangent = (1, 14, 245);
 
@@ -64,6 +79,8 @@ void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSO
 		element.normal = mul(float4(normal, 0), worldMatrix).xyz; //get the normal into worldspace
 
 		element.worldPosition = mul(input[i].Pos, worldMatrix);
+		element.tangent = tangent;
+		element.biTanget = biTangent;
 
 
 		output.Append(element);
@@ -79,6 +96,8 @@ void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSO
 		element.normal = mul(float4(normal, 0), worldMatrix).xyz;
 		element.worldPosition = mul(input[i].Pos + float4(normal, 0.0), worldMatrix);
 
+		element.tangent = tangent;
+		element.biTanget = biTangent;
 
 		output.Append(element);
 

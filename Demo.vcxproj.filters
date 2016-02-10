@@ -19,6 +19,9 @@
     <Filter Include="Source Files\Texture">
       <UniqueIdentifier>{3207cbdf-0145-486e-8e5b-dffe1a406c7f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{0a9ac3ed-24d8-452c-b17f-3ae6b1c807e4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -41,14 +44,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
     <FxCompile Include="Vertex.hlsl">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="GeometryShader.hlsl">
-      <Filter>Source Files</Filter>
-    </FxCompile>
-    <FxCompile Include="PixelShader.hlsl">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
