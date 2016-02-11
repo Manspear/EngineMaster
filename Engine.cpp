@@ -290,7 +290,7 @@ void Engine::Update() {
 
 	//world matrix
 	static float radianRotation = 0.00;
-	//radianRotation += 0.0002;
+	radianRotation += 0.0002;
 	XMMATRIX worMat = XMMatrixRotationY(radianRotation);
 
 	//Transpose the matrices. This is a must for DirectX 11
