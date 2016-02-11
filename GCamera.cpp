@@ -46,11 +46,15 @@ void GCamera::rotate(XMFLOAT4 axis, float degrees)
 	XMFLOAT4 lookAtTarget = VtoF(cTarget - cPosition);
 	XMFLOAT4 lookAtUp = VtoF(cUp - cPosition);
 
+	XMVECTOR strafeVec = (XMVector3Cross((cTarget - cPosition), cUp));
+	XMVECTOR ZVec = (cTarget - cPosition);
+
 	lookAtTarget = VtoF(XMVector4Transform(FtoV(lookAtTarget), XMMatrixRotationAxis(FtoV(axis), XMConvertToRadians(degrees))));
 	lookAtUp = VtoF(XMVector4Transform(FtoV(lookAtUp), XMMatrixRotationAxis(FtoV(axis), XMConvertToRadians(degrees))));
 
 	cTarget = (cPosition + FtoV(lookAtTarget));
 	//cUp = (cPosition + FtoV(lookAtUp)); //uncomment for roll instead of jaw
+	//cUp = XMVector3Cross(ZVec, strafeVec)*XMConvertToRadians(degrees);
 
 	this->initViewMatrix();
 }
