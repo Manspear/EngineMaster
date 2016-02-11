@@ -30,9 +30,9 @@ struct PS_IN
 float4 PS_main(PS_IN input) : SV_Target
 {
 
-	float3 lightPos = float3 (0, 2, -3) - input.worldPosition; //Vector from worldPosition to camera. This is correct.
+	float3 lightPos = float3 (4, 3, -3) - input.worldPosition; //Vector from worldPosition to camera. This is correct.
 	float4 ambientLightColor = { 0.2, 0.2, 0.2, 0 };
-	float4 diffuseColor = float4(1,0,0,1);
+	float4 diffuseColor = float4(1,1,1,1);
 
 	float3 color, textureColor, bumpMap;
 	color = textureColor = float3 (txDiffuse[0].Sample(sampAni, input.UV).xyz);
@@ -47,10 +47,10 @@ float4 PS_main(PS_IN input) : SV_Target
 	
 	
 	//specular
-	float shinypower = 6.0f;
+	float shinypower = 3.0f;
 	float4 specular = float4(1.0, 1.0, 1.0, 1.0);
 	float3 r = reflect(normalize(lightPos - input.worldPosition), input.normal);
-	float3 v = (input.worldPosition * -1.0);
+	float3 v = normalize(input.worldPosition * -1.0);
 
 	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower); //sl = Specular Lighting
 
