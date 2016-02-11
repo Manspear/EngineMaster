@@ -1,8 +1,8 @@
 struct GSOutput
 {
 	float4 Pos : SV_Position;
-	float2 UV  : TEXCOORD;
 	float3 normal : NORMAL;
+	float2 UV  : TEXCOORD;
 	float4 worldPosition : WORLDSPACE;
 
 	float3 tangent : TANGENT;
@@ -87,23 +87,6 @@ void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSO
 
 	}
 
-	output.RestartStrip();
-
-	for (uint i = 0; i < 3; i++)
-	{ //2nd Loop
-		element.Pos = mul((input[i].Pos + float4(normal, 0.0)), allMatrix);
-		element.UV = input[i].UV;
-		element.normal = mul(float4(normal, 0), worldMatrix).xyz;
-		element.worldPosition = mul(input[i].Pos + float4(normal, 0.0), worldMatrix);
-
-		element.tangent = tangent;
-		element.biTanget = biTangent;
-
-		output.Append(element);
-
-
-
-	}
 	output.RestartStrip();
 }
 
