@@ -14,11 +14,9 @@
 
 #include "FbxDawg.h"
 
+#include "GModel.h"
 
-
-
-
-
+#include <vector>
 
 #ifndef ENGINE_H
 #define ENGINE_H
@@ -32,17 +30,20 @@ class Engine
 {
 
 private:
-	
 
+	GModel * modelList = nullptr; //points at model objects
 
 public:
+	struct MyVertexStruct
+	{
+		float x, y, z, norX, norY, norZ, u, v;
+	};
+	//numberOfModels is used in Engine::Render, 
+	//and the Engine-constructor 
+	const int numberOfModels = 1; 
+
 	Engine();
 	~Engine();
-	struct matrixBuffer {
-		XMMATRIX worldMatrix;
-		XMMATRIX viewMatrix;
-		XMMATRIX projectionMatrix;
-	};
 
 	IDXGISwapChain* gSwapChain = nullptr;
 	ID3D11Device* gDevice = nullptr;
@@ -50,8 +51,8 @@ public:
 	ID3D11RenderTargetView* gBackbufferRTV = nullptr;
 
 	ID3D11Buffer* gVertexBuffer = nullptr;
-	ID3D11Buffer* gConstantBuffer = nullptr; 
-											
+	ID3D11Buffer* gConstantBuffer = nullptr;
+
 	ID3D11Texture2D* gDepthStencilBuffer = nullptr;
 	ID3D11DepthStencilView* depthStencilView = nullptr;
 	ID3D11ShaderResourceView* gTextureView[2];
@@ -61,8 +62,17 @@ public:
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;
 
+	struct matrixBuffer {
+		XMMATRIX worldMatrix;
+		XMMATRIX viewMatrix;
+		XMMATRIX projectionMatrix;
+	};
+
+	
+
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
+	
 
 	FbxDawg * fbxobj = nullptr;
 
