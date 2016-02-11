@@ -441,7 +441,7 @@ void Engine::InitializeCamera()
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
 
-	const char* filePath = "D:\\skolan\\3D PROGRAMMERING\\Programmering\\Projektet\\itsBoxxy.fbx";
+	const char* filePath = ".\\itsBoxxy.fbx";
 	fbxobj = new FbxDawg();
 	fbxobj->loadModels(filePath);
 
