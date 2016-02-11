@@ -34,6 +34,7 @@ void FbxDawg::loadModels(const char* filePath)
 	std::vector<MyNormal> MyNormalVector;//MyNormalVector
 	std::vector<MyUV> MyUVVector;//MyUVVector
 	std::vector<MyVertexStruct> MyVertexStructVector;//vertexVector
+
 	//MyVertexStruct
 	if(FBXRootNode)
 	{
@@ -182,29 +183,61 @@ void FbxDawg::loadModels(const char* filePath)
 				}
 
 			}//uv
+			 //>>>>>>>>>Texture filepath<<<<<<<<<<<<<<<
+			int material_Count = mesh->GetSrcObjectCount<FbxSurfaceMaterial>();
+			int matCount = FbxChildNode->GetMaterialCount();
+			for (int m = 0; m < matCount; m++)//.. for every material attached to the mesh
+			{
+				FbxSurfaceMaterial* material = FbxChildNode->GetMaterial(m);
+				if(material)//.. if material
+				{
+					FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
+					int texture_Count = prop.GetSrcObjectCount<FbxTexture>();
+					for (int i = 0; i < texture_Count; i++)// how many texturefiles attached to the material
+					{
+						const FbxTexture* texture = FbxCast<FbxTexture>(prop.GetSrcObject<FbxTexture>(i));
+
+						wchar_t* wideName;
+						FbxUTF8ToWC(((const FbxFileTexture*)texture)->GetFileName(), wideName);
+
+						textureFilepath = wideName;
+
+						FbxFree(wideName);
+					}
+				}
+			}
+
 			 //>>>>>>>>>ASSEMBLY OF VERTEXDATA<<<<<<<<<<<<<<<
 			MyVertexStruct tempVertex;
-			for (int vertex = 0; vertex < MyPositionVector.size(); vertex++)//for every vertex in mesh, over 300 000 for a character
+			for (int triangleBase = 0; triangleBase < MyPositionVector.size(); triangleBase += 3)
 			{
-				tempVertex.x = MyPositionVector[vertex].pos[0];//v x
-				tempVertex.y = MyPositionVector[vertex].pos[1];//v y
-				tempVertex.z = MyPositionVector[vertex].pos[2];//v z
-				
-				tempVertex.norX = MyNormalVector[vertex].direction[0];//v x
-				tempVertex.norY = MyNormalVector[vertex].direction[1];//v y
-				tempVertex.norZ = MyNormalVector[vertex].direction[2];//v z
-		
-				tempVertex.u = MyUVVector[vertex].uvCoord[0];// u
-				tempVertex.v = MyUVVector[vertex].uvCoord[1];// v
+				static int offsets[] = { 1, 0, 2 };
+				for (int i = 0; i < 3; ++i)
+				{
+					int vertex = triangleBase + offsets[i];
 
-				//tempVertex.vertVar = MyPositionVector[vertex];
-				//tempVertex.norVar = MyNormalVector[vertex];
-				//tempVertex.uvVar = MyUVVector[vertex];
-				this->modelVertexList.push_back(tempVertex);
+					tempVertex.x = MyPositionVector[vertex].pos[0];//v x
+					tempVertex.y = MyPositionVector[vertex].pos[1];//v y
+					tempVertex.z = -MyPositionVector[vertex].pos[2];//v z
+
+					tempVertex.norX = MyNormalVector[vertex].direction[0];//v x
+					tempVertex.norY = MyNormalVector[vertex].direction[1];//v y
+					tempVertex.norZ = -MyNormalVector[vertex].direction[2];//v z
+
+					tempVertex.u = MyUVVector[vertex].uvCoord[0];// u
+					tempVertex.v = 1 - MyUVVector[vertex].uvCoord[1];// v
+
+					//tempVertex.vertVar = MyPositionVector[vertex];
+					//tempVertex.norVar = MyNormalVector[vertex];
+					//tempVertex.uvVar = MyUVVector[vertex];
+					this->modelVertexList.push_back(tempVertex);
+				}
 			}
+
 
 			 //Here the class-variable meshVertices 
 		}//inside this put code yes
 	}
+
 	SDK_Manager->Destroy();
 }
