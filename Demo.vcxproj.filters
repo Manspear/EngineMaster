@@ -39,7 +39,7 @@
     <ClCompile Include="WICTextureLoader.cpp">
       <Filter>Source Files\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="Fbx.cpp">
+    <ClCompile Include="FbxDawg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
