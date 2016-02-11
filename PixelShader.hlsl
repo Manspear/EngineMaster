@@ -5,8 +5,8 @@ struct PS_IN
 {
 
 	float4 Pos : SV_Position;
-	float2 UV : TEXCOORD;
 	float3 normal : normal;
+	float2 UV : TEXCOORD;
 	float4 worldPosition : WORLDSPACE;
 
 	float3 tangent : TANGENT;
@@ -32,7 +32,7 @@ float4 PS_main(PS_IN input) : SV_Target
 
 	float3 lightPos = float3 (0, 2, -3) - input.worldPosition; //Vector from worldPosition to camera. This is correct.
 	float4 ambientLightColor = { 0.2, 0.2, 0.2, 0 };
-	float4 diffuseColor = float4(1,1,1,1);
+	float4 diffuseColor = float4(1,0,0,1);
 
 	float3 color, textureColor, bumpMap;
 	color = textureColor = float3 (txDiffuse[0].Sample(sampAni, input.UV).xyz);

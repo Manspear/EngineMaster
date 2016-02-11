@@ -12,6 +12,8 @@
 
 #include "GInput.h"
 
+#include "FbxDawg.h"
+
 
 
 
@@ -61,6 +63,8 @@ public:
 
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
+
+	FbxDawg * fbxobj = nullptr;
 
 	int wHEIGHT = 480;
 	int wWIDTH = 640;

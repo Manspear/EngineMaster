@@ -1,6 +1,6 @@
 #include "Engine.h"
 #include "bth_image.h" //This header wouldn't work in Engine.h VS complained
-#include "Fbx.h"					   //of one or more multiply defined symbols found
+#include "FbxDawg.h"					   //of one or more multiply defined symbols found
 
 
 
@@ -10,9 +10,6 @@
 
 #pragma endregion
 
-
-
-
 Engine::Engine(){
 	//EMPTY
 }
@@ -21,9 +18,8 @@ Engine::Engine(){
 Engine::~Engine()
 {
 
+
 }
-
-
 
 void Engine::CreateShaders()
 {
@@ -50,7 +46,8 @@ void Engine::CreateShaders()
 	//create input layout (verified using vertex shader)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0},
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
@@ -95,42 +92,25 @@ void Engine::CreateShaders()
 
 void Engine::CreateTriangleData()
 {
-	struct TriangleVertex
-	{
-		float x, y, z;
-		float u, v;
-	};
+	//struct TriangleVertex
+	//{
+	//	float x, y, z;
+	//	float u, v;
+	//};
+	//TriangleVertex poop[6]{
+	//
+	//};
 
-	TriangleVertex triangleVertices[6] =
-	{
-		-0.5f, 0.5f, 0.0f,	//v0 pos
-		0.0f, 0.0f,	//v0 uv
-
-		0.5f, -0.5f, 0.0f,	//v1
-		1.0f, 1.0f, 	//v1 uv
-
-		-0.5f, -0.5f, 0.0f, //v2
-		0.0f, 1.0f, 	//v2 uv
-
-		-0.5f, 0.5f, 0.0f,	//v3 pos
-		0.0f, 0.0f,	//v3 uv
-
-		0.5f, 0.5f, 0.0f, //v4
-		1.0f, 0.0f,	//v4 uv
-
-		0.5f, -0.5f, 0.0f,	//v5
-		1.0f, 1.0f	//v5 uv	
-
-	};
-
+	//std::vector<MyVertexStruct> templist = fbxobj->modelVertexList;
+	int shit = fbxobj->modelVertexList.size();
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(triangleVertices);
+	bufferDesc.ByteWidth = fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
 
 	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = triangleVertices;
+	data.pSysMem = fbxobj->modelVertexList.data();
 	gDevice->CreateBuffer(&bufferDesc, &data, &gVertexBuffer);
 }
 
@@ -226,6 +206,8 @@ void Engine::SetViewport()
 // SWAG
 void Engine::Render()
 {
+	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
+	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
 	float clearColor[] = { 0, 0, 0, 1 };
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -262,7 +244,7 @@ void Engine::Render()
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 	gDeviceContext->PSSetShaderResources(0, 2, gTextureView);
-	UINT32 vertexSize = sizeof(float) * 5;
+	UINT32 vertexSize = sizeof(float) * 8;
 	UINT32 offset = 0;
 	gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
 
@@ -272,7 +254,7 @@ void Engine::Render()
 
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
-	gDeviceContext->Draw(12, 0);
+	gDeviceContext->Draw(fbxobj->modelVertexList.size(), 0);
 }
 
 
@@ -285,8 +267,8 @@ void Engine::Update() {
 	
 	//JESPER FIXA MINNESLÄCKAN 3 rader framåt
 	//FbxDawg fbxobj;
-	//std::vector<FbxDawg::MyVertex>* pOutVertexVector = new std::vector<FbxDawg::MyVertex>;
-	//fbxobj.loadModels(pOutVertexVector);
+	//std::vector<FbxDawg::MyPosition>* MyPositionVector = new std::vector<FbxDawg::MyPosition>;
+	//fbxobj.loadModels(MyPositionVector);
 
 	//world matrix
 	static float radianRotation = 0.00;
@@ -439,20 +421,31 @@ void Engine::Clean() {
 	depthStencilView->Release();
 	gDepthStencilBuffer->Release();
 
+	if (fbxobj != nullptr)
+	{
+		delete fbxobj;
+		//for every new, have a delete.
+		//the destructor of FbxDawg is called before this destructor is called.
+		//Destructors are called every time a variable runs out of scope.
+		//Delete removes the memory allocated.
+	}
 	delete camera;
 	delete input;
 }
 void Engine::InitializeCamera()
 {
-	camera = new GCamera;
-	camera->InitProjMatrix(XM_PI * 0.45, wHEIGHT, wWIDTH, 0.5, 20);
+	camera = new GCamera;//										vv far plane	dessa är 400 gånger ifrån varandra. Det är okej att ha runt 10 000 - 20 000
+	camera->InitProjMatrix(XM_PI * 0.45, wHEIGHT, wWIDTH, 0.05, 20);
+	//													  ^^ near plane  förut var det 0.5 här
 
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
 
-
+	const char* filePath = ".\\itsBoxxy.fbx";
+	fbxobj = new FbxDawg();
+	fbxobj->loadModels(filePath);
 
 	CreateDirect3DContext(wndHandle);
 
