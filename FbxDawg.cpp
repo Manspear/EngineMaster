@@ -30,15 +30,27 @@ void FbxDawg::loadModels(const char* filePath)
 	// FbxCamera, FbxLight, FbxMesh, etc... elements organized in a hierarchical tree. Root is the mother and by FbxNode::GetChild() we work our way down
 	FbxNode* FBXRootNode = Fbx_Scene->GetRootNode();
 
-	std::vector<MyPosition> MyPositionVector;//MyPositionVector
-	std::vector<MyNormal> MyNormalVector;//MyNormalVector
-	std::vector<MyUV> MyUVVector;//MyUVVector
-	std::vector<MyVertexStruct> MyVertexStructVector;//vertexVector
+	//vertexVector, holds complete vertex data. 
+	//The data contained in the Nor, Pos, and UV 
+	//structs get appended/push_backed into this one.
+	//This vector we read in the Engine-class to get
+	//models.
+	std::vector<MyVertexStruct> MyVertexStructVector;
+	
 	//MyVertexStruct
 	if(FBXRootNode)
 	{
+		//int polyIndexCounter = 0; //Think this is a fbx-file-global-thing
+		//int indexByPolygonVertex = 0; //Think this is so too
 		for (int i = 0; i < FBXRootNode->GetChildCount(); i++)//For each and every childnode...
 		{
+			//These three vectors are reset each loop iteration, that way they
+			//1. Don't get unneccesarily big and 
+			//2. they get looped through correctly in the ">>>ASSEMBLY<<<"-stage. 
+			std::vector<MyPosition> MyPositionVector;//MyPositionVector
+			std::vector<MyNormal> MyNormalVector;//MyNormalVector
+			std::vector<MyUV> MyUVVector;//MyUVVector 
+
 			FbxNode* FbxChildNode = FBXRootNode->GetChild(i);//... initialize the childnode we are at
 			if (FbxChildNode->GetNodeAttribute() == NULL)//... and then check if its an unset attribute. (special node that we dont want now) (A NULL node attribute is set by calling function FbxNode::SetNodeAttribute() with a NULL pointer)
 				continue;//tar nästa child istället
@@ -170,7 +182,7 @@ void FbxDawg::loadModels(const char* filePath)
 
 								UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
 
-								temp.uvIndex = UVIndex;
+								temp.uvIndex = UVIndex;//here i am
 								temp.uvCoord[0] = UVValue[0];
 								temp.uvCoord[1] = UVValue[1];
 								MyUVVector.push_back(temp);
@@ -202,6 +214,8 @@ void FbxDawg::loadModels(const char* filePath)
 				//tempVertex.uvVar = MyUVVector[vertex];
 				this->modelVertexList.push_back(tempVertex);
 			}
+			//oldLengthOffset += MyPositionVector.size()-1;
+			//Now: 2nd time through the loop of the 2nd object it crashes on UV tempVertex.u = MyUVVector[vertex].uvCoord[0];//
 
 			 //Here the class-variable meshVertices 
 		}//inside this put code yes

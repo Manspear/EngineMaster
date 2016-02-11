@@ -206,6 +206,8 @@ void Engine::SetViewport()
 // SWAG
 void Engine::Render()
 {
+	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
+	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
 	float clearColor[] = { 0, 0, 0, 1 };
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
