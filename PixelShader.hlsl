@@ -30,7 +30,7 @@ struct PS_IN
 float4 PS_main(PS_IN input) : SV_Target
 {
 
-	float3 lightPos = float3 (0, 0, -3) - input.worldPosition; //Vector from worldPosition to camera. This is correct.
+	float3 lightPos = float3 (0, 2, -3) - input.worldPosition; //Vector from worldPosition to camera. This is correct.
 	float4 ambientLightColor = { 0.2, 0.2, 0.2, 0 };
 	float4 diffuseColor = float4(1,0,0,1);
 
@@ -43,7 +43,16 @@ float4 PS_main(PS_IN input) : SV_Target
 	input.normal = normalize(input.normal);
 	float lightIntensity;
 
+	
+	
+	
+	//specular
+	float shinypower = 6.0f;
+	float4 specular = float4(1.0, 1.0, 1.0, 1.0);
+	float3 r = reflect(normalize(lightPos - input.worldPosition), input.normal);
+	float3 v = (input.worldPosition * -1.0);
 
+	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower); //sl = Specular Lighting
 
 
 	lightPos = normalize(lightPos);
@@ -52,6 +61,7 @@ float4 PS_main(PS_IN input) : SV_Target
 	color = saturate(diffuseColor * lightIntensity); //if lower than 0 set to 0, else if higher than 1 set to 1;
 	color = color * textureColor;
 	color = color + (ambientLightColor * textureColor);
+	color = color + sl;
 
 	return float4(color,1);
 };
