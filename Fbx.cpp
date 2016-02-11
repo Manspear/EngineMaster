@@ -35,7 +35,7 @@ void FbxDawg::loadModels(const char* filePath)
 	std::vector<MyUV> MyUVVector;//MyUVVector
 	std::vector<MyVertexStruct> MyVertexStructVector;//vertexVector
 	//MyVertexStruct
-	if (FBXRootNode)
+	if(FBXRootNode)
 	{
 		for (int i = 0; i < FBXRootNode->GetChildCount(); i++)//For each and every childnode...
 		{

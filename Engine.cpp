@@ -17,14 +17,7 @@ Engine::Engine(){
 
 Engine::~Engine()
 {
-	if (fbxobj != nullptr)
-	{
-		delete fbxobj;
-		//for every new, have a delete.
-		//the destructor of FbxDawg is called before this destructor is called.
-		//Destructors are called every time a variable runs out of scope.
-		//Delete removes the memory allocated.
-	}
+
 
 }
 
@@ -53,7 +46,8 @@ void Engine::CreateShaders()
 	//create input layout (verified using vertex shader)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0},
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
@@ -113,7 +107,7 @@ void Engine::CreateTriangleData()
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(fbxobj->modelVertexList);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
+	bufferDesc.ByteWidth = fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
 
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = fbxobj->modelVertexList.data();
@@ -248,7 +242,7 @@ void Engine::Render()
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 	gDeviceContext->PSSetShaderResources(0, 2, gTextureView);
-	UINT32 vertexSize = sizeof(float) * 5;
+	UINT32 vertexSize = sizeof(float) * 8;
 	UINT32 offset = 0;
 	gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
 
@@ -425,20 +419,29 @@ void Engine::Clean() {
 	depthStencilView->Release();
 	gDepthStencilBuffer->Release();
 
+	if (fbxobj != nullptr)
+	{
+		delete fbxobj;
+		//for every new, have a delete.
+		//the destructor of FbxDawg is called before this destructor is called.
+		//Destructors are called every time a variable runs out of scope.
+		//Delete removes the memory allocated.
+	}
 	delete camera;
 	delete input;
 }
 void Engine::InitializeCamera()
 {
-	camera = new GCamera;
-	camera->InitProjMatrix(XM_PI * 0.45, wHEIGHT, wWIDTH, 0.5, 20);
+	camera = new GCamera;//										vv far plane	dessa är 400 gånger ifrån varandra. Det är okej att ha runt 10 000 - 20 000
+	camera->InitProjMatrix(XM_PI * 0.45, wHEIGHT, wWIDTH, 0.05, 20);
+	//													  ^^ near plane  förut var det 0.5 här
 
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
 
-	const char* filePath = "F:\\skolan\\3D PROGRAMMERING\\Programmering\\Projektet\\itsBoxxy.fbx";
+	const char* filePath = "D:\\skolan\\3D PROGRAMMERING\\Programmering\\Projektet\\itsBoxxy.fbx";
 	fbxobj = new FbxDawg();
 	fbxobj->loadModels(filePath);
 
