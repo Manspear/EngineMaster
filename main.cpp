@@ -65,7 +65,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	if (wndHandle)
 	{
-
+		//console
+		AllocConsole();
+		freopen("CONOUT$", "wb", stdout);
 		HRESULT CreateDirect3DContext(HWND wndHandle); //need to type engine.h
 
 
