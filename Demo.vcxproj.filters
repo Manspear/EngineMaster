@@ -73,5 +73,8 @@
     <ClInclude Include="FbxDawg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -126,6 +126,7 @@
     </ClInclude>
     <ClInclude Include="GCamera.h" />
     <ClInclude Include="GInput.h" />
+    <ClInclude Include="GModel.h" />
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
