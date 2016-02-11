@@ -36,9 +36,6 @@ void FbxDawg::loadModels(const char* filePath)
 	//structs get appended/push_backed into this one.
 	//This vector we read in the Engine-class to get
 	//models.
-	
-
-
 	std::vector<MyVertexStruct> MyVertexStructVector;//vertexVector
 
 
