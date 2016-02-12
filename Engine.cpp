@@ -138,8 +138,8 @@ void Engine::CreateTexture() {
 	ID3D11ShaderResourceView * Texture;
 	CoInitialize(NULL);
 
-	hr = CreateWICTextureFromFile(gDevice, L"./Images/SexyPic.jpg", NULL, &gTextureView[0]);
-	hr = CreateWICTextureFromFile(gDevice, L"./Images/Chesterfield - (Normal Map_2).png", NULL, &gTextureView[1]);
+	hr = CreateWICTextureFromFile(gDevice, fbxobj->textureFilepath.c_str(), NULL, &gTextureView[0]);//wstring äger functionen c_str som är en getFucntion till wchar_t* som finns redan
+	hr = CreateWICTextureFromFile(gDevice, L"./Images/normal_map.jpg", NULL, &gTextureView[1]);
 	//(d3d11DeviceInterface, d3d11DeviceContextInterface, L"test.bmp", 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0, &pTex2D, NULL);
 	#pragma endregion 
 	
@@ -257,7 +257,7 @@ void Engine::Update() {
 	XMFLOAT4X4 worldMatrix;
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
-	
+
 	//JESPER FIXA MINNESLÄCKAN 3 rader framåt
 	//FbxDawg fbxobj;
 	//std::vector<FbxDawg::MyPosition>* MyPositionVector = new std::vector<FbxDawg::MyPosition>;
@@ -265,7 +265,7 @@ void Engine::Update() {
 
 	//world matrix
 	static float radianRotation = 0.00;
-	//radianRotation += 0.0002;
+	radianRotation += 0.0002;
 	XMMATRIX worMat = XMMatrixRotationY(radianRotation);
 
 	//Transpose the matrices. This is a must for DirectX 11
@@ -448,9 +448,15 @@ void Engine::InitializeModels() {
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
 
+<<<<<<< HEAD
 	//const char* filePath = ".\\itsBoxxy.fbx";
 	//fbxobj = new FbxDawg();
 	//fbxobj->loadModels(filePath);
+=======
+	const char* filePath = ".\\box3.fbx";
+	fbxobj = new FbxDawg();
+	fbxobj->loadModels(filePath);
+>>>>>>> origin/superbranch_DEV
 
 	CreateDirect3DContext(wndHandle);
 
