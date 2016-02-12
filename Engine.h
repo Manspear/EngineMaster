@@ -1,4 +1,4 @@
-//#pragma once
+#pragma once
 
 #include <windows.h>
 
@@ -31,7 +31,7 @@ class Engine
 
 private:
 
-	GModel * modelList = nullptr; //points at model objects
+	
 
 public:
 	struct MyVertexStruct
@@ -40,7 +40,7 @@ public:
 	};
 	//numberOfModels is used in Engine::Render, 
 	//and the Engine-constructor 
-	const int numberOfModels = 1; 
+	int numberOfModels; 
 
 	Engine();
 	~Engine();
@@ -69,7 +69,7 @@ public:
 	};
 
 	
-
+	GModel * modelList = nullptr; //points at model objects
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
 	
@@ -93,6 +93,7 @@ public:
 	void Clean(); //releases all resources
 	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once
 	void InitializeCamera();
+	void InitializeModels();
 	HRESULT CreateDirect3DContext(HWND wndHandle);
 
 	/*LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

@@ -9,9 +9,7 @@
 #pragma endregion
 
 Engine::Engine(){
-	//Here create the dynamic GModel-Array:
-	this->modelList = new GModel[numberOfModels];
-	this->modelList[0].load(".\\itsBoxxy.fbx");
+
 }
 
 Engine::~Engine()
@@ -242,17 +240,11 @@ void Engine::Render()
 
 	for (int bufferCounter = 0; bufferCounter < numberOfModels; bufferCounter++)
 	{
-		D3D11_BUFFER_DESC bufferDesc;
-		memset(&bufferDesc, 0, sizeof(bufferDesc));
-		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		bufferDesc.ByteWidth = this->modelList[bufferCounter].modelVertices.size()*sizeof(MyVertexStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
+		
+		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 
-		D3D11_SUBRESOURCE_DATA data;
-		data.pSysMem = this->modelList[bufferCounter].modelVertices.data();
-		gDevice->CreateBuffer(&bufferDesc, &data, &gVertexBuffer);
 
-		gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
+		gDeviceContext->IASetVertexBuffers(0, 1, &modelList[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
 
 		gDeviceContext->Draw(this->modelList[bufferCounter].modelVertices.size(), 0);
 	}
@@ -406,7 +398,7 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 }
 
 void Engine::Clean() {
-	gVertexBuffer->Release();
+	//gVertexBuffer->Release();
 
 	gVertexLayout->Release();
 	gVertexShader->Release();
@@ -443,14 +435,26 @@ void Engine::InitializeCamera()
 
 }
 
+void Engine::InitializeModels() {
+	//Here create the dynamic GModel-Array:
+	this->numberOfModels = 2;
+	this->modelList = new GModel[numberOfModels];
+
+	this->modelList[0].load(".\\itsBoxxy.fbx", gDevice);
+	this->modelList[1].load(".\\itsPyramiddy.fbx", gDevice);
+	
+}
+
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
 
-	const char* filePath = ".\\itsBoxxy.fbx";
-	fbxobj = new FbxDawg();
-	fbxobj->loadModels(filePath);
+	//const char* filePath = ".\\itsBoxxy.fbx";
+	//fbxobj = new FbxDawg();
+	//fbxobj->loadModels(filePath);
 
 	CreateDirect3DContext(wndHandle);
+
+	InitializeModels();
 
 	SetViewport();
 
