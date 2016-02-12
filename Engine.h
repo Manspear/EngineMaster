@@ -39,7 +39,7 @@ public:
 		float x, y, z, norX, norY, norZ, u, v;
 	};
 	//numberOfModels is used in Engine::Render, 
-	//and the Engine-constructor 
+	//and is set in the Engine::InitializeModels
 	int numberOfModels; 
 
 	Engine();
@@ -55,7 +55,7 @@ public:
 
 	ID3D11Texture2D* gDepthStencilBuffer = nullptr;
 	ID3D11DepthStencilView* depthStencilView = nullptr;
-	ID3D11ShaderResourceView* gTextureView[2];
+	//ID3D11ShaderResourceView* gTextureView[2];
 
 	ID3D11InputLayout* gVertexLayout = nullptr;
 	ID3D11VertexShader* gVertexShader = nullptr;
@@ -84,7 +84,7 @@ public:
 
 	void CreateShaders();
 	void CreateTriangleData();
-	void CreateTexture();
+	//void CreateTexture(int modelCounter);
 	void CreateConstantBuffer();
 	void CreateDepthStencilBuffer();
 	void SetViewport();
