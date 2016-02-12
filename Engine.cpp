@@ -1,8 +1,6 @@
 #include "Engine.h"
-#include "bth_image.h" //This header wouldn't work in Engine.h VS complained
-#include "FbxDawg.h"					   //of one or more multiply defined symbols found
-
-
+//#include "bth_image.h" //This header wouldn't work in Engine.h VS complained
+//of one or more multiply defined symbols found
 
 #pragma region Texture includes
 #include "WICTextureLoader.h"
@@ -11,9 +9,8 @@
 #pragma endregion
 
 Engine::Engine(){
-	//EMPTY
-}
 
+}
 
 Engine::~Engine()
 {
@@ -46,7 +43,7 @@ void Engine::CreateShaders()
 	//create input layout (verified using vertex shader)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0},
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
@@ -90,28 +87,17 @@ void Engine::CreateShaders()
 	pGS->Release();
 }
 
-void Engine::CreateTriangleData()
+void Engine::CreateTriangleData() //each model'll also need their own CreateTriangleData... For their own vertexBuffer
 {
-	//struct TriangleVertex
-	//{
-	//	float x, y, z;
-	//	float u, v;
-	//};
-	//TriangleVertex poop[6]{
-	//
-	//};
+	//D3D11_BUFFER_DESC bufferDesc;
+	//memset(&bufferDesc, 0, sizeof(bufferDesc));
+	//bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	//bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	//bufferDesc.ByteWidth = fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
 
-	//std::vector<MyVertexStruct> templist = fbxobj->modelVertexList;
-	int shit = fbxobj->modelVertexList.size();
-	D3D11_BUFFER_DESC bufferDesc;
-	memset(&bufferDesc, 0, sizeof(bufferDesc));
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
-
-	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = fbxobj->modelVertexList.data();
-	gDevice->CreateBuffer(&bufferDesc, &data, &gVertexBuffer);
+	//D3D11_SUBRESOURCE_DATA data;
+	//data.pSysMem = fbxobj->modelVertexList.data();
+	//gDevice->CreateBuffer(&bufferDesc, &data, &gVertexBuffer);
 }
 
 void Engine::CreateTexture() {
@@ -206,11 +192,6 @@ void Engine::SetViewport()
 // SWAG
 void Engine::Render()
 {
-	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
-	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
-	float clearColor[] = { 0, 0, 0, 1 };
-	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
-	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	//>>>EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM<<<
 	//The depth buffer clears itself with a value between 0 and 1. If it clears to 1
@@ -238,6 +219,12 @@ void Engine::Render()
 	//the shadow volume that is behind the last object that it hits, and positive values 
 	//represent the shadow-volume before it hits it's "object-that-will-get-shadow-on-it".
 
+	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
+	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
+	float clearColor[] = { 0, 0, 0, 1 };
+	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
 	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
@@ -245,16 +232,22 @@ void Engine::Render()
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 	gDeviceContext->PSSetShaderResources(0, 2, gTextureView);
 	UINT32 vertexSize = sizeof(float) * 8;
-	UINT32 offset = 0;
-	gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
-
+	UINT32 offset = 0; //This, when handling multiple buffers, is equal to the length of the current buffer element in bytes
+	
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	gDeviceContext->IASetInputLayout(gVertexLayout);
-
-
-
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
-	gDeviceContext->Draw(fbxobj->modelVertexList.size(), 0);
+
+	for (int bufferCounter = 0; bufferCounter < numberOfModels; bufferCounter++)
+	{
+		
+		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
+
+
+		gDeviceContext->IASetVertexBuffers(0, 1, &modelList[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
+
+		gDeviceContext->Draw(this->modelList[bufferCounter].modelVertices.size(), 0);
+	}
 }
 
 
@@ -405,7 +398,7 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 }
 
 void Engine::Clean() {
-	gVertexBuffer->Release();
+	//gVertexBuffer->Release();
 
 	gVertexLayout->Release();
 	gVertexShader->Release();
@@ -431,6 +424,8 @@ void Engine::Clean() {
 	}
 	delete camera;
 	delete input;
+	//delete[] loops through the new-objects in the array, and deletes them!
+	delete[] this->modelList; 
 }
 void Engine::InitializeCamera()
 {
@@ -440,14 +435,26 @@ void Engine::InitializeCamera()
 
 }
 
+void Engine::InitializeModels() {
+	//Here create the dynamic GModel-Array:
+	this->numberOfModels = 2;
+	this->modelList = new GModel[numberOfModels];
+
+	this->modelList[0].load(".\\itsBoxxy.fbx", gDevice);
+	this->modelList[1].load(".\\itsPyramiddy.fbx", gDevice);
+	
+}
+
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
 
-	const char* filePath = ".\\itsBoxxy.fbx";
-	fbxobj = new FbxDawg();
-	fbxobj->loadModels(filePath);
+	//const char* filePath = ".\\itsBoxxy.fbx";
+	//fbxobj = new FbxDawg();
+	//fbxobj->loadModels(filePath);
 
 	CreateDirect3DContext(wndHandle);
+
+	InitializeModels();
 
 	SetViewport();
 
