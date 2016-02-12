@@ -14,7 +14,6 @@ public:
 	~GModel();
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture and normal map
-	//vertex buffer, constant buffer, 
 	//share projection and view, but have different world-view.
 	//void setPosition(DirectX::XMMATRIX translationMatrix);
 	void renderModel();
@@ -24,6 +23,17 @@ public:
 	void load(const char* fbxFilePath, ID3D11Device* gDevice); //<-- Loads the model. Means that modelLoader is called.
 	//DirectX::XMMATRIX objectWorldMatrix;
 };
+
+//>>>>>>>USER MANUAL<<<<<<<<<<<
+//Look at GModel.cpp
+//note the load()-function. It loads data from the Fbx-file with the FbxDawg-class-functions
+//and creates both a textureView and a vertexBuffer.
+//Now look at Engine.cpp
+//In InitializeModels, you set the number of models you load, and which Fbx-file yoy load from.
+//Now look at Engine::Render()
+//Here a new vertexBuffer, and texture-resource is set per object (by looping through the Engine-variable numberOfModels)
+//then a draw()-call is initialized, the number of vertices drawn equal to the number of vertices in
+//the GModel::modelVertices - vector - array.
 
 
 

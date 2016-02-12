@@ -132,7 +132,7 @@ void Engine::SetViewport()
 // SWAG
 void Engine::Render()
 {
-
+#pragma region //EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM
 	//>>>EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM<<<
 	//The depth buffer clears itself with a value between 0 and 1. If it clears to 1
 	//it has a depth-value corresponding to the Far Plane of the view-frustum. 
@@ -158,7 +158,7 @@ void Engine::Render()
 	//The values it holds are both positive and negative, where negative values represent 
 	//the shadow volume that is behind the last object that it hits, and positive values 
 	//represent the shadow-volume before it hits it's "object-that-will-get-shadow-on-it".
-
+#pragma endregion
 	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
 	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
 	float clearColor[] = { 0, 0, 0, 1 };
@@ -171,7 +171,7 @@ void Engine::Render()
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 	UINT32 vertexSize = sizeof(float) * 8;
-	UINT32 offset = 0; //This, when handling multiple buffers, is equal to the length of the current buffer element in bytes
+	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
 	
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	gDeviceContext->IASetInputLayout(gVertexLayout);
@@ -180,7 +180,6 @@ void Engine::Render()
 
 	for (int bufferCounter = 0; bufferCounter < numberOfModels; bufferCounter++)
 	{
-		
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 		gDeviceContext->PSSetShaderResources(0, 2, modelList[bufferCounter].modelTextureView);
 
@@ -290,7 +289,6 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 }
 
 void Engine::Clean() {
-	//gVertexBuffer->Release();
 
 	gVertexLayout->Release();
 	gVertexShader->Release();
