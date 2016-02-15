@@ -30,7 +30,7 @@ struct PS_IN
 float4 PS_main(PS_IN input) : SV_Target
 {
 
-	float3 lightPos = float3 (4, 3, -3) - input.worldPosition; //Vector from worldPosition to camera. This is correct.
+	float3 lightPos = normalize(float3 (4, 3, -3) - input.worldPosition); //Vector from worldPosition to camera(is correct)
 	float4 ambientLightColor = { 0.2, 0.2, 0.2, 0 };
 	float4 diffuseColor = float4(1,1,1,1);
 
@@ -55,7 +55,7 @@ float4 PS_main(PS_IN input) : SV_Target
 	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower); //sl = Specular Lighting
 
 
-	lightPos = normalize(lightPos);
+	
 	lightIntensity = dot(input.normal, lightPos); //angle of ray vs object determines the amount of reflected light. saturate means 0-1 dot product. If they are the same it returns 0 if 90 1
 
 	color = saturate(diffuseColor * lightIntensity); //if lower than 0 set to 0, else if higher than 1 set to 1;
