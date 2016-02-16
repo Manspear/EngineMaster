@@ -7,7 +7,7 @@ struct PS_IN
 	float4 Pos : SV_Position;
 	float3 normal : normal;
 	float2 UV : TEXCOORD;
-	float4 worldPosition : WORLDSPACE;
+	float4 pixelPosition : WORLDSPACE;
 
 	float3 tangent : TANGENT;
 	float3 biTangent : BITANGENT;
@@ -30,7 +30,7 @@ struct PS_IN
 float4 PS_main(PS_IN input) : SV_Target
 {
 	//Light Inits
-	float3 lightPos = normalize(float3 (4, 3, -3) - input.worldPosition); //Vector from worldPosition to camera(is correct)
+	float3 lightPos = normalize(float3 (4, 3, -3) - input.pixelPosition); //Vector from pixelPosition to camera(is correct)
 	float4 ambientLightColor = { 0.2, 0.2, 0.2, 0 };
 	float4 diffuseColor = float4(1,1,1,1);
 
@@ -48,8 +48,8 @@ float4 PS_main(PS_IN input) : SV_Target
 	//specular
 	float shinypower = 3.0f;
 	float4 specular = float4(1.0, 1.0, 1.0, 1.0);
-	float3 r = reflect(normalize(lightPos - input.worldPosition), input.normal);
-	float3 v = normalize(input.worldPosition * -1.0);
+	float3 r = reflect(normalize(lightPos - input.pixelPosition), input.normal);
+	float3 v = normalize(input.pixelPosition * -1.0);
 
 	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower); //sl = Specular Lighting
 

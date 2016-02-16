@@ -26,6 +26,11 @@ struct MyVertexStruct
 {
 	float x, y, z, norX, norY, norZ, u, v;
 };
+
+struct MyIndexStruct
+{
+	int posIndex, norIndex, uvIndex;
+};
 //GLOBALS^^^^^^^^
 
 class FbxDawg
@@ -38,6 +43,10 @@ public:
 	std::wstring textureFilepath;//När denna blir tilldelad så får den en kopia istället. Så vi kan utan problem radera den variablen som var med i tilldelningen.
 	void loadModels(const char* filePath);
 	std::vector<MyVertexStruct> modelVertexList;
+	std::vector<MyPosition> indexedPosList;
+	std::vector<MyNormal> indexedNormalList;
+	std::vector<MyUV> indexedUVList;
+	std::vector<MyIndexStruct> myIndexList;
 };
 #endif
 

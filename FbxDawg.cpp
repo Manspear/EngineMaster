@@ -36,7 +36,8 @@ void FbxDawg::loadModels(const char* filePath)
 	//structs get appended/push_backed into this one.
 	//This vector we read in the Engine-class to get
 	//models.
-	std::vector<MyVertexStruct> MyVertexStructVector;//vertexVector
+	//std::vector<MyVertexStruct> MyVertexStructVector;//vertexVector
+	
 
 
 	//MyVertexStruct
@@ -221,11 +222,14 @@ void FbxDawg::loadModels(const char* filePath)
 				}
 			}
 
-			 //>>>>>>>>>ASSEMBLY OF VERTEXDATA<<<<<<<<<<<<<<<
+			 //>>>>>>>>>ASSEMBLY OF VERTEXDATA<<<<<<<<<<
 			MyVertexStruct tempVertex;
+			MyIndexStruct tempIndex;
 			for (int triangleCounter = 0; triangleCounter < MyPositionVector.size(); triangleCounter += 3)
 			{
-				static int offsets[] = { 1, 0, 2 };
+				//This offset is made because directX is left-hand-oriented
+				//If this doesn't exist, the textures and vertices get mirrored.
+				static int offsets[] = { 1, 0, 2 }; 
 				for (int i = 0; i < 3; ++i)
 				{
 					int vertex = triangleCounter + offsets[i];
@@ -246,17 +250,145 @@ void FbxDawg::loadModels(const char* filePath)
 					//tempVertex.uvVar = MyUVVector[vertex];
 					this->modelVertexList.push_back(tempVertex);
 				}
+
+				for (int i = 0; i < 3; ++i)
+				{
+					int vertex = triangleCounter + offsets[i];
+					
+					tempIndex.posIndex = MyPositionVector[vertex].vertexIndex;
+					tempIndex.norIndex = MyNormalVector[vertex].normalIndex;
+					tempIndex.uvIndex = MyUVVector[vertex].uvIndex;
+					
+					this->myIndexList.push_back(tempIndex);
+				}
 			}
-			//Hmm... Put positions with index 0 at index 0. Loop through the three vectors
-			while (true) {
-				MyPositionVector
+
+			//>>>>>>>CREATING ORDERED LISTS OF NEEDED VERTICES FOR INDEX-BUFFER IN MAIN<<<<<<<
+			#pragma region
+			//>>>vertex positions
+
+			//Getting all of the vertices with unique indices.
+			std::vector <MyPosition> unorderedPosList;
+			bool indexAlreadyExists = false;
+			//per position of MyPositionVector
+			for (int aids = 0; aids < MyPositionVector.size(); aids++)
+			{
+				
+				//loop through unorderedPosList to check if it already contains the index of MyPositionVector[aids]
+				for (int ebola = 0; ebola < unorderedPosList.size(); ebola++)
+				{
+					//here checks if the index is already saved 
+					if (unorderedPosList[ebola].vertexIndex == MyPositionVector[aids].vertexIndex) {
+						indexAlreadyExists = true;
+						ebola = INT_MAX;
+					}
+				}
+				if (indexAlreadyExists == true) {
+					indexAlreadyExists = false;
+				}else if(indexAlreadyExists == false){
+					//if the index isn't present in unorderedPosList, add the vertex.
+					unorderedPosList.push_back(MyPositionVector[aids]); //... I see. The loop will never end since this never ends.
+				}
+			}
+			
+			//Now that we've isolated the values needed, we need to order them by index.
+			std::vector <MyPosition> orderedPosList;
+			int searchedIndex = 0;
+			while (orderedPosList.size() != unorderedPosList.size()) 
+			{
+				for (int monkey = 0; monkey < unorderedPosList.size(); monkey++) 
+				{
+					if (unorderedPosList[monkey].vertexIndex == searchedIndex) {
+						orderedPosList.push_back(unorderedPosList[monkey]);
+						monkey = INT_MAX;
+						searchedIndex++;
+					}
+				}
 			}
 
-			//oldLengthOffset += MyPositionVector.size()-1;
-			//Now: 2nd time through the loop of the 2nd object it crashes on UV tempVertex.u = MyUVVector[vertex].uvCoord[0];//
+			//>>>vertex normals
+			std::vector <MyNormal> unorderedNormalList;
+			indexAlreadyExists = false;
+			//per position of MyPositionVector
+			for (int aids = 0; aids < MyNormalVector.size(); aids++)
+			{
+				//loop through unorderedNormalList to check if it already contains the index of MyPositionVector[aids]
+				for (int ebola = 0; ebola < unorderedNormalList.size(); ebola++)
+				{
+					//here checks if the index is already saved 
+					if (unorderedNormalList[ebola].normalIndex == MyNormalVector[aids].normalIndex) {
+						indexAlreadyExists = true;
+						ebola = INT_MAX;
+					}
+				}
+				if (indexAlreadyExists == true) {
+					indexAlreadyExists = false;
+				}
+				else {
+					//if the index isn't present in unorderedNormalList, add the vertex.
+					unorderedNormalList.push_back(MyNormalVector[aids]);
+				}
+			}
 
+			//Now that we've isolated the values needed, we need to order them by index.
+			std::vector <MyNormal> orderedNormalList;
+			searchedIndex = 0;
+			while (orderedNormalList.size() != unorderedNormalList.size())
+			{
+				for (int monkey = 0; monkey < unorderedNormalList.size(); monkey++)
+				{
+					if (unorderedNormalList[monkey].normalIndex == searchedIndex) {
+						orderedNormalList.push_back(unorderedNormalList[monkey]);
+						monkey = INT_MAX;
+						searchedIndex++;
+					}
+				}
+			}
 
-			 //Here the class-variable meshVertices 
+			//>>>vertex UVs
+			std::vector <MyUV> unorderedUVList;
+			indexAlreadyExists = false;
+			//per position of MyPositionVector
+			for (int aids = 0; aids < MyUVVector.size(); aids++)
+			{
+				//loop through unorderedUVList to check if it already contains the index of MyPositionVector[aids]
+				for (int ebola = 0; ebola < unorderedUVList.size(); ebola++)
+				{
+					//here checks if the index is already saved 
+					if (unorderedUVList[ebola].uvIndex == MyUVVector[aids].uvIndex) {
+						indexAlreadyExists = true;
+						ebola = INT_MAX;
+					}
+				}
+				if (indexAlreadyExists == true) {
+					indexAlreadyExists = false;
+				}
+				else {
+					//if the index isn't present in unorderedUVList, add the vertex.
+					unorderedUVList.push_back(MyUVVector[aids]);
+				}
+			}
+
+			//Now that we've isolated the values needed, we need to order them by index.
+			std::vector <MyUV> orderedUVList;
+			searchedIndex = 0;
+			while (orderedUVList.size() != unorderedUVList.size())
+			{
+				for (int monkey = 0; monkey < unorderedUVList.size(); monkey++)
+				{
+					if (unorderedUVList[monkey].uvIndex == searchedIndex) {
+						orderedUVList.push_back(unorderedUVList[monkey]);
+						monkey = INT_MAX;
+						searchedIndex++;
+					}
+				}
+			}
+			#pragma endregion //<<<Open this to see code
+			
+			//saves the indexed lists to the FBXDawg-lists
+			indexedPosList = orderedPosList;
+			indexedNormalList = orderedNormalList;
+			indexedUVList = orderedUVList;
 		}//inside this put code yes
 	}
 

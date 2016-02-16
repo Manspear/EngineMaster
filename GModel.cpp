@@ -4,7 +4,6 @@
 GModel::GModel()
 {
 	this->objectWorldMatrix = DirectX::XMMatrixIdentity();
-
 }
 
 GModel::~GModel()
