@@ -20,7 +20,8 @@
 
 #ifndef ENGINE_H
 #define ENGINE_H
-
+#define XAXIS 0
+#define YAXIS 1
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 
@@ -80,7 +81,13 @@ public:
 	int wWIDTH = 640;
 	byte * keys;
 
-
+	//Delta Time Stuff
+	double countsPerSecond;
+	__int64 counterStart;
+	int frameCount;
+	int fps;
+	__int64 frameTimeOld;
+	double frameTime;
 
 	void CreateShaders();
 	void CreateTriangleData();

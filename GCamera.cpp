@@ -37,7 +37,7 @@ void GCamera::moveStrafe(float speed) //positive speed is forward, negative is b
 	this->initViewMatrix();
 }
 
-void GCamera::rotate(int rotAx, float degrees)
+void GCamera::rotate(int rotAx, float degrees) //rotax is 0 for x and 1 for y
 {
 	//degrees = degrees * 0.001;
 	XMFLOAT4 axis;

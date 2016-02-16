@@ -8,8 +8,13 @@
 
 #pragma endregion
 
-Engine::Engine(){
-
+Engine::Engine()
+{
+	countsPerSecond = 0;
+	counterStart = 0;
+	frameCount = 0;
+	fps = 0;
+	frameTimeOld = 0;
 }
 
 Engine::~Engine()
@@ -211,8 +216,8 @@ void Engine::Update() {
 	if (input->keyState[DIK_LALT])
 	{
 		
-		camera->rotate(0, input->mouseX);
-		camera->rotate(1, -input->mouseY);
+		camera->rotate(XAXIS, input->mouseX);
+		camera->rotate(YAXIS, -input->mouseY);
 
 		//camera->rotate2(0, input->mouseY);
 		//camera->rotate2(1, input->mouseX);
