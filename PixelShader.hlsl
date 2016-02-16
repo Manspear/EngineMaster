@@ -29,21 +29,20 @@ struct PS_IN
 
 float4 PS_main(PS_IN input) : SV_Target
 {
-
-	float3 lightPos = float3 (4, 3, -3) - input.worldPosition; //Vector from worldPosition to camera. This is correct.
+	//Light Inits
+	float3 lightPos = normalize(float3 (4, 3, -3) - input.worldPosition); //Vector from worldPosition to camera(is correct)
 	float4 ambientLightColor = { 0.2, 0.2, 0.2, 0 };
 	float4 diffuseColor = float4(1,1,1,1);
 
+	//texture
 	float3 color, textureColor, bumpMap;
 	color = textureColor = float3 (txDiffuse[0].Sample(sampAni, input.UV).xyz);
 
+	//Normal
 	bumpMap = float3 (txDiffuse[1].Sample(sampAni, input.UV).xyz);
 	bumpMap = (bumpMap * 2.0f) - 1.0f;
 	input.normal = (bumpMap.x * input.tangent) + (bumpMap.y * input.biTangent) + (bumpMap.z * input.normal);
 	input.normal = normalize(input.normal);
-	float lightIntensity;
-
-	
 	
 	
 	//specular
@@ -55,9 +54,8 @@ float4 PS_main(PS_IN input) : SV_Target
 	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower); //sl = Specular Lighting
 
 
-	lightPos = normalize(lightPos);
-	lightIntensity = dot(input.normal, lightPos); //angle of ray vs object determines the amount of reflected light. saturate means 0-1 dot product. If they are the same it returns 0 if 90 1
-
+	//lightCalc
+	float lightIntensity = dot(input.normal, lightPos); //angle of ray vs object determines the amount of reflected light. 
 	color = saturate(diffuseColor * lightIntensity); //if lower than 0 set to 0, else if higher than 1 set to 1;
 	color = color * textureColor;
 	color = color + (ambientLightColor * textureColor);
