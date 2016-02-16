@@ -42,6 +42,9 @@
     <ClCompile Include="FbxDawg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DCM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -71,6 +74,9 @@
       <Filter>Source Files\Texture</Filter>
     </ClInclude>
     <ClInclude Include="FbxDawg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DCM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
