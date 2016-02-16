@@ -29,14 +29,14 @@ public:
 	void moveForward(float speed);
 	void moveStrafe(float speed);
 	void move(XMFLOAT4 direction);
-	void rotate(XMFLOAT4 axis, float degrees);
+	void rotate(int rotAx, float degrees);
 	void setPosition(XMFLOAT4& newPosition);
 	const XMVECTOR& getPosition() const { return cPosition; }
-	void setTarget(XMFLOAT4 nTarget);
 	const XMVECTOR& getTarget() const { return cTarget; }
 	const XMVECTOR getUp(); //returns camera up vector
 	const XMVECTOR getLookAtTarget(); //returns camera look at target vector
 	const XMMATRIX getViewMatrix();
+
 
 	//PROJECTION
 	void setFrustAngle(float Angle);

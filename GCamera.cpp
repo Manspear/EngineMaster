@@ -4,7 +4,6 @@
 void GCamera::initViewMatrix()
 {
 	cView = XMMatrixLookAtLH(cPosition, cTarget, cUp);
-
 }
 
 void GCamera::move(XMFLOAT4 direction)
@@ -18,10 +17,10 @@ void GCamera::move(XMFLOAT4 direction)
 
 void GCamera::moveForward(float speed) //positive speed is forward, negative is backwards
 {
-	XMFLOAT4 moveVec = VtoF((cTarget - cPosition)*speed);
+	XMFLOAT4 moveVec = VtoF((XMVector4Normalize(cTarget - cPosition))*speed);
 
-	cPosition = XMVector4Transform(cPosition, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
-	cTarget = XMVector4Transform(cTarget, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
+	cPosition = XMVector3Transform(cPosition, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
+	cTarget = XMVector3Transform(cTarget, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
 	//cUp = XMVector4Transform(cUp, XMMatrixTranslation(direction.x, direction.y, direction.z)); //uncomment for roll instead of jaw
 
 	this->initViewMatrix();
@@ -29,35 +28,49 @@ void GCamera::moveForward(float speed) //positive speed is forward, negative is 
 
 void GCamera::moveStrafe(float speed) //positive speed is forward, negative is backwards
 {
-	XMFLOAT4 moveVec = VtoF((XMVector3Cross((cTarget - cPosition), cUp)*speed));
+	XMFLOAT4 moveVec = VtoF((XMVector3Cross((XMVector4Normalize(cTarget - cPosition)), cUp)*speed));
 
-	cPosition = XMVector4Transform(cPosition, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
-	cTarget = XMVector4Transform(cTarget, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
+	cPosition = XMVector3Transform(cPosition, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
+	cTarget = XMVector3Transform(cTarget, XMMatrixTranslation(moveVec.x, moveVec.y, moveVec.z));
 	//cUp = XMVector4Transform(cUp, XMMatrixTranslation(direction.x, direction.y, direction.z)); //uncomment for roll instead of jaw
 
 	this->initViewMatrix();
 }
 
-void GCamera::rotate(XMFLOAT4 axis, float degrees)
+void GCamera::rotate(int rotAx, float degrees)
 {
-	if (XMVector4Equal(FtoV(axis), XMVectorZero()) || degrees == 0.0f)
-		return;
+	//degrees = degrees * 0.001;
+	XMFLOAT4 axis;
 
-	XMFLOAT4 lookAtTarget = VtoF(cTarget - cPosition);
-	XMFLOAT4 lookAtUp = VtoF(cUp - cPosition);
+	if (rotAx == 0)
+		axis = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	else if (rotAx == 1)
+	{
+		 axis = XMFLOAT4(VtoF(XMVector3Cross((cTarget - cPosition), cUp)));
+	}
 
-	XMVECTOR strafeVec = (XMVector3Cross((cTarget - cPosition), cUp));
-	XMVECTOR ZVec = (cTarget - cPosition);
+	static float degreecheck;
+	degreecheck += degrees;
+	if (degreecheck < 80 && axis.y != -1.0f);
+	{
+		if (XMVector4Equal(FtoV(axis), XMVectorZero()) || degrees == 0.0f)
+			return;
 
-	lookAtTarget = VtoF(XMVector4Transform(FtoV(lookAtTarget), XMMatrixRotationAxis(FtoV(axis), XMConvertToRadians(degrees))));
-	lookAtUp = VtoF(XMVector4Transform(FtoV(lookAtUp), XMMatrixRotationAxis(FtoV(axis), XMConvertToRadians(degrees))));
+		XMFLOAT4 lookAtTarget = VtoF(cTarget - cPosition);
+		XMFLOAT4 lookAtUp = VtoF(cUp - cPosition);
 
-	cTarget = (cPosition + FtoV(lookAtTarget));
-	//cUp = (cPosition + FtoV(lookAtUp)); //uncomment for roll instead of jaw
-	//cUp = XMVector3Cross(ZVec, strafeVec)*XMConvertToRadians(degrees);
 
-	this->initViewMatrix();
+		lookAtTarget = VtoF(XMVector4Transform(FtoV(lookAtTarget), XMMatrixRotationAxis(FtoV(axis), XMConvertToRadians(degrees))));
+		lookAtUp = VtoF(XMVector4Transform(FtoV(lookAtUp), XMMatrixRotationAxis(FtoV(axis), XMConvertToRadians(degrees))));
+
+		cTarget = (cPosition + FtoV(lookAtTarget));
+		
+		this->initViewMatrix();
+
+	}
 }
+
+
 void GCamera::setPosition(XMFLOAT4& newPosition)
 {
 	XMFLOAT4 move = VtoF(FtoV(newPosition) - cPosition);
@@ -65,24 +78,6 @@ void GCamera::setPosition(XMFLOAT4& newPosition)
 
 	this->move(move);
 	this->setTarget(target);
-}
-void GCamera::setTarget(XMFLOAT4 nTarget)
-{
-	if (XMVector4Equal(FtoV(nTarget), cTarget) || XMVector4Equal(FtoV(nTarget), cPosition))
-		return;
-
-	XMFLOAT4 oldTarget = VtoF(cTarget - cPosition);
-	XMFLOAT4 newTarget = VtoF(FtoV(nTarget) - cPosition);
-
-	float angle = XMConvertToDegrees(XMVectorGetX(XMVector4AngleBetweenNormals(XMVector4Normalize(FtoV(oldTarget)),
-		XMVector4Normalize(FtoV(newTarget)))));
-
-	if (angle != 0.0f && angle != 360.0f && angle != 180.0f)
-	{
-		XMVECTOR axis = XMVector3Cross(FtoV(oldTarget), FtoV(newTarget));
-		rotate(VtoF(axis), angle);
-	}
-	cTarget = FtoV(nTarget);
 }
 
 const XMVECTOR GCamera::getUp() //returns camera up vector

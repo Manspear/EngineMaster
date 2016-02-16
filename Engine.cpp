@@ -283,8 +283,12 @@ void Engine::Update() {
 
 	if (input->keyState[DIK_LALT])
 	{
-		camera->rotate(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), input->mouseY);
-		camera->rotate(XMFLOAT4(0.0f, -1.0f, 0.0f, 1.0f), -input->mouseX);
+		
+		camera->rotate(0, input->mouseX);
+		camera->rotate(1, -input->mouseY);
+
+		//camera->rotate2(0, input->mouseY);
+		//camera->rotate2(1, input->mouseX);
 	}
 
 	// kryssprodukten mellan upp vektor och riktings vektorn ger sidleds vektorn.
