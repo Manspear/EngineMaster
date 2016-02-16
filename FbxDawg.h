@@ -5,6 +5,7 @@
 #include <vector>
 #include <fbxsdk.h>
 
+//GLOBALSvvvvvv
 struct MyPosition
 {
 	float pos[3];
@@ -25,7 +26,7 @@ struct MyVertexStruct
 {
 	float x, y, z, norX, norY, norZ, u, v;
 };
-
+//GLOBALS^^^^^^^^
 
 class FbxDawg
 {
