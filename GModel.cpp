@@ -32,12 +32,32 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice) //This is used
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.ByteWidth = modelVertices.size()*sizeof(MyVertexStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
-
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = modelVertices.data();
 
 	gDevice->CreateBuffer(&bufferDesc, &data, &modelVertexBuffer);
 	
+	//Creating constant buffer holding only worldmatrix
+	D3D11_BUFFER_DESC bufferDesc;
+	memset(&bufferDesc, 0, sizeof(bufferDesc));
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.ByteWidth = sizeof(modelWorldStruct);
+	gDevice->CreateBuffer(&bufferDesc, NULL, &modelConstantBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE gMappedResource;
+	matrixBuffer* dataPtr;
+
+	gDeviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
+	dataPtr = (matrixBuffer*)gMappedResource.pData;
+
+	dataPtr->worldMatrix = worMat;
+	dataPtr->viewMatrix = XMMatrixTranspose(camera->getViewMatrix());
+	dataPtr->projectionMatrix = XMMatrixTranspose(camera->getProjMatrix());
+
+	gDeviceContext->Unmap(gConstantBuffer, NULL);
+
 	#pragma region //Import from File
 	HRESULT hr;
 	ID3D11ShaderResourceView * Texture;
