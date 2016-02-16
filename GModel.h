@@ -5,6 +5,8 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 
+using namespace DirectX;
+
 class GModel
 {
 private:
@@ -15,13 +17,13 @@ public:
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture and normal map
 	//share projection and view, but have different world-view.
-	//void setPosition(DirectX::XMMATRIX translationMatrix);
+	void setPosition(DirectX::XMFLOAT3 position);
 	void renderModel();
 	std::vector<MyVertexStruct> modelVertices; //This holds the vertices.
 	std::wstring modelTextureFilepath; //THis holds the texture's file-path
 	//struct with vertex positions held by FbxDawg
 	void load(const char* fbxFilePath, ID3D11Device* gDevice); //<-- Loads the model. Means that modelLoader is called.
-	//DirectX::XMMATRIX objectWorldMatrix;
+	DirectX::XMMATRIX objectWorldMatrix;
 };
 
 //>>>>>>>USER MANUAL<<<<<<<<<<<

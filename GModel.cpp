@@ -3,7 +3,8 @@
 
 GModel::GModel()
 {
-	//	//this->objectWorldMatrix = XMMatrixIdentity();
+	this->objectWorldMatrix = DirectX::XMMatrixIdentity();
+
 }
 
 GModel::~GModel()
@@ -12,11 +13,12 @@ GModel::~GModel()
 	//modelTextureView[0]->Release();
 	//modelTextureView[1]->Release();
 }
-//void GModel::setPosition(XMMATRIX translationMatrix) 
-//{
-//	//For this to work, we'll need our own world matrix, which we've got created in the GModel constructor.
-//	objectWorldMatrix = XMMatrixMultiply(objectWorldMatrix, translationMatrix);
-//};
+void GModel::setPosition(DirectX::XMFLOAT3 position) 
+{
+	//For this to work, we'll need our own world matrix, which we've got created in the GModel constructor.
+	XMMATRIX translation = XMMatrixTranslation(position.x, position.y, position.z);
+	objectWorldMatrix *= translation;
+};
 //struct with vertex positions held by FbxDawg
 void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice) //This is used in the default-constructor of Engine.
 {

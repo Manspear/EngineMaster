@@ -76,6 +76,7 @@ void FbxDawg::loadModels(const char* filePath)
 					vertex.pos[0] = (float)Vertices[controlPointIndex].mData[0];
 					vertex.pos[1] = (float)Vertices[controlPointIndex].mData[1];
 					vertex.pos[2] = (float)Vertices[controlPointIndex].mData[2];
+					vertex.vertexIndex = controlPointIndex;
 					MyPositionVector.push_back(vertex);
 				}
 			}//end vertex
@@ -222,12 +223,12 @@ void FbxDawg::loadModels(const char* filePath)
 
 			 //>>>>>>>>>ASSEMBLY OF VERTEXDATA<<<<<<<<<<<<<<<
 			MyVertexStruct tempVertex;
-			for (int triangleBase = 0; triangleBase < MyPositionVector.size(); triangleBase += 3)
+			for (int triangleCounter = 0; triangleCounter < MyPositionVector.size(); triangleCounter += 3)
 			{
 				static int offsets[] = { 1, 0, 2 };
 				for (int i = 0; i < 3; ++i)
 				{
-					int vertex = triangleBase + offsets[i];
+					int vertex = triangleCounter + offsets[i];
 
 					tempVertex.x = MyPositionVector[vertex].pos[0];//v x
 					tempVertex.y = MyPositionVector[vertex].pos[1];//v y
@@ -246,6 +247,11 @@ void FbxDawg::loadModels(const char* filePath)
 					this->modelVertexList.push_back(tempVertex);
 				}
 			}
+			//Hmm... Put positions with index 0 at index 0. Loop through the three vectors
+			while (true) {
+				MyPositionVector
+			}
+
 			//oldLengthOffset += MyPositionVector.size()-1;
 			//Now: 2nd time through the loop of the 2nd object it crashes on UV tempVertex.u = MyUVVector[vertex].uvCoord[0];//
 
