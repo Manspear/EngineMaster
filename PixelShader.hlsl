@@ -53,7 +53,7 @@ float4 PS_main(PS_IN input) : SV_Target
 	float3 r = reflect(normalize(lightPos - input.pixelPosition), input.normal);
 	float3 v = normalize(input.pixelPosition * -1.0);
 
-	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower); //sl = Specular Lighting
+	float3 sl = -specular * pow(max(dot(r, v), 0.0f), shinypower); //sl = Specular Lighting
 
 
 	//lightCalc
