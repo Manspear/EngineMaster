@@ -77,7 +77,7 @@ void GCamera::setPosition(XMFLOAT4& newPosition)
 	XMFLOAT4 target = VtoF(cTarget);
 
 	this->move(move);
-	this->setTarget(target);
+	//this->setTarget(target);
 }
 
 const XMVECTOR GCamera::getUp() //returns camera up vector
