@@ -355,3 +355,20 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	InitializeCamera();
 }
+
+void Engine::renderText(std::wstring text)
+{
+
+}
+void Engine::startTimer()
+{
+
+}
+double Engine::getTime()
+{
+	return NULL;
+}
+double Engine::getFrameTime()
+{
+	return NULL;
+}

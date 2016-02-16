@@ -88,6 +88,11 @@ public:
 	int fps;
 	__int64 frameTimeOld;
 	double frameTime;
+	void renderText(std::wstring text);
+	void startTimer();
+	double getTime();
+	double getFrameTime();
+	//end delta dime stuff
 
 	void CreateShaders();
 	void CreateTriangleData();
