@@ -41,6 +41,9 @@ void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSO
 	float2 uvEdge2 = input[2].UV - input[0].UV;
 
 	float3 normal = normalize(cross(edge1, edge2));
+	
+	//if (dot(camDir - input[0].Pos, normal) < 0 && dot(camDir - input[1].Pos, normal) < 0 && dot(camDir - input[2].Pos, normal) < 0)
+	//	normal = normal*-1.0f;
 
 	float3 tangent = (uvEdge2[1] * edge1 - uvEdge1[1] * edge2) *(1 / (uvEdge1[0] * uvEdge2[1] - uvEdge2[0] * uvEdge1[1]));
 	float3 biTangent = -cross(normal, tangent);
@@ -60,11 +63,10 @@ void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSO
 		element.worldPosition = mul(input[i].Pos, worldMatrix);
 		element.tangent = tangent;
 		element.biTanget = biTangent;
-
+		
 		
 
 		output.Append(element);
-
 	}
 
 	output.RestartStrip();
