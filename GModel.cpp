@@ -17,7 +17,9 @@ void GModel::setPosition(DirectX::XMFLOAT3 position, ID3D11DeviceContext* gDevic
 	//For this to work, we'll need our own world matrix, which we've got created in the GModel constructor.
 	XMMATRIX translation = XMMatrixTranslation(position.x, position.y, position.z);
 	translation = XMMatrixTranspose(translation); 
-	objectWorldMatrix *= translation; //multiply transposed matrix with transposed matrix --> result is transposed (I think)
+	XMMATRIX identity = XMMatrixIdentity();
+	identity = XMMatrixTranspose(identity);
+	objectWorldMatrix = identity * translation; //multiply transposed matrix with transposed matrix --> result is transposed (I think)
 
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
 	modelWorldStruct* dataPtr;
