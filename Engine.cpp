@@ -186,6 +186,7 @@ void Engine::Render()
 	for (int bufferCounter = 0; bufferCounter < numberOfModels; bufferCounter++)
 	{
 		
+
 		gDeviceContext->GSSetConstantBuffers(1, 1, &modelList[bufferCounter].modelConstantBuffer);
 
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
@@ -201,6 +202,7 @@ void Engine::Render()
 
 void Engine::Update() {
 
+<<<<<<< HEAD
 	frameCount++;
 	if (getTime() > 1.0f)
 	{
@@ -212,6 +214,8 @@ void Engine::Update() {
 	//printf("%i \n", fps); uncomment for fps in console
 	printf("%d \n", dt);
 	XMFLOAT4X4 worldMatrix;
+=======
+>>>>>>> refs/remotes/origin/Albin's-Lair-2
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
 
@@ -344,10 +348,13 @@ void Engine::InitializeModels() {
 	this->numberOfModels = 3;
 	this->modelList = new GModel[numberOfModels];
 
-	this->modelList[0].load(".\\ItsAlbin.fbx", gDevice, gDeviceContext);
-	this->modelList[1].load(".\\itsPyramiddy.fbx", gDevice, gDeviceContext);
-	this->modelList[2].load(".\\itsRectoBoxxy.fbx", gDevice, gDeviceContext);
+	this->modelList[0].load(".\\ItsBoxxyTextured.fbx", gDevice, gDeviceContext);
+	this->modelList[1].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
+	this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
 	//this->modelList[3].load(".\\itsBoxxy", gDevice);
+
+	modelList[0].setPosition(XMFLOAT3(2, 0, 0), gDeviceContext);
+	modelList[1].setPosition(XMFLOAT3(0, 0, 2), gDeviceContext);
 	
 }
 
