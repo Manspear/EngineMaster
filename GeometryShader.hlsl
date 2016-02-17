@@ -15,11 +15,13 @@ cbuffer matrixBuffer:register(b0) {
 	//"buffer array" belonging to the Vertex Shader. So if more
 	//buffers are to be added to the Vertex Buffer, they must 
 	//be registered as b1, b2, etc...
-	matrix worldMatrix;
 	matrix viewMatrix;
 	matrix projectionMatrix;
 
 	float4 camPos;
+};
+cbuffer worldBuffer:register(b1) { //Gotten from the GModel class.
+	matrix worldMatrix;
 };
 
 [maxvertexcount(6)] //returns a maximum of x vertices
