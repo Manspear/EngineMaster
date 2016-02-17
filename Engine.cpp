@@ -210,7 +210,7 @@ void Engine::Update() {
 	}
 	dt = getFrameTime();
 	//printf("%i \n", fps); uncomment for fps in console
-	printf("%d \n", dt);
+	//printf("%d \n", dt); uncomment for dt
 
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
@@ -255,7 +255,7 @@ void Engine::Update() {
 	dataPtr->viewMatrix = DirectX::XMMatrixTranspose(camera->getViewMatrix());
 	dataPtr->projectionMatrix = DirectX::XMMatrixTranspose(camera->getProjMatrix());
 	dataPtr->camPos = camera->getPosition();
-
+	dataPtr->camDir = camera->getCameraDirection();
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
 

@@ -8,6 +8,7 @@ struct GSOutput
 	float3 tangent : TANGENT;
 	float3 biTanget : BITANGENT;
 	float4 camPos : WORLDSPACE1;
+	float4 camDir :WORLDSPACE2;
 };
 
 cbuffer matrixBuffer:register(b0) {
@@ -19,6 +20,7 @@ cbuffer matrixBuffer:register(b0) {
 	matrix projectionMatrix;
 
 	float4 camPos;
+	float4 camDir;
 };
 cbuffer worldBuffer:register(b1) { //Gotten from the GModel class.
 	matrix worldMatrix;

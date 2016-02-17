@@ -70,6 +70,7 @@ public:
 		XMMATRIX projectionMatrix;
 
 		XMFLOAT4 camPos;
+		XMFLOAT4 camDir;
 	};
 
 	

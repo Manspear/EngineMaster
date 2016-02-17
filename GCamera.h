@@ -24,6 +24,8 @@ public:
 
 	//FUNCTIONS
 
+
+
 	//VEIW
 	void reset();
 	void moveForward(float speed);
@@ -36,6 +38,7 @@ public:
 	const XMVECTOR getUp(); //returns camera up vector
 	const XMVECTOR getLookAtTarget(); //returns camera look at target vector
 	const XMMATRIX getViewMatrix();
+	XMFLOAT4 getCameraDirection();
 
 
 	//PROJECTION
