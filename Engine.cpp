@@ -175,11 +175,14 @@ void Engine::Render()
 	
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	gDeviceContext->IASetInputLayout(gVertexLayout);
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 	
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
 	for (int bufferCounter = 0; bufferCounter < numberOfModels; bufferCounter++)
 	{
+		
+		gDeviceContext->GSSetConstantBuffers(1, 1, &modelList[bufferCounter].modelConstantBuffer);
+
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 		gDeviceContext->PSSetShaderResources(0, 2, modelList[bufferCounter].modelTextureView);
 
@@ -233,7 +236,7 @@ void Engine::Update() {
 	gDeviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (matrixBuffer*)gMappedResource.pData;
 
-	dataPtr->worldMatrix = worMat;
+	//dataPtr->worldMatrix = worMat;
 	dataPtr->viewMatrix = XMMatrixTranspose(camera->getViewMatrix());
 	dataPtr->projectionMatrix = XMMatrixTranspose(camera->getProjMatrix());
 
@@ -322,9 +325,9 @@ void Engine::InitializeModels() {
 	this->numberOfModels = 3;
 	this->modelList = new GModel[numberOfModels];
 
-	this->modelList[0].load(".\\ItsAlbin.fbx", gDevice);
-	this->modelList[1].load(".\\itsPyramiddy.fbx", gDevice);
-	this->modelList[2].load(".\\itsRectoBoxxy.fbx", gDevice);
+	this->modelList[0].load(".\\ItsAlbin.fbx", gDevice, gDeviceContext);
+	this->modelList[1].load(".\\itsPyramiddy.fbx", gDevice, gDeviceContext);
+	this->modelList[2].load(".\\itsRectoBoxxy.fbx", gDevice, gDeviceContext);
 	//this->modelList[3].load(".\\itsBoxxy", gDevice);
 	
 }

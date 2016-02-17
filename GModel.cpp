@@ -3,7 +3,7 @@
 
 GModel::GModel()
 {
-	this->objectWorldMatrix = DirectX::XMMatrixIdentity();
+	this->objectWorldMatrix = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
 }
 
 GModel::~GModel()
@@ -12,14 +12,25 @@ GModel::~GModel()
 	//modelTextureView[0]->Release();
 	//modelTextureView[1]->Release();
 }
-void GModel::setPosition(DirectX::XMFLOAT3 position) 
+void GModel::setPosition(DirectX::XMFLOAT3 position, ID3D11DeviceContext* gDeviceContext)
 {
 	//For this to work, we'll need our own world matrix, which we've got created in the GModel constructor.
 	XMMATRIX translation = XMMatrixTranslation(position.x, position.y, position.z);
-	objectWorldMatrix *= translation;
+	translation = XMMatrixTranspose(translation); 
+	objectWorldMatrix *= translation; //multiply transposed matrix with transposed matrix --> result is transposed (I think)
+
+	D3D11_MAPPED_SUBRESOURCE gMappedResource;
+	modelWorldStruct* dataPtr;
+
+	gDeviceContext->Map(modelConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
+	dataPtr = (modelWorldStruct*)gMappedResource.pData;
+
+	dataPtr->worldMatrix = objectWorldMatrix;
+
+	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 };
 //struct with vertex positions held by FbxDawg
-void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice) //This is used in the default-constructor of Engine.
+void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext) //This is used in the default-constructor of Engine.
 {
 	FbxDawg modelLoader;
 	modelLoader.loadModels(fbxFilePath);
@@ -38,7 +49,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice) //This is used
 	gDevice->CreateBuffer(&bufferDesc, &data, &modelVertexBuffer);
 	
 	//Creating constant buffer holding only worldmatrix
-	D3D11_BUFFER_DESC bufferDesc;
+	//D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -46,19 +57,20 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice) //This is used
 	bufferDesc.ByteWidth = sizeof(modelWorldStruct);
 	gDevice->CreateBuffer(&bufferDesc, NULL, &modelConstantBuffer);
 
+	//Giving the constant buffer data
+
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
-	matrixBuffer* dataPtr;
+	modelWorldStruct* dataPtr;
 
-	gDeviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
-	dataPtr = (matrixBuffer*)gMappedResource.pData;
+	gDeviceContext->Map(modelConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
+	dataPtr = (modelWorldStruct*)gMappedResource.pData;
 
-	dataPtr->worldMatrix = worMat;
-	dataPtr->viewMatrix = XMMatrixTranspose(camera->getViewMatrix());
-	dataPtr->projectionMatrix = XMMatrixTranspose(camera->getProjMatrix());
+	dataPtr->worldMatrix = objectWorldMatrix;
 
-	gDeviceContext->Unmap(gConstantBuffer, NULL);
+	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 
-	#pragma region //Import from File
+	//Import from File
+	#pragma region
 	HRESULT hr;
 	ID3D11ShaderResourceView * Texture;
 	CoInitialize(NULL);
