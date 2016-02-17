@@ -218,10 +218,10 @@ void Engine::Update() {
 	//world matrix
 	static float radianRotation = 0.00;
 	//radianRotation += 4500*dt;
-	XMMATRIX worMat = XMMatrixRotationY(radianRotation);
+	XMMATRIX worMat = DirectX::XMMatrixRotationY(radianRotation);
 
 	//Transpose the matrices. This is a must for DirectX 11
-	worMat = XMMatrixTranspose(worMat);
+	worMat = DirectX::XMMatrixTranspose(worMat);
 
 	input->getKeyboardState();
 	input->GetMouseLoc();
@@ -252,8 +252,8 @@ void Engine::Update() {
 	dataPtr = (matrixBuffer*)gMappedResource.pData;
 
 	//dataPtr->worldMatrix = worMat;
-	dataPtr->viewMatrix = XMMatrixTranspose(camera->getViewMatrix());
-	dataPtr->projectionMatrix = XMMatrixTranspose(camera->getProjMatrix());
+	dataPtr->viewMatrix = DirectX::XMMatrixTranspose(camera->getViewMatrix());
+	dataPtr->projectionMatrix = DirectX::XMMatrixTranspose(camera->getProjMatrix());
 
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
