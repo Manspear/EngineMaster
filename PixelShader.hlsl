@@ -3,7 +3,6 @@ SamplerState sampAni;
 
 struct PS_IN
 {
-
 	float4 Pos : SV_Position;
 	float3 normal : normal;
 	float2 UV : TEXCOORD;
@@ -50,10 +49,10 @@ float4 PS_main(PS_IN input) : SV_Target
 	//specular
 	float shinypower = 3.0f;
 	float4 specular = float4(1.0, 1.0, 1.0, 1.0);
-	float3 r = reflect(normalize(lightPos - input.pixelPosition), input.normal);
-	float3 v = normalize(input.pixelPosition * -1.0);
+	float3 r = reflect(-lightPos, input.normal);
+	float3 v = normalize(input.pixelPosition * -1.0); // SKA VARA (camPos - input.pixelPosition)
 
-	float3 sl = -specular * pow(max(dot(r, v), 0.0f), shinypower); //sl = Specular Lighting
+	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower); //sl = Specular Lighting
 
 
 	//lightCalc
@@ -64,5 +63,6 @@ float4 PS_main(PS_IN input) : SV_Target
 	color = color + sl;
 
 	return float4(color,1);
+	//return float4(v / 2.f + 0.5f, 1.f); debug
 };
 
