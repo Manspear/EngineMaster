@@ -12,7 +12,7 @@ GModel::~GModel()
 	//modelTextureView[0]->Release();
 	//modelTextureView[1]->Release();
 }
-void GModel::setPosition(DirectX::XMFLOAT3 position, ID3D11DeviceContext* gDeviceContext)
+void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext)
 {
 	//For this to work, we'll need our own world matrix, which we've got created in the GModel constructor.
 	XMMATRIX translation = XMMatrixTranslation(position.x, position.y, position.z);
