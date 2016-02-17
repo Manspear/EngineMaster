@@ -66,7 +66,6 @@ public:
 	ID3D11GeometryShader* gGeometryShader = nullptr;
 
 	struct matrixBuffer {
-		XMMATRIX worldMatrix;
 		XMMATRIX viewMatrix;
 		XMMATRIX projectionMatrix;
 	};
