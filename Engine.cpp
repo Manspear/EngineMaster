@@ -201,8 +201,6 @@ void Engine::Render()
 
 
 void Engine::Update() {
-
-<<<<<<< HEAD
 	frameCount++;
 	if (getTime() > 1.0f)
 	{
@@ -213,9 +211,7 @@ void Engine::Update() {
 	dt = getFrameTime();
 	//printf("%i \n", fps); uncomment for fps in console
 	printf("%d \n", dt);
-	XMFLOAT4X4 worldMatrix;
-=======
->>>>>>> refs/remotes/origin/Albin's-Lair-2
+
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
 
