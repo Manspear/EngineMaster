@@ -8,8 +8,13 @@
 
 #pragma endregion
 
-Engine::Engine(){
-
+Engine::Engine()
+{
+	countsPerSecond = 0;
+	counterStart = 0;
+	frameCount = 0;
+	fps = 0;
+	frameTimeOld = 0;
 }
 
 Engine::~Engine()
@@ -196,36 +201,50 @@ void Engine::Render()
 
 
 void Engine::Update() {
+	frameCount++;
+	if (getTime() > 1.0f)
+	{
+		fps = frameCount;
+		frameCount = 0;
+		startTimer();
+	}
+	dt = getFrameTime();
+	//printf("%i \n", fps); uncomment for fps in console
+	printf("%d \n", dt);
 
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
 
 	//world matrix
 	static float radianRotation = 0.00;
-	radianRotation += 0.0002;
-	XMMATRIX worMat = XMMatrixRotationY(radianRotation);
+	//radianRotation += 4500*dt;
+	XMMATRIX worMat = DirectX::XMMatrixRotationY(radianRotation);
 
 	//Transpose the matrices. This is a must for DirectX 11
-	worMat = XMMatrixTranspose(worMat);
+	worMat = DirectX::XMMatrixTranspose(worMat);
 
 	input->getKeyboardState();
 	input->GetMouseLoc();
 
 	if (input->keyState[DIK_LALT])
 	{
-		camera->rotate(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), input->mouseY);
-		camera->rotate(XMFLOAT4(0.0f, -1.0f, 0.0f, 1.0f), -input->mouseX);
+		
+		camera->rotate(XAXIS, input->mouseX*MOUSE_SENSITIVITY*dt);
+		camera->rotate(YAXIS, -input->mouseY*MOUSE_SENSITIVITY*dt);
+
+		//camera->rotate2(0, input->mouseY);
+		//camera->rotate2(1, input->mouseX);
 	}
 
 	// kryssprodukten mellan upp vektor och riktings vektorn ger sidleds vektorn.
 	if (input->keyState[DIK_S])
-		camera->moveForward(-0.001);
+		camera->moveForward(-MOVESPEED*dt);
 	if (input->keyState[DIK_A])
-		camera->moveStrafe(0.001);
+		camera->moveStrafe(MOVESPEED*dt);
 	if (input->keyState[DIK_D])
-		camera->moveStrafe(-0.001);
+		camera->moveStrafe(-MOVESPEED*dt);
 	if (input->keyState[DIK_W])
-		camera->moveForward(0.001);
+		camera->moveForward(MOVESPEED*dt);
 	if (input->keyState[DIK_R])
 		camera->reset();
 
@@ -237,8 +256,8 @@ void Engine::Update() {
 	dataPtr = (matrixBuffer*)gMappedResource.pData;
 
 	//dataPtr->worldMatrix = worMat;
-	dataPtr->viewMatrix = XMMatrixTranspose(camera->getViewMatrix());
-	dataPtr->projectionMatrix = XMMatrixTranspose(camera->getProjMatrix());
+	dataPtr->viewMatrix = DirectX::XMMatrixTranspose(camera->getViewMatrix());
+	dataPtr->projectionMatrix = DirectX::XMMatrixTranspose(camera->getProjMatrix());
 
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
@@ -351,4 +370,41 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	CreateConstantBuffer();
 
 	InitializeCamera();
+}
+
+void Engine::renderText(std::wstring text)
+{
+
+}
+
+void Engine::startTimer()
+{
+	LARGE_INTEGER frequencyCount;
+	QueryPerformanceFrequency(&frequencyCount);
+
+	countsPerSecond = double(frequencyCount.QuadPart);
+
+	QueryPerformanceCounter(&frequencyCount);
+	counterStart = frequencyCount.QuadPart;
+}
+
+double Engine::getTime()
+{
+	LARGE_INTEGER currentTime;
+	QueryPerformanceCounter(&currentTime);
+	return double(currentTime.QuadPart - counterStart) / countsPerSecond;
+}
+double Engine::getFrameTime()
+{
+	LARGE_INTEGER currentTime;
+	__int64 tickCount;
+	QueryPerformanceCounter(&currentTime);
+
+	tickCount = currentTime.QuadPart - frameTimeOld;
+	frameTimeOld = currentTime.QuadPart;
+
+	if (tickCount < 0.0f)
+		tickCount = 0.0f;
+
+	return float(tickCount) / countsPerSecond;
 }
