@@ -10,6 +10,7 @@ struct PS_IN
 
 	float3 tangent : TANGENT;
 	float3 biTangent : BITANGENT;
+	float4 camPos : WORLDSPACE1;
 };
 
 
@@ -50,7 +51,7 @@ float4 PS_main(PS_IN input) : SV_Target
 	float shinypower = 3.0f;
 	float4 specular = float4(1.0, 1.0, 1.0, 1.0);
 	float3 r = reflect(-lightPos, input.normal);
-	float3 v = normalize(input.pixelPosition * -1.0); // SKA VARA (camPos - input.pixelPosition)
+	float3 v = normalize(input.camPos - input.pixelPosition); // SKA VARA (camPos - input.pixelPosition)
 
 	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower); //sl = Specular Lighting
 

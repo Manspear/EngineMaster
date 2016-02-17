@@ -7,6 +7,7 @@ struct GSOutput
 
 	float3 tangent : TANGENT;
 	float3 biTanget : BITANGENT;
+	float4 camPos : WORLDSPACE1;
 };
 
 cbuffer matrixBuffer:register(b0) {
@@ -17,6 +18,8 @@ cbuffer matrixBuffer:register(b0) {
 	matrix worldMatrix;
 	matrix viewMatrix;
 	matrix projectionMatrix;
+
+	float4 camPos;
 };
 
 [maxvertexcount(6)] //returns a maximum of x vertices
@@ -42,7 +45,7 @@ void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSO
 	tangent = mul(float4(tangent, 1), worldMatrix).xyz;
 	biTangent = mul(float4(biTangent, 1), worldMatrix).xyz;
 	//End of Normal
-
+	element.camPos = camPos;
 
 	for (uint i = 0; i < 3; i++)
 	{ 
@@ -54,6 +57,7 @@ void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSO
 		element.tangent = tangent;
 		element.biTanget = biTangent;
 
+		
 
 		output.Append(element);
 

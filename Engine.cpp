@@ -251,6 +251,7 @@ void Engine::Update() {
 	dataPtr->worldMatrix = worMat;
 	dataPtr->viewMatrix = XMMatrixTranspose(camera->getViewMatrix());
 	dataPtr->projectionMatrix = XMMatrixTranspose(camera->getProjMatrix());
+	dataPtr->camPos = camera->getPosition();
 
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }

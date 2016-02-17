@@ -69,6 +69,8 @@ public:
 		XMMATRIX worldMatrix;
 		XMMATRIX viewMatrix;
 		XMMATRIX projectionMatrix;
+
+		XMFLOAT4 camPos;
 	};
 
 	
