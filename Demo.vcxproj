@@ -90,6 +90,8 @@
     <ClCompile Include="GCamera.cpp" />
     <ClCompile Include="GInput.cpp" />
     <ClCompile Include="GModel.cpp" />
+    <ClCompile Include="GModelList.cpp" />
+    <ClCompile Include="GQuadTree.cpp" />
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -126,8 +128,11 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="GCamera.h" />
+    <ClInclude Include="GFrustum.h" />
     <ClInclude Include="GInput.h" />
     <ClInclude Include="GModel.h" />
+    <ClInclude Include="GModelList.h" />
+    <ClInclude Include="GQuadTree.h" />
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
