@@ -210,7 +210,7 @@ void Engine::Update() {
 	}
 	dt = getFrameTime();
 	//printf("%i \n", fps); uncomment for fps in console
-	printf("%d \n", dt);
+	//printf("%d \n", dt); uncomment for dt
 
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
@@ -255,7 +255,7 @@ void Engine::Update() {
 	dataPtr->viewMatrix = DirectX::XMMatrixTranspose(camera->getViewMatrix());
 	dataPtr->projectionMatrix = DirectX::XMMatrixTranspose(camera->getProjMatrix());
 	dataPtr->camPos = camera->getPosition();
-
+	dataPtr->camDir = camera->getCameraDirection();
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
 
@@ -346,8 +346,8 @@ void Engine::InitializeModels() {
 	this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
 	//this->modelList[3].load(".\\itsBoxxy", gDevice);
 
-	modelList[0].setPosition(XMFLOAT3(2, 0, 0), gDeviceContext);
-	modelList[1].setPosition(XMFLOAT3(0, 0, 2), gDeviceContext);
+	modelList[0].setPosition(XMFLOAT4(2, 0, 0, 1), gDeviceContext);
+	modelList[1].setPosition(XMFLOAT4(0, 0, 2, 1), gDeviceContext);
 	
 }
 

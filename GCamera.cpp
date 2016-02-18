@@ -5,6 +5,14 @@ const XMFLOAT4 GCamera::getPosition()
 	return VtoF(cPosition);
 }
 
+XMFLOAT4 GCamera::getCameraDirection()
+{
+	XMFLOAT4 temp = VtoF(-1.0*(cTarget - cPosition));
+	temp.w = 0.0;
+	return temp;
+}
+
+
 //VEIW
 void GCamera::initViewMatrix()
 {
