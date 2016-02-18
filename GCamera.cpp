@@ -1,5 +1,10 @@
 #include "GCamera.h"
 
+const XMFLOAT4 GCamera::getPosition()
+{
+	return VtoF(cPosition);
+}
+
 //VEIW
 void GCamera::initViewMatrix()
 {

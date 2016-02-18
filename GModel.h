@@ -21,7 +21,7 @@ public:
 	ID3D11Buffer* modelConstantBuffer = nullptr;
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture and normal map
 	//share projection and view, but have different world-view.
-	void setPosition(DirectX::XMFLOAT3 position, ID3D11DeviceContext* gDeviceContext);
+	void setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext);
 	void renderModel();
 	std::vector<MyVertexStruct> modelVertices; //This holds the vertices.
 	std::wstring modelTextureFilepath; //THis holds the texture's file-path

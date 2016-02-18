@@ -228,12 +228,8 @@ void Engine::Update() {
 
 	if (input->keyState[DIK_LALT])
 	{
-		
 		camera->rotate(XAXIS, input->mouseX*MOUSE_SENSITIVITY*dt);
 		camera->rotate(YAXIS, -input->mouseY*MOUSE_SENSITIVITY*dt);
-
-		//camera->rotate2(0, input->mouseY);
-		//camera->rotate2(1, input->mouseX);
 	}
 
 	// kryssprodukten mellan upp vektor och riktings vektorn ger sidleds vektorn.
@@ -258,6 +254,7 @@ void Engine::Update() {
 	//dataPtr->worldMatrix = worMat;
 	dataPtr->viewMatrix = DirectX::XMMatrixTranspose(camera->getViewMatrix());
 	dataPtr->projectionMatrix = DirectX::XMMatrixTranspose(camera->getProjMatrix());
+	dataPtr->camPos = camera->getPosition();
 
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
