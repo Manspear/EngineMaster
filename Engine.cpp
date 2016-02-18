@@ -210,7 +210,7 @@ void Engine::Update() {
 	}
 	dt = getFrameTime();
 	//printf("%i \n", fps); uncomment for fps in console
-	printf("%d \n", dt);
+	//printf("%d \n", dt);
 
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;

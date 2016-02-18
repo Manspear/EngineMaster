@@ -260,6 +260,8 @@ void FbxDawg::loadModels(const char* filePath)
 					tempIndex.norIndex = MyNormalVector[vertex].normalIndex;
 					tempIndex.uvIndex = MyUVVector[vertex].uvIndex;
 					
+					printf("The indices: %d %d %d\n", tempIndex.posIndex, tempIndex.norIndex, tempIndex.uvIndex);
+
 					this->myIndexList.push_back(tempIndex);
 				}
 			}
