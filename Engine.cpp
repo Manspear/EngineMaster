@@ -19,8 +19,7 @@ Engine::Engine()
 
 Engine::~Engine()
 {
-
-
+	
 }
 
 void Engine::CreateShaders()
@@ -212,11 +211,11 @@ void Engine::Update() {
 	}
 	dt = getFrameTime();
 	//printf("%i \n", fps); uncomment for fps in console
-<<<<<<< HEAD
+
 	//printf("%d \n", dt); uncomment for dt
-=======
+
 	//printf("%d \n", dt);
->>>>>>> refs/remotes/origin/Albin's-Lair-2
+
 
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
@@ -344,21 +343,7 @@ void Engine::InitializeCamera()
 
 void Engine::InitializeModels() {
 	//Here create the dynamic GModel-Array:
-<<<<<<< HEAD
-	this->numberOfModels = 3;
-	this->modelList = new GModel[numberOfModels];
-
-	this->modelList[0].load(".\\ItsBoxxyTextured.fbx", gDevice, gDeviceContext);
-	this->modelList[1].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
-	this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
-	//this->modelList[3].load(".\\itsBoxxy", gDevice);
-
-	modelList[0].setPosition(XMFLOAT4(2, 0, 0, 1), gDeviceContext);
-	modelList[1].setPosition(XMFLOAT4(0, 0, 2, 1), gDeviceContext);
-	
-=======
 	modelListObject->initializeModels(gDevice, gDeviceContext);
->>>>>>> refs/remotes/origin/Albin's-Lair-2
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {

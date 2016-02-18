@@ -99,7 +99,6 @@ public:
 	//end delta dime stuff
 
 	void CreateShaders();
-	void CreateTriangleData();
 	//void CreateTexture(int modelCounter);
 	void CreateConstantBuffer();
 	void CreateDepthStencilBuffer();
