@@ -145,8 +145,8 @@ void FbxDawg::loadModels(const char* filePath)
 
 						temp.normalIndex = normalIndex;
 						temp.direction[0] = normals[0];
-						//temp.direction[1] = normals[1];
-						//temp.direction[2] = normals[2];
+						temp.direction[1] = normals[1];
+						temp.direction[2] = normals[2];
 
 						MyNormalVector.push_back(temp);
 
