@@ -437,7 +437,6 @@ void Engine::InitializeCamera()
 	camera = new GCamera;//										vv far plane	dessa är 400 gånger ifrån varandra. Det är okej att ha runt 10 000 - 20 000
 	camera->InitProjMatrix(XM_PI * 0.45, wHEIGHT, wWIDTH, 0.05, 20);
 	//													  ^^ near plane  förut var det 0.5 här
-
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
@@ -462,4 +461,6 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	CreateConstantBuffer();
 
 	InitializeCamera();
+
+
 }

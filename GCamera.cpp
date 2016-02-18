@@ -64,30 +64,29 @@ void GCamera::setPosition(XMFLOAT4& newPosition)
 }
 void GCamera::setTarget(XMFLOAT4 nTarget)
 {
-	if (XMVector4Equal(FtoV(nTarget), cTarget) || XMVector4Equal(FtoV(nTarget), cPosition))
-		return;
-
-	XMFLOAT4 oldTarget = VtoF(cTarget - cPosition);
-	XMFLOAT4 newTarget = VtoF(FtoV(nTarget) - cPosition);
-
-	float angle = XMConvertToDegrees(XMVectorGetX(XMVector4AngleBetweenNormals(XMVector4Normalize(FtoV(oldTarget)),
-		XMVector4Normalize(FtoV(newTarget)))));
-
-	if (angle != 0.0f && angle != 360.0f && angle != 180.0f)
-	{
-		XMVECTOR axis = XMVector3Cross(FtoV(oldTarget), FtoV(newTarget));
-		rotate(VtoF(axis), angle);
-	}
 	cTarget = FtoV(nTarget);
 }
 
-const XMVECTOR GCamera::getUp() //returns camera up vector
+//jespers
+void GCamera::LookAt(XMFLOAT4 pos, XMFLOAT4 target, XMFLOAT4 worldUp)
 {
-	return cUp;
+	GCamera::setPosition(pos);
+	GCamera::setTarget(target);
+	GCamera::setUp(worldUp);
 }
-const XMVECTOR GCamera::getLookAtTarget() //returns camera look at target vector
+
+void GCamera::setUp(XMFLOAT4 cUp)
 {
-	return cTarget;
+	this-> cUp = FtoV(cUp);
+}
+
+const XMFLOAT4 GCamera::getUp() //returns camera up vector
+{
+	return VtoF(cUp);
+}
+const XMFLOAT4 GCamera::getLookAtTarget() //returns camera look at target vector
+{
+	return VtoF(cTarget);
 }
 const XMMATRIX GCamera::getViewMatrix()
 {
@@ -108,6 +107,8 @@ void GCamera::setFarPlane(float farthest)
 {
 	frustFar = farthest;
 }
+
+
 
 const XMMATRIX GCamera::getProjMatrix()
 {
@@ -132,6 +133,22 @@ GCamera::GCamera()
 	cPosition = XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f);
 	cTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	cUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+
+	this->initViewMatrix();
+
+	frustAngle = 0.0f;
+	frustFar = 0.0f;
+	frustNear = 0.0f;
+
+	cHeight = 0.0f;
+	cWidth = 0.0f;
+}
+
+GCamera::GCamera(XMFLOAT4 pos, XMFLOAT4 up, XMFLOAT4 target)
+{
+	cPosition = FtoV(pos);
+	cTarget = FtoV(target);
+	cUp = FtoV(up);
 
 	this->initViewMatrix();
 
