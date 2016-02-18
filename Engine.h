@@ -71,6 +71,7 @@ public:
 		XMMATRIX projectionMatrix;
 
 		XMFLOAT4 camPos;
+		XMFLOAT4 camDir;
 	};
 
 	GModelList * modelListObject = nullptr;
@@ -98,7 +99,6 @@ public:
 	//end delta dime stuff
 
 	void CreateShaders();
-	void CreateTriangleData();
 	//void CreateTexture(int modelCounter);
 	void CreateConstantBuffer();
 	void CreateDepthStencilBuffer();
