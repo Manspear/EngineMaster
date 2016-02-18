@@ -36,35 +36,43 @@ float4 PS_main(PS_IN input) : SV_Target
 	float3 lightPos = normalize(float3 (4, 3, -3) - input.pixelPosition); //Vector from pixelPosition to camera(is correct)
 	float4 ambientLightColor = { 0.2, 0.2, 0.2, 0 };
 	float4 diffuseColor = float4(1,1,1,1);
+	float specShadow = 1.0;
 
 	//texture
 	float3 color, textureColor, bumpMap;
 	color = textureColor = float3 (txDiffuse[0].Sample(sampAni, input.UV).xyz);
 
+	float3 r = reflect(-lightPos, input.normal);
+	float3 v = normalize(input.camPos - input.pixelPosition);
+	
+	//if (dot(r, v) < 0.0f)
+	//	specShadow = 0.0;
+	
 	//Normal
 	bumpMap = float3 (txDiffuse[1].Sample(sampAni, input.UV).xyz);
 	bumpMap = (bumpMap * 2.0f) - 1.0f;
 	input.normal = (bumpMap.x * input.tangent) + (bumpMap.y * input.biTangent) + (bumpMap.z * input.normal);
 	input.normal = normalize(input.normal);
 	
-	
+	float lightIntensity = dot(input.normal, lightPos);
+
 	//specular
 	float shinypower = 100.0f;
 	float4 specular = float4(1.0, 1.0, 1.0, 1.0);
-	float3 r = reflect(-lightPos, input.normal);
-	float3 v = normalize(input.camPos - input.pixelPosition); // SKA VARA (camPos - input.pixelPosition)
+	r = reflect(-lightPos, input.normal);
+	v = normalize(input.camPos - input.pixelPosition); 
 
-	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower); //sl = Specular Lighting
+	//float specShadow = saturate(4 * diffuseColor);
 
+	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower) * specShadow; //sl = Specular Lighting
+	float3 diffuse = saturate(diffuseColor * lightIntensity) * textureColor;
+	float3 ambient = (ambientLightColor * textureColor);
 
 	//lightCalc
-	float lightIntensity = dot(input.normal, lightPos); //angle of ray vs object determines the amount of reflected light. 
-	color = saturate(diffuseColor * lightIntensity); //if lower than 0 set to 0, else if higher than 1 set to 1;
-	color = color * textureColor;
-	color = color + (ambientLightColor * textureColor);
-	color = color + sl;
+	 //angle of ray vs object determines the amount of reflected light. 
+	color = diffuse + ambient + sl/* */;
 
 	return float4(color,1);
-	//return float4(v / 2.f + 0.5f, 1.f); debug
+	//return float4(sl + 0.1f, 1.f);// debug
 };
 
