@@ -23,7 +23,7 @@
 #define XAXIS 0
 #define YAXIS 1
 #define MOVESPEED 1
-#define MOUSE_SENSITIVITY 50
+#define MOUSE_SENSITIVITY 100
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 
