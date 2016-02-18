@@ -346,8 +346,8 @@ void Engine::InitializeModels() {
 	this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
 	//this->modelList[3].load(".\\itsBoxxy", gDevice);
 
-	modelList[0].setPosition(XMFLOAT3(2, 0, 0), gDeviceContext);
-	modelList[1].setPosition(XMFLOAT3(0, 0, 2), gDeviceContext);
+	modelList[0].setPosition(XMFLOAT4(2, 0, 0, 1), gDeviceContext);
+	modelList[1].setPosition(XMFLOAT4(0, 0, 2, 1), gDeviceContext);
 	
 }
 
