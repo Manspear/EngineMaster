@@ -120,6 +120,42 @@ void FbxDawg::loadModels(const char* filePath)
 					}
 				}
 			}//end normal
+			
+			else if (normalElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+			{
+				FbxVector4 normals;
+				int indexByPolygonVertex = 0;
+				MyNormal temp;
+				//normals of polygonvertex are stored per polygon. Meaning that even if a cube's got 8 vertices, it'll get one normal per vertex per triangle. So instead of 24 normals, we'll get 36. 
+				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++)
+				{ //For every triangle
+					int polygonSize = mesh->GetPolygonSize(polygonIndex);
+					for (int i = 0; i < polygonSize; i++)
+					{ //For every vertex in triangle
+						int normalIndex = 0;
+						//reference mode is direct, the normal index is the same as indexByPolygonVertex
+						if (normalElement->GetReferenceMode() == FbxGeometryElement::eDirect) {
+							normalIndex = indexByPolygonVertex;
+						}
+						if (normalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
+							normalIndex = normalElement->GetIndexArray().GetAt(indexByPolygonVertex);
+						}
+
+						normals = normalElement->GetDirectArray().GetAt(normalIndex);
+
+						temp.normalIndex = normalIndex;
+						temp.direction[0] = normals[0];
+						temp.direction[1] = normals[1];
+						temp.direction[2] = normals[2];
+
+						MyNormalVector.push_back(temp);
+
+						//printf("\nNormalz: %f %f %f %f %f %f %f %f %f Number of Vertices: %d", normals[0], normals[1], normals[2], normals[3],normals[4], normals[5], normals[6], normals[7], normals[8], , mesh->GetControlPointsCount());
+						//printf("number of normals: %d\n", MyNormalVector.size());
+						indexByPolygonVertex++;
+					}
+				}
+			}
 
 			 //>>>>>>>>>>>>>>UV<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -260,7 +296,7 @@ void FbxDawg::loadModels(const char* filePath)
 					tempIndex.norIndex = MyNormalVector[vertex].normalIndex;
 					tempIndex.uvIndex = MyUVVector[vertex].uvIndex;
 					
-					printf("The indices: %d %d %d\n", tempIndex.posIndex, tempIndex.norIndex, tempIndex.uvIndex);
+					//printf("The indices: %d %d %d\n", tempIndex.posIndex, tempIndex.norIndex, tempIndex.uvIndex);
 
 					this->myIndexList.push_back(tempIndex);
 				}

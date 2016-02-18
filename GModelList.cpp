@@ -15,13 +15,15 @@ void GModelList::initializeModels(ID3D11Device* gDevice, ID3D11DeviceContext * g
 	this->numberOfModels = 3;
 	this->modelList = new GModel[this->numberOfModels];
 
-	this->modelList[0].load(".\\ItsBoxxyTextured.fbx", gDevice, gDeviceContext);
-	this->modelList[1].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
-	this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
+	this->modelList[0].load(".\\Objects/ItsBoxxyTextured.fbx", gDevice, gDeviceContext); 
+	this->modelList[1].load(".\\Objects/itsBoxxyTextured.fbx", gDevice, gDeviceContext);
+	this->modelList[2].load(".\\Objects/ItsSofty.fbx", gDevice, gDeviceContext);
+	
 	//this->modelList[3].load(".\\itsBoxxy", gDevice);
 
 	modelList[0].setPosition(XMFLOAT4(2, 0, 0, 1), gDeviceContext);
 	modelList[1].setPosition(XMFLOAT4(0, 0, 2, 1), gDeviceContext);
+	modelList[2].setPosition(XMFLOAT4(-2, 0, 2, 1), gDeviceContext);
 }
 
 GModel* GModelList::getModelList() {
