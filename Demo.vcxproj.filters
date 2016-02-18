@@ -45,6 +45,12 @@
     <ClCompile Include="GModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GQuadTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GModelList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -77,6 +83,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GQuadTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GFrustum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GModelList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

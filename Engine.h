@@ -16,6 +16,8 @@
 
 #include "GModel.h"
 
+#include "GModelList.h"
+
 #include <vector>
 
 #ifndef ENGINE_H
@@ -43,7 +45,6 @@ public:
 	};
 	//numberOfModels is used in Engine::Render, 
 	//and is set in the Engine::InitializeModels
-	int numberOfModels; 
 
 	Engine();
 	~Engine();
@@ -73,8 +74,7 @@ public:
 		XMFLOAT4 camDir;
 	};
 
-	
-	GModel * modelList = nullptr; //points at model objects
+	GModelList * modelListObject = nullptr;
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
 	
