@@ -22,6 +22,12 @@
     <Filter Include="Source Files\Shaders">
       <UniqueIdentifier>{0a9ac3ed-24d8-452c-b17f-3ae6b1c807e4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Model">
+      <UniqueIdentifier>{0d99d42a-8258-4705-9a56-142f7116271a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model">
+      <UniqueIdentifier>{80b0ff61-1592-4337-9867-a819ce78c4a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -42,14 +48,14 @@
     <ClCompile Include="FbxDawg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GQuadTree.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="GModel.cpp">
+      <Filter>Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="GModelList.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -82,17 +88,17 @@
     <ClInclude Include="FbxDawg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GQuadTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GFrustum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GQuadTree.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
     <ClInclude Include="GModelList.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="GModel.h">
+      <Filter>Header Files\Model</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

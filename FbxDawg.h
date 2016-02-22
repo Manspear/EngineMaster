@@ -41,7 +41,9 @@ public:
 	~FbxDawg();
 
 	std::wstring textureFilepath;//När denna blir tilldelad så får den en kopia istället. Så vi kan utan problem radera den variablen som var med i tilldelningen.
-	void loadModels(const char* filePath);
+	void loadModels(const char* filePath); 
+	void makeIndexList();
+
 	std::vector<MyVertexStruct> modelVertexList;
 	std::vector<MyPosition> indexedPosList;
 	std::vector<MyNormal> indexedNormalList;
