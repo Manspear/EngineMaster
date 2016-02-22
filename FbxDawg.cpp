@@ -15,7 +15,7 @@ FbxDawg::~FbxDawg()
 
 void FbxDawg::loadModels(const char* filePath)
 {
-
+	#pragma region init+ isMesh
 	FbxManager *SDK_Manager = FbxManager::Create(); //FbxManager is an object that handles memory management.
 
 	FbxIOSettings *ios = FbxIOSettings::Create(SDK_Manager, IOSROOT); //FbxIOSettings is a collection of import/export options
@@ -48,25 +48,30 @@ void FbxDawg::loadModels(const char* filePath)
 
 
 			FbxNode* FbxChildNode = FBXRootNode->GetChild(i);//... initialize the childnode we are at
+			
 			if (FbxChildNode->GetNodeAttribute() == NULL)//... and then check if its an unset attribute. (special node that we dont want now) (A NULL node attribute is set by calling function FbxNode::SetNodeAttribute() with a NULL pointer)
 				continue;//tar nästa child istället
+			
 			FbxNodeAttribute::EType AttributeType = FbxChildNode->GetNodeAttribute()->GetAttributeType();//... But if its not unset, we check what type the content is, FbxCamera, FbxSkeleton, FbxMesh, etc...
-			if (AttributeType != FbxNodeAttribute::eMesh)//... here we do the Only meshes allowed to enter check.
-				continue;//tar nästa child istället
+			
+			if (AttributeType != FbxNodeAttribute::eMesh)// Only meshes allowed to enter check.
+				continue;// Go to next child/mesh
 
-
-
-
-						 //>>>>>>>>>>>VERTEX POSITION<<<<<<<<<<<<<
-			FbxMesh* mesh = (FbxMesh*)FbxChildNode->GetNodeAttribute();//... now that we are sure that there was a mesh that went through, we get the content of the node.
-			FbxVector4* Vertices = mesh->GetControlPoints();//... and amongs that contet, lays the vertices. 
+			FbxMesh* mesh = (FbxMesh*)FbxChildNode->GetNodeAttribute();//we are sure that there was a mesh that went through, we get the content of the node.
+			#pragma endregion init+ isMesh
 
 			//These three vectors are reset each loop iteration, that way they
 			//1. Don't get unneccesarily big and 
 			//2. they get looped through correctly in the ">>>ASSEMBLY<<<"-stage. 
-			std::vector<MyPosition> MyPositionVector;
-			std::vector<MyNormal> MyNormalVector;
-			std::vector<MyUV> MyUVVector;
+			std::vector<MyPosition> MyPositionVector; //containes all vertex positions
+			std::vector<MyNormal> MyNormalVector; //contains all normals.
+			std::vector<MyUV> MyUVVector; //contain all UVs
+
+			#pragma region >>VERTEX POSITION<<
+			
+			FbxVector4* Vertices = mesh->GetControlPoints();//... and amongs that contet, lays the vertices. 
+
+			
 
 			for (int t = 0; t < mesh->GetPolygonCount(); t++)//...  for every polygon in the polygonCount tex 25 000 tris or 40 000 quads
 			{
@@ -82,9 +87,11 @@ void FbxDawg::loadModels(const char* filePath)
 					vertex.vertexIndex = controlPointIndex;
 					MyPositionVector.push_back(vertex);
 				}
-			}//end vertex
+			}
+			#pragma endregion >>VERTEX POSITION<<
 
-#pragma region >>NORMALS<<
+			#pragma region >>NORMALS<<
+
 			FbxGeometryElementNormal* normalElement = mesh->GetElementNormal();
 			if (normalElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
 			{
@@ -158,9 +165,9 @@ void FbxDawg::loadModels(const char* filePath)
 					}
 				}
 			}
-#pragma endregion >> NORMALS <<
+			#pragma endregion >> NORMALS <<
 
-#pragma region >>UV<<
+			#pragma region >>UV<<
 
 
 			FbxStringList UVSetNameList;  //Gets all UV sets
@@ -263,9 +270,9 @@ void FbxDawg::loadModels(const char* filePath)
 				}
 			}
 
-#pragma endregion >>UV<<
+			#pragma endregion >>UV<<
 
-#pragma region >>ASSEMBLY OF VERTEXDATA<<
+			#pragma region >>ASSEMBLY OF VERTEXDATA<<
 			MyVertexStruct tempVertex;
 			MyIndexStruct tempIndex;
 
@@ -292,7 +299,7 @@ void FbxDawg::loadModels(const char* filePath)
 					this->modelVertexList.push_back(tempVertex);
 				}
 
-				for (int i = 0; i < 3; ++i)
+				for (int i = 0; i < 3; ++i) //get this triangles indices
 				{
 					int vertex = triangleCounter + offsets[i];
 
@@ -302,69 +309,74 @@ void FbxDawg::loadModels(const char* filePath)
 
 					//printf("The indices: %d %d %d\n", tempIndex.posIndex, tempIndex.norIndex, tempIndex.uvIndex);
 
-					this->myIndexList.push_back(tempIndex);
+					this->myIndexList.push_back(tempIndex); //vi samlar alla triangelns indices och lägger dem i listan myIndexList
 				}
 			}
-#pragma endregion >>ASSEMBLY OF VERTEXDATA<<
+			#pragma endregion >>ASSEMBLY OF VERTEXDATA<<
+				
 
 
 
-
-
-		}
+			makeIndexList(MyPositionVector, MyNormalVector, MyUVVector);
+		}//for mesh
 	}//if fbxnode
-	Fbx_Importer->Destroy();
+	Fbx_Importer->Destroy(); //need be destroyed at the end
 
 } //end of loader
 
-/*void FbxDawg::makeIndexList()
+
+
+void FbxDawg::makeIndexList(std::vector<MyPosition> MyPositionVector,std::vector<MyNormal> MyNormalVector, std::vector<MyUV> MyUVVector)
 {
 	//>>>>>>>CREATING ORDERED LISTS OF NEEDED VERTICES FOR INDEX-BUFFER IN MAIN<<<<<<<
 
-	//>>>vertex positions
-
-	//Getting all of the vertices with unique indices.
-	std::vector <MyPosition> unorderedPosList;
+	
+	std::vector <MyPosition> unorderedPosList; //Getting all of the vertices with unique indices.
 	bool indexAlreadyExists = false;
-	//per position of MyPositionVector
-	for (int aids = 0; aids < MyPositionVector.size(); aids++)
+
+	for (int PosVecCount = 0; PosVecCount < MyPositionVector.size(); PosVecCount++) //per position of MyPositionVector/ per vertex.
 	{
 
-		//loop through unorderedPosList to check if it already contains the index of MyPositionVector[aids]
-		for (int ebola = 0; ebola < unorderedPosList.size(); ebola++)
+		
+		for (int unorderedPosCount = 0; unorderedPosCount < unorderedPosList.size(); unorderedPosCount++) //loop through unorderedPosList to check if it already contains the index of MyPositionVector[PosVecCount]
 		{
-			//here checks if the index is already saved 
-			if (unorderedPosList[ebola].vertexIndex == MyPositionVector[aids].vertexIndex) {
+			
+			if (unorderedPosList[unorderedPosCount].vertexIndex == MyPositionVector[PosVecCount].vertexIndex) //checks if the index is already saved 
+			{
 				indexAlreadyExists = true;
-				ebola = INT_MAX;
-			}
+				//printf("kill\n");
+				continue;
+			} 
 		}
-		if (indexAlreadyExists == true) {
-			indexAlreadyExists = false;
-		}
-		else if (indexAlreadyExists == false) {
-			//if the index isn't present in unorderedPosList, add the vertex.
-			unorderedPosList.push_back(MyPositionVector[aids]); //... I see. The loop will never end since this never ends.
-		}
+		if (indexAlreadyExists == false)
+			unorderedPosList.push_back(MyPositionVector[PosVecCount]); //if the index isn't present in unorderedPosList, add the vertex.
+
+		indexAlreadyExists = false; //reset
 	}
+	
 
 	//Now that we've isolated the values needed, we need to order them by index.
 	std::vector <MyPosition> orderedPosList;
 	int searchedIndex = 0;
-	while (orderedPosList.size() != unorderedPosList.size())
-	{
-		for (int monkey = 0; monkey < unorderedPosList.size(); monkey++)
+
+	
+	
+	while (orderedPosList.size() != unorderedPosList.size()) //until all in unorderdered are in ordered.
 		{
-			if (unorderedPosList[monkey].vertexIndex == searchedIndex) {
-				orderedPosList.push_back(unorderedPosList[monkey]);
-				monkey = INT_MAX;
-				searchedIndex++;
+			for (int ordCount = 0; ordCount < unorderedPosList.size(); ordCount++)
+			{
+				if (unorderedPosList[ordCount].vertexIndex == searchedIndex) 
+				{
+					orderedPosList.push_back(unorderedPosList[ordCount]);
+					searchedIndex++;
+					printf("%d \n", unorderedPosList[ordCount].pos[0]);
+					continue;
+				}
 			}
 		}
-	}
+	
 
-
-}*/
+}
 
 
 
