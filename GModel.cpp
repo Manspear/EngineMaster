@@ -42,7 +42,6 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 {
 	
 
-	this->hasNormal = hasNormal;
 	modelLoader.loadModels(fbxFilePath);
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
 	this->modelVertices = modelLoader.modelVertexList; 
