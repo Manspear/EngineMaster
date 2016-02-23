@@ -56,7 +56,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 
 	gDevice->CreateBuffer(&bufferDesc, &data, &modelVertexBuffer);
 	
-#pragma region index buffer
+#pragma region indexBuffer
 	D3D11_BUFFER_DESC indexBufferDesc;
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 
@@ -70,16 +70,8 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	indexInitData.pSysMem = this->IndexArray;
 	
 	gDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &this->modelIndexBuffer);
-	
-	//printf("%d\n", sizeof(modelLoader.indexArray));
-	for (int i = 0;i < modelVertices.size();i++)
-	{
-		printf("%d\n", IndexArray[i]);
-	}
 
-	//gDeviceContext->IASetIndexBuffer(modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-#pragma endregion END OF INDEX BUFFER
+#pragma endregion indexBuffer
 
 
 	//Creating constant buffer holding only worldmatrix

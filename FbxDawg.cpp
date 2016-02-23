@@ -388,7 +388,7 @@ void FbxDawg::makeIndexList(std::vector<MyPosition> MyPositionVector,std::vector
 {
 	//>>>>>>>CREATING ORDERED LISTS OF NEEDED VERTICES FOR INDEX-BUFFER IN MAIN<<<<<<<
 	
-	#pragma region Vertex
+#pragma region Vertex
 	std::vector <MyPosition> unorderedPosList, orderedPosList; 
 	bool indexAlreadyExists = false;
 
@@ -426,9 +426,9 @@ void FbxDawg::makeIndexList(std::vector<MyPosition> MyPositionVector,std::vector
 			}
 		}
 	}
-	#pragma endregion Vertex
+#pragma endregion Vertex
 
-	#pragma region make normallist
+#pragma region make normallist
 	std::vector <MyNormal> unorderedNorList, orderedNorList; 
 
 	for (int NorVecCount = 0; NorVecCount  < MyNormalVector.size(); NorVecCount ++) //per position of MyPositionVector/ per vertex.
@@ -466,9 +466,9 @@ void FbxDawg::makeIndexList(std::vector<MyPosition> MyPositionVector,std::vector
 			}
 		}
 	
-	#pragma endregion MakeNormalList
+#pragma endregion MakeNormalList
 	
-	#pragma region make UVList
+#pragma region make UVList
 
 	std::vector <MyUV> unorderedUVList, orderedUVList; //Getting all of the vertices with unique indices.
 	//bool indexAlreadyExists = false;
@@ -506,18 +506,17 @@ void FbxDawg::makeIndexList(std::vector<MyPosition> MyPositionVector,std::vector
 			}
 		}
 	}
-	#pragma endregion MakeUVList
+#pragma endregion MakeUVList
 	
-	//orderedUVList; orderedNorList; orderedPosList;
 	
-	//this->modelVertexList
+	
+	
 	MyVertexStruct tempVertex;
-	//printf()
-	//printf(": %d", (myIndexList));
 	
-	//this->modelVertexList.clear();
-	//static int offsets[] = { 1, 0, 2 };
-	/*for (int i = 0; i < myIndexList.size(); i++)
+	
+	/*this->modelVertexList.clear();
+	
+	for (int i = 0; i < myIndexList.size(); i++)
 	{
 		printf("The indices: %d %d %d\n", myIndexList[i].posIndex, myIndexList[i].norIndex, myIndexList[i].uvIndex);
 		//printf("%d", orderedPosList[i].pos[0] );
@@ -536,25 +535,15 @@ void FbxDawg::makeIndexList(std::vector<MyPosition> MyPositionVector,std::vector
 		//printf("%f \n",modelVertexList[i].x);
 	}*/
 
-	//this->myIndexList.clear();
+	this->myIndexList.clear();
 	
-	printf("%d \n", modelVertexList.size());
 	indexArray = new int[modelVertexList.size()];
-
-	/*for (int i = 0; i < orderedUVList.size(); i++)
-	{
-		printf("%d\n", orderedUVList[i].uvIndex);
-	}*/
-
-
 	for (int i = 0; i < modelVertexList.size(); i++)
 	{
 		indexArray[i] = i;
-		//printf("%d\n",indexArray[i]);
+		
 	}
-	//printf("%d", (sizeof(indexArray) / sizeof(int)));
-
-	//now we make the vertices
+	
 
 	
 }
