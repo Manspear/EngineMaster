@@ -40,8 +40,11 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	FbxDawg modelLoader;
 	modelLoader.loadModels(fbxFilePath);
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
-	this->modelVertices = modelLoader.modelVertexList; 
+	this->modelVertices = modelLoader.modelVertexList;
+	this->IndexArray = modelLoader.indexArray;
 	this->modelTextureFilepath = modelLoader.textureFilepath;
+
+	
 
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
@@ -53,6 +56,32 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 
 	gDevice->CreateBuffer(&bufferDesc, &data, &modelVertexBuffer);
 	
+#pragma region index buffer
+	D3D11_BUFFER_DESC indexBufferDesc;
+	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
+
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = modelVertices.size()*sizeof(int); //sizeof(int) * len(indices);
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA indexInitData;
+	indexInitData.pSysMem = this->IndexArray;
+	
+	gDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &this->modelIndexBuffer);
+	
+	//printf("%d\n", sizeof(modelLoader.indexArray));
+	for (int i = 0;i < modelVertices.size();i++)
+	{
+		printf("%d\n", IndexArray[i]);
+	}
+
+	//gDeviceContext->IASetIndexBuffer(modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+#pragma endregion END OF INDEX BUFFER
+
+
 	//Creating constant buffer holding only worldmatrix
 	//D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));

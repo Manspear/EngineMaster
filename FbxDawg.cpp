@@ -514,11 +514,12 @@ void FbxDawg::makeIndexList(std::vector<MyPosition> MyPositionVector,std::vector
 	MyVertexStruct tempVertex;
 	//printf()
 	//printf(": %d", (myIndexList));
-
-	this->modelVertexList.clear();
-	for (int i = 0; i < myIndexList.size(); i++)
+	
+	//this->modelVertexList.clear();
+	//static int offsets[] = { 1, 0, 2 };
+	/*for (int i = 0; i < myIndexList.size(); i++)
 	{
-		//printf("The indices: %d %d %d\n", myIndexList[i].posIndex, myIndexList[i].norIndex, myIndexList[i].uvIndex);
+		printf("The indices: %d %d %d\n", myIndexList[i].posIndex, myIndexList[i].norIndex, myIndexList[i].uvIndex);
 		//printf("%d", orderedPosList[i].pos[0] );
 		tempVertex.x = orderedPosList[myIndexList[i].posIndex].pos[0];
 		tempVertex.y = orderedPosList[myIndexList[i].posIndex].pos[1];
@@ -529,20 +530,29 @@ void FbxDawg::makeIndexList(std::vector<MyPosition> MyPositionVector,std::vector
 		tempVertex.norZ = orderedNorList[myIndexList[i].norIndex].direction[2];
 
 		tempVertex.u = orderedUVList[myIndexList[i].uvIndex].uvCoord[0];
-		tempVertex.u = orderedUVList[myIndexList[i].uvIndex].uvCoord[1];
-		printf("pos: %f \n", tempVertex.y);
+		tempVertex.v = orderedUVList[myIndexList[i].uvIndex].uvCoord[1];
+		//printf("pos: %f \n", tempVertex.y);
 		this->modelVertexList.push_back(tempVertex);
-	}
+		//printf("%f \n",modelVertexList[i].x);
+	}*/
 
-	//printf("size of model: %d \n", modelVertexList.size());
-	//for (int i = 0; i < modelVertexList.size();i++)
-	//{
-	//	printf("pos: %f \n", modelVertexList[i].u);
-	//}
+	//this->myIndexList.clear();
+	
+	printf("%d \n", modelVertexList.size());
+	indexArray = new int[modelVertexList.size()];
 
-	int* newIndexArray = new int[modelVertexList.size()];
+	/*for (int i = 0; i < orderedUVList.size(); i++)
+	{
+		printf("%d\n", orderedUVList[i].uvIndex);
+	}*/
+
+
 	for (int i = 0; i < modelVertexList.size(); i++)
-		newIndexArray[i]=i;
+	{
+		indexArray[i] = i;
+		//printf("%d\n",indexArray[i]);
+	}
+	//printf("%d", (sizeof(indexArray) / sizeof(int)));
 
 	//now we make the vertices
 

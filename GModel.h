@@ -17,10 +17,16 @@ public:
 	};
 	GModel();
 	~GModel();
+
 	ID3D11Buffer* modelVertexBuffer = nullptr;
+	ID3D11Buffer* modelIndexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
+	
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture and normal map
-	//share projection and view, but have different world-view.
+	
+												   //share projection and view, but have different world-view.
+	int* IndexArray = nullptr;
+
 	void setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext);
 	XMMATRIX getPosition();
 	void renderModel();

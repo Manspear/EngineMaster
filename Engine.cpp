@@ -192,10 +192,14 @@ void Engine::Render()
 
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 		gDeviceContext->PSSetShaderResources(0, 2, listOfModels[bufferCounter].modelTextureView);
+		
+		//gDeviceContext->IASetIndexBuffer(squareIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		//gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 		gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
-
-		gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
+		gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
+		gDeviceContext->DrawIndexed(100, 0, 0);
 	}
 }
 

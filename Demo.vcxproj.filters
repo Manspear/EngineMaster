@@ -48,13 +48,13 @@
     <ClCompile Include="FbxDawg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GQuadTree.cpp">
-      <Filter>Source Files\Model</Filter>
-    </ClCompile>
     <ClCompile Include="GModel.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="GModelList.cpp">
+      <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="GQuadTree.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
   </ItemGroup>

@@ -49,6 +49,8 @@ public:
 	std::vector<MyNormal> indexedNormalList;
 	std::vector<MyUV> indexedUVList;
 	std::vector<MyIndexStruct> myIndexList;
+
+	int* indexArray = nullptr;
 };
 #endif
 
