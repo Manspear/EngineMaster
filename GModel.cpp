@@ -3,7 +3,7 @@
 
 GModel::GModel()
 {
-
+	noOfTextures = 1;
 	this->objectWorldMatrix = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
 }
 
@@ -92,11 +92,11 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	if (normalPath == NULL)
 	{
 		noOfTextures = 1;
+		modelTextureView[1] = nullptr;
 	}else{
 		noOfTextures = 2;
-		//wstring äger functionen c_str som är en getFucntion till wchar_t* som finns redan
 		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]);
-		//(d3d11DeviceInterface, d3d11DeviceContextInterface, L"test.bmp", 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0, &pTex2D, NULL);
+
 	}
 	#pragma endregion 
 }; 
