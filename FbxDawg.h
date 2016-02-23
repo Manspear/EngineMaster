@@ -5,7 +5,7 @@
 #include <vector>
 #include <fbxsdk.h>
 
-//GLOBALSvvvvvv
+#pragma region structs
 struct MyPosition
 {
 	float pos[3];
@@ -31,7 +31,7 @@ struct MyIndexStruct
 {
 	int posIndex, norIndex, uvIndex;
 };
-//GLOBALS^^^^^^^^
+#pragma endregion structs
 
 class FbxDawg
 {
@@ -41,7 +41,9 @@ public:
 	~FbxDawg();
 
 	std::wstring textureFilepath;//När denna blir tilldelad så får den en kopia istället. Så vi kan utan problem radera den variablen som var med i tilldelningen.
-	void loadModels(const char* filePath);
+	void loadModels(const char* filePath); 
+	void makeIndexList(std::vector<MyPosition> MyPositionVector, std::vector<MyNormal> MyNormalVector, std::vector<MyUV> MyUVVector);
+
 	std::vector<MyVertexStruct> modelVertexList;
 	std::vector<MyPosition> indexedPosList;
 	std::vector<MyNormal> indexedNormalList;

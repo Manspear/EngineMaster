@@ -34,13 +34,13 @@ void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSO
 	GSOutput element = (GSOutput)0;
 	matrix allMatrix = mul(mul(worldMatrix, viewMatrix), projectionMatrix);
 
-	//Normal
+	//Normal //still used in tangent bitangent
 	float3 edge1 = input[1].Pos - input[0].Pos;
 	float3 edge2 = input[2].Pos - input[0].Pos;
 	float2 uvEdge1 = input[1].UV - input[0].UV;
 	float2 uvEdge2 = input[2].UV - input[0].UV;
 
-	float3 normal = normalize(cross(edge1, edge2));
+	float3 normal = normalize(cross(edge1, edge2)) ;//will not be sent to pixel shader
 	
 	//if (dot(camPos - input[0].Pos, normal) < 0 && dot(camPos - input[1].Pos, normal) < 0 && dot(camPos - input[2].Pos, normal) < 0)
 	//	normal = normal*-1.0f;
@@ -58,7 +58,7 @@ void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSO
 		{ 
 			element.Pos = mul(input[i].Pos, allMatrix);
 			element.UV = input[i].UV;
-			element.normal = mul(float4(normal, 0), worldMatrix).xyz; //get the normal into worldspace
+			element.normal = normalize(mul(float4(input[i].normal, 0), worldMatrix).xyz); //get the normal into worldspace
 
 			element.worldPosition = mul(input[i].Pos, worldMatrix);
 			element.tangent = tangent;

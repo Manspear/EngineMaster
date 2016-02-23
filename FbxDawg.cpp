@@ -11,61 +11,67 @@ FbxDawg::~FbxDawg()
 }
 
 
-//Jesper
+
+
 void FbxDawg::loadModels(const char* filePath)
 {
-	//FbxManager is an object that handles memory management.
-	FbxManager *SDK_Manager = FbxManager::Create();
-	//FbxIOSettings is a collection of import/export options
-	FbxIOSettings *ios = FbxIOSettings::Create(SDK_Manager, IOSROOT);
+	#pragma region init+ isMesh
+	FbxManager *SDK_Manager = FbxManager::Create(); //FbxManager is an object that handles memory management.
+
+	FbxIOSettings *ios = FbxIOSettings::Create(SDK_Manager, IOSROOT); //FbxIOSettings is a collection of import/export options
 	SDK_Manager->SetIOSettings(ios);
+
 	ios->SetBoolProp(IMP_FBX_MATERIAL, true);
 	ios->SetBoolProp(IMP_FBX_TEXTURE, true);
-	//FbxScene contains all the nodes, materials, textures, poses, characters
-	FbxScene* Fbx_Scene = FbxScene::Create(SDK_Manager, "myScene");
-	//FbxImporter is to import an FBX file into SDK objects.
-	FbxImporter * Fbx_Importer = FbxImporter::Create(SDK_Manager, "");
+
+
+	FbxScene* Fbx_Scene = FbxScene::Create(SDK_Manager, "myScene"); //FbxScene contains all the nodes, materials, textures, poses, characters
+
+
+	FbxImporter * Fbx_Importer = FbxImporter::Create(SDK_Manager, ""); //FbxImporter is to import an FBX file into SDK objects.
+
 	Fbx_Importer->Initialize(filePath, -1, SDK_Manager->GetIOSettings());// eller ios istället för SDK_M
 	Fbx_Importer->Import(Fbx_Scene);
-	Fbx_Importer->Destroy();
-	// FbxCamera, FbxLight, FbxMesh, etc... elements organized in a hierarchical tree. Root is the mother and by FbxNode::GetChild() we work our way down
-	FbxNode* FBXRootNode = Fbx_Scene->GetRootNode();
-
-
-	//vertexVector, holds complete vertex data. 
-	//The data contained in the Nor, Pos, and UV 
-	//structs get appended/push_backed into this one.
-	//This vector we read in the Engine-class to get
-	//models.
-	//std::vector<MyVertexStruct> MyVertexStructVector;//vertexVector
+	
 	
 
+	FbxNode* FBXRootNode = Fbx_Scene->GetRootNode(); // FbxCamera, FbxLight, FbxMesh, etc... elements organized in a hierarchical tree. Root is the mother and by FbxNode::GetChild() we work our way down
 
-	//MyVertexStruct
-	if(FBXRootNode)
+
+
+
+	if (FBXRootNode)
 	{
-		//int polyIndexCounter = 0; //Think this is a fbx-file-global-thing
-		//int indexByPolygonVertex = 0; //Think this is so too
+
 		for (int i = 0; i < FBXRootNode->GetChildCount(); i++)//For each and every childnode...
 		{
+
+
+			FbxNode* FbxChildNode = FBXRootNode->GetChild(i);//... initialize the childnode we are at
+			
+			if (FbxChildNode->GetNodeAttribute() == NULL)//... and then check if its an unset attribute. (special node that we dont want now) (A NULL node attribute is set by calling function FbxNode::SetNodeAttribute() with a NULL pointer)
+				continue;//tar nästa child istället
+			
+			FbxNodeAttribute::EType AttributeType = FbxChildNode->GetNodeAttribute()->GetAttributeType();//... But if its not unset, we check what type the content is, FbxCamera, FbxSkeleton, FbxMesh, etc...
+			
+			if (AttributeType != FbxNodeAttribute::eMesh)// Only meshes allowed to enter check.
+				continue;// Go to next child/mesh
+
+			FbxMesh* mesh = (FbxMesh*)FbxChildNode->GetNodeAttribute();//we are sure that there was a mesh that went through, we get the content of the node.
+			#pragma endregion init+ isMesh
+
 			//These three vectors are reset each loop iteration, that way they
 			//1. Don't get unneccesarily big and 
 			//2. they get looped through correctly in the ">>>ASSEMBLY<<<"-stage. 
-			std::vector<MyPosition> MyPositionVector;//MyPositionVector
-			std::vector<MyNormal> MyNormalVector;//MyNormalVector
-			std::vector<MyUV> MyUVVector;//MyUVVector 
+			std::vector<MyPosition> MyPositionVector; //containes all vertex positions
+			std::vector<MyNormal> MyNormalVector; //contains all normals.
+			std::vector<MyUV> MyUVVector; //contain all UVs
 
-			FbxNode* FbxChildNode = FBXRootNode->GetChild(i);//... initialize the childnode we are at
-			if (FbxChildNode->GetNodeAttribute() == NULL)//... and then check if its an unset attribute. (special node that we dont want now) (A NULL node attribute is set by calling function FbxNode::SetNodeAttribute() with a NULL pointer)
-				continue;//tar nästa child istället
-			FbxNodeAttribute::EType AttributeType = FbxChildNode->GetNodeAttribute()->GetAttributeType();//... But if its not unset, we check what type the content is, FbxCamera, FbxSkeleton, FbxMesh, etc...
-			if (AttributeType != FbxNodeAttribute::eMesh)//... here we do the Only meshes allowed to enter check.
-				continue;//tar nästa child istället
-
-
-						 //>>>>>>>>>>>VERTEX POSITION<<<<<<<<<<<<<
-			FbxMesh* mesh = (FbxMesh*)FbxChildNode->GetNodeAttribute();//... now that we are sure that there was a mesh that went through, we get the content of the node.
+			#pragma region >>VERTEX POSITION<<
+			
 			FbxVector4* Vertices = mesh->GetControlPoints();//... and amongs that contet, lays the vertices. 
+
+			
 
 			for (int t = 0; t < mesh->GetPolygonCount(); t++)//...  for every polygon in the polygonCount tex 25 000 tris or 40 000 quads
 			{
@@ -81,21 +87,62 @@ void FbxDawg::loadModels(const char* filePath)
 					vertex.vertexIndex = controlPointIndex;
 					MyPositionVector.push_back(vertex);
 				}
-			}//end vertex
+			}
+			#pragma endregion >>VERTEX POSITION<<
 
-			 //>>>>>>>>>>>>>>NORMALS<<<<<<<<<<<<<<<<<<<<<<<<
+			#pragma region >>NORMALS<<
+
 			FbxGeometryElementNormal* normalElement = mesh->GetElementNormal();
 			if (normalElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
 			{
 				FbxVector4 normals;
 				int indexByPolygonVertex = 0;
 				MyNormal temp;
-				//normals of polygonvertex are stored per polygon. Meaning that even if a cube's got 8 vertices, it'll get one normal per vertex per triangle. So instead of 24 normals, we'll get 36. 
-				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++)
-				{ //For every triangle
+
+				//normals of polygonvertex are stored per polygon. Meaning that even if a cube's got 8 vertices, it'll get one normal per vertex per triangle. So instead of 24 normals, we'll get 36.
+				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
+				{
 					int polygonSize = mesh->GetPolygonSize(polygonIndex);
-					for (int i = 0; i < polygonSize; i++)
-					{ //For every vertex in triangle
+
+					for (int i = 0; i < polygonSize; i++) //For every vertex in triangle
+					{
+						int normalIndex = 0; //reference mode is direct, the normal index is the same as indexByPolygonVertex
+
+						if (normalElement->GetReferenceMode() == FbxGeometryElement::eDirect) {
+							normalIndex = indexByPolygonVertex;
+						}
+						if (normalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
+							normalIndex = normalElement->GetIndexArray().GetAt(indexByPolygonVertex);
+						}
+
+						normals = normalElement->GetDirectArray().GetAt(normalIndex);
+
+						temp.normalIndex = normalIndex;
+						temp.direction[0] = normals[0];
+						temp.direction[1] = normals[1];
+						temp.direction[2] = normals[2];
+
+						MyNormalVector.push_back(temp);
+
+
+						indexByPolygonVertex++;
+					}
+				}
+			}
+
+
+			else if (normalElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+			{
+				FbxVector4 normals;
+				int indexByPolygonVertex = 0;
+				MyNormal temp;
+
+				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
+				{
+					int polygonSize = mesh->GetPolygonSize(polygonIndex);
+
+					for (int i = 0; i < polygonSize; i++) //For every vertex in triangle
+					{
 						int normalIndex = 0;
 						//reference mode is direct, the normal index is the same as indexByPolygonVertex
 						if (normalElement->GetReferenceMode() == FbxGeometryElement::eDirect) {
@@ -114,30 +161,30 @@ void FbxDawg::loadModels(const char* filePath)
 
 						MyNormalVector.push_back(temp);
 
-						//printf("\nNormalz: %f %f %f %f %f %f %f %f %f Number of Vertices: %d", normals[0], normals[1], normals[2], normals[3],normals[4], normals[5], normals[6], normals[7], normals[8], , mesh->GetControlPointsCount());
-						//printf("number of normals: %d\n", MyNormalVector.size());
 						indexByPolygonVertex++;
 					}
 				}
-			}//end normal
+			}
+			#pragma endregion >> NORMALS <<
 
-			 //>>>>>>>>>>>>>>UV<<<<<<<<<<<<<<<<<<<<<<<<
+			#pragma region >>UV<<
 
-			 //Gets all UV sets
-			FbxStringList UVSetNameList;
+
+			FbxStringList UVSetNameList;  //Gets all UV sets
 			mesh->GetUVSetNames(UVSetNameList);
 
-			//Iterates through the UV sets. Meshes can have multiple textures, every texture got a different UV set
-			for (int UVSetIndex = 0; UVSetIndex < UVSetNameList.GetCount(); UVSetIndex++)
+
+			for (int UVSetIndex = 0; UVSetIndex < UVSetNameList.GetCount(); UVSetIndex++) //Iterates through the UV sets. Meshes can have multiple textures, every texture got a different UV set
 			{
-				//Gets name of the current UV set
-				char* UVSetName = UVSetNameList.GetStringAt(UVSetIndex);
-				//Gets the UV-element with the name that UVSetName holds
-				FbxGeometryElementUV* UVElement = mesh->GetElementUV(UVSetName);
+
+				char* UVSetName = UVSetNameList.GetStringAt(UVSetIndex); //Gets name of the current UV set
+
+				FbxGeometryElementUV* UVElement = mesh->GetElementUV(UVSetName); //Gets the UV-element with the name that UVSetName holds
 
 				if (!UVElement) {
 					continue;
 				}
+
 				//Only supports these two modes.
 				if (UVElement->GetMappingMode() != FbxGeometryElement::eByPolygonVertex &&
 					UVElement->GetMappingMode() != FbxGeometryElement::eByControlPoint)
@@ -205,7 +252,7 @@ void FbxDawg::loadModels(const char* filePath)
 			for (int m = 0; m < matCount; m++)//.. for every material attached to the mesh
 			{
 				FbxSurfaceMaterial* material = FbxChildNode->GetMaterial(m);
-				if(material)//.. if material
+				if (material)//.. if material
 				{
 					FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
 					int texture_Count = prop.GetSrcObjectCount<FbxTexture>();
@@ -223,14 +270,16 @@ void FbxDawg::loadModels(const char* filePath)
 				}
 			}
 
-			 //>>>>>>>>>ASSEMBLY OF VERTEXDATA<<<<<<<<<<
+			#pragma endregion >>UV<<
+
+			#pragma region >>ASSEMBLY OF VERTEXDATA<<
 			MyVertexStruct tempVertex;
 			MyIndexStruct tempIndex;
+
 			for (int triangleCounter = 0; triangleCounter < MyPositionVector.size(); triangleCounter += 3)
 			{
-				//This offset is made because directX is left-hand-oriented
-				//If this doesn't exist, the textures and vertices get mirrored.
-				static int offsets[] = { 1, 0, 2 }; 
+
+				static int offsets[] = { 1, 0, 2 }; //offset made because directX is left-hand-oriented else the textures and vertices get mirrored.
 				for (int i = 0; i < 3; ++i)
 				{
 					int vertex = triangleCounter + offsets[i];
@@ -246,152 +295,89 @@ void FbxDawg::loadModels(const char* filePath)
 					tempVertex.u = MyUVVector[vertex].uvCoord[0];// u
 					tempVertex.v = 1 - MyUVVector[vertex].uvCoord[1];// v
 
-					//tempVertex.vertVar = MyPositionVector[vertex];
-					//tempVertex.norVar = MyNormalVector[vertex];
-					//tempVertex.uvVar = MyUVVector[vertex];
+
 					this->modelVertexList.push_back(tempVertex);
 				}
 
-				for (int i = 0; i < 3; ++i)
+				for (int i = 0; i < 3; ++i) //get this triangles indices
 				{
 					int vertex = triangleCounter + offsets[i];
-					
+
 					tempIndex.posIndex = MyPositionVector[vertex].vertexIndex;
 					tempIndex.norIndex = MyNormalVector[vertex].normalIndex;
 					tempIndex.uvIndex = MyUVVector[vertex].uvIndex;
-					
-					this->myIndexList.push_back(tempIndex);
+
+					//printf("The indices: %d %d %d\n", tempIndex.posIndex, tempIndex.norIndex, tempIndex.uvIndex);
+
+					this->myIndexList.push_back(tempIndex); //vi samlar alla triangelns indices och lägger dem i listan myIndexList
 				}
 			}
-
-			//>>>>>>>CREATING ORDERED LISTS OF NEEDED VERTICES FOR INDEX-BUFFER IN MAIN<<<<<<<
-			#pragma region
-			//>>>vertex positions
-
-			//Getting all of the vertices with unique indices.
-			std::vector <MyPosition> unorderedPosList;
-			bool indexAlreadyExists = false;
-			//per position of MyPositionVector
-			for (int aids = 0; aids < MyPositionVector.size(); aids++)
-			{
+			#pragma endregion >>ASSEMBLY OF VERTEXDATA<<
 				
-				//loop through unorderedPosList to check if it already contains the index of MyPositionVector[aids]
-				for (int ebola = 0; ebola < unorderedPosList.size(); ebola++)
-				{
-					//here checks if the index is already saved 
-					if (unorderedPosList[ebola].vertexIndex == MyPositionVector[aids].vertexIndex) {
-						indexAlreadyExists = true;
-						ebola = INT_MAX;
-					}
-				}
-				if (indexAlreadyExists == true) {
-					indexAlreadyExists = false;
-				}else if(indexAlreadyExists == false){
-					//if the index isn't present in unorderedPosList, add the vertex.
-					unorderedPosList.push_back(MyPositionVector[aids]); //... I see. The loop will never end since this never ends.
-				}
-			}
+
+
+
+			makeIndexList(MyPositionVector, MyNormalVector, MyUVVector);
+		}//for mesh
+	}//if fbxnode
+	Fbx_Importer->Destroy(); //need be destroyed at the end
+
+} //end of loader
+
+
+
+void FbxDawg::makeIndexList(std::vector<MyPosition> MyPositionVector,std::vector<MyNormal> MyNormalVector, std::vector<MyUV> MyUVVector)
+{
+	//>>>>>>>CREATING ORDERED LISTS OF NEEDED VERTICES FOR INDEX-BUFFER IN MAIN<<<<<<<
+
+	
+	std::vector <MyPosition> unorderedPosList; //Getting all of the vertices with unique indices.
+	bool indexAlreadyExists = false;
+
+	for (int PosVecCount = 0; PosVecCount < MyPositionVector.size(); PosVecCount++) //per position of MyPositionVector/ per vertex.
+	{
+
+		
+		for (int unorderedPosCount = 0; unorderedPosCount < unorderedPosList.size(); unorderedPosCount++) //loop through unorderedPosList to check if it already contains the index of MyPositionVector[PosVecCount]
+		{
 			
-			//Now that we've isolated the values needed, we need to order them by index.
-			std::vector <MyPosition> orderedPosList;
-			int searchedIndex = 0;
-			while (orderedPosList.size() != unorderedPosList.size()) 
+			if (unorderedPosList[unorderedPosCount].vertexIndex == MyPositionVector[PosVecCount].vertexIndex) //checks if the index is already saved 
 			{
-				for (int monkey = 0; monkey < unorderedPosList.size(); monkey++) 
-				{
-					if (unorderedPosList[monkey].vertexIndex == searchedIndex) {
-						orderedPosList.push_back(unorderedPosList[monkey]);
-						monkey = INT_MAX;
-						searchedIndex++;
-					}
-				}
-			}
+				indexAlreadyExists = true;
+				//printf("kill\n");
+				continue;
+			} 
+		}
+		if (indexAlreadyExists == false)
+			unorderedPosList.push_back(MyPositionVector[PosVecCount]); //if the index isn't present in unorderedPosList, add the vertex.
 
-			//>>>vertex normals
-			std::vector <MyNormal> unorderedNormalList;
-			indexAlreadyExists = false;
-			//per position of MyPositionVector
-			for (int aids = 0; aids < MyNormalVector.size(); aids++)
-			{
-				//loop through unorderedNormalList to check if it already contains the index of MyPositionVector[aids]
-				for (int ebola = 0; ebola < unorderedNormalList.size(); ebola++)
-				{
-					//here checks if the index is already saved 
-					if (unorderedNormalList[ebola].normalIndex == MyNormalVector[aids].normalIndex) {
-						indexAlreadyExists = true;
-						ebola = INT_MAX;
-					}
-				}
-				if (indexAlreadyExists == true) {
-					indexAlreadyExists = false;
-				}
-				else {
-					//if the index isn't present in unorderedNormalList, add the vertex.
-					unorderedNormalList.push_back(MyNormalVector[aids]);
-				}
-			}
-
-			//Now that we've isolated the values needed, we need to order them by index.
-			std::vector <MyNormal> orderedNormalList;
-			searchedIndex = 0;
-			while (orderedNormalList.size() != unorderedNormalList.size())
-			{
-				for (int monkey = 0; monkey < unorderedNormalList.size(); monkey++)
-				{
-					if (unorderedNormalList[monkey].normalIndex == searchedIndex) {
-						orderedNormalList.push_back(unorderedNormalList[monkey]);
-						monkey = INT_MAX;
-						searchedIndex++;
-					}
-				}
-			}
-
-			//>>>vertex UVs
-			std::vector <MyUV> unorderedUVList;
-			indexAlreadyExists = false;
-			//per position of MyPositionVector
-			for (int aids = 0; aids < MyUVVector.size(); aids++)
-			{
-				//loop through unorderedUVList to check if it already contains the index of MyPositionVector[aids]
-				for (int ebola = 0; ebola < unorderedUVList.size(); ebola++)
-				{
-					//here checks if the index is already saved 
-					if (unorderedUVList[ebola].uvIndex == MyUVVector[aids].uvIndex) {
-						indexAlreadyExists = true;
-						ebola = INT_MAX;
-					}
-				}
-				if (indexAlreadyExists == true) {
-					indexAlreadyExists = false;
-				}
-				else {
-					//if the index isn't present in unorderedUVList, add the vertex.
-					unorderedUVList.push_back(MyUVVector[aids]);
-				}
-			}
-
-			//Now that we've isolated the values needed, we need to order them by index.
-			std::vector <MyUV> orderedUVList;
-			searchedIndex = 0;
-			while (orderedUVList.size() != unorderedUVList.size())
-			{
-				for (int monkey = 0; monkey < unorderedUVList.size(); monkey++)
-				{
-					if (unorderedUVList[monkey].uvIndex == searchedIndex) {
-						orderedUVList.push_back(unorderedUVList[monkey]);
-						monkey = INT_MAX;
-						searchedIndex++;
-					}
-				}
-			}
-			#pragma endregion //<<<Open this to see code
-			
-			//saves the indexed lists to the FBXDawg-lists
-			indexedPosList = orderedPosList;
-			indexedNormalList = orderedNormalList;
-			indexedUVList = orderedUVList;
-		}//inside this put code yes
+		indexAlreadyExists = false; //reset
 	}
+	
 
-	SDK_Manager->Destroy();
+	//Now that we've isolated the values needed, we need to order them by index.
+	std::vector <MyPosition> orderedPosList;
+	int searchedIndex = 0;
+
+	
+	
+	while (orderedPosList.size() != unorderedPosList.size()) //until all in unorderdered are in ordered.
+		{
+			for (int ordCount = 0; ordCount < unorderedPosList.size(); ordCount++)
+			{
+				if (unorderedPosList[ordCount].vertexIndex == searchedIndex) 
+				{
+					orderedPosList.push_back(unorderedPosList[ordCount]);
+					searchedIndex++;
+					printf("%d \n", unorderedPosList[ordCount].pos[0]);
+					continue;
+				}
+			}
+		}
+	
+
 }
+
+
+
+
