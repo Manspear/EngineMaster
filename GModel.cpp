@@ -35,7 +35,7 @@ void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDevic
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 };
 //struct with vertex positions held by FbxDawg
-void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext) //This is used in the default-constructor of Engine.
+void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, bool hasNormal) //This is used in the default-constructor of Engine.
 {
 	FbxDawg modelLoader;
 	modelLoader.loadModels(fbxFilePath);
