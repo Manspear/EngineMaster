@@ -19,8 +19,7 @@ Engine::Engine()
 
 Engine::~Engine()
 {
-
-
+	
 }
 
 void Engine::CreateShaders()
@@ -183,18 +182,20 @@ void Engine::Render()
 	
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
-	for (int bufferCounter = 0; bufferCounter < numberOfModels; bufferCounter++)
+	GModel* listOfModels = modelListObject->getModelList();
+
+	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
 		
 
-		gDeviceContext->GSSetConstantBuffers(1, 1, &modelList[bufferCounter].modelConstantBuffer);
+		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
 
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
-		gDeviceContext->PSSetShaderResources(0, 2, modelList[bufferCounter].modelTextureView);
+		gDeviceContext->PSSetShaderResources(0, 2, listOfModels[bufferCounter].modelTextureView);
 
-		gDeviceContext->IASetVertexBuffers(0, 1, &modelList[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
+		gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
 
-		gDeviceContext->Draw(this->modelList[bufferCounter].modelVertices.size(), 0);
+		gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
 	}
 }
 
@@ -210,7 +211,11 @@ void Engine::Update() {
 	}
 	dt = getFrameTime();
 	//printf("%i \n", fps); uncomment for fps in console
+
 	//printf("%d \n", dt); uncomment for dt
+
+	//printf("%d \n", dt);
+
 
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
@@ -325,8 +330,8 @@ void Engine::Clean() {
 
 	delete camera;
 	delete input;
+	delete modelListObject;
 	//delete[] loops through the new-objects in the array, and deletes them!
-	delete[] this->modelList; 
 }
 void Engine::InitializeCamera()
 {
@@ -338,21 +343,12 @@ void Engine::InitializeCamera()
 
 void Engine::InitializeModels() {
 	//Here create the dynamic GModel-Array:
-	this->numberOfModels = 3;
-	this->modelList = new GModel[numberOfModels];
-
-	this->modelList[0].load(".\\ItsBoxxyTextured.fbx", gDevice, gDeviceContext);
-	this->modelList[1].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
-	this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
-	//this->modelList[3].load(".\\itsBoxxy", gDevice);
-
-	modelList[0].setPosition(XMFLOAT4(2, 0, 0, 1), gDeviceContext);
-	modelList[1].setPosition(XMFLOAT4(0, 0, 2, 1), gDeviceContext);
-	
+	modelListObject->initializeModels(gDevice, gDeviceContext);
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
+	modelListObject = new GModelList;
 
 	CreateDirect3DContext(wndHandle);
 

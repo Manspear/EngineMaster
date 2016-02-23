@@ -34,7 +34,7 @@ float4 PS_main(PS_IN input) : SV_Target
 
 	//Why is the lightposition a vector pointing at the light position? It's weird. 
 	float3 lightPos = normalize(float3 (4, 3, -3) - input.pixelPosition); //Vector from pixelPosition to camera(is correct)
-	float4 ambientLightColor = { 0.2, 0.2, 0.2, 0 };
+	float4 ambientLightColor = { 0.2, 0.3, 0.3, 0 };
 	float4 diffuseColor = float4(1,1,1,1);
 	float specShadow = 1.0;
 

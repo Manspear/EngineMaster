@@ -12,7 +12,7 @@ using namespace DirectX;
 class GModel
 {
 private:
-
+	DirectX::XMMATRIX objectWorldMatrix;
 public:
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
@@ -24,7 +24,7 @@ public:
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture then normal map
 	//share projection and view, but have different world-view.
 	void setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext);
-	int getNumberOfTextures();
+	XMMATRIX getPosition();
 	void renderModel();
 	void GModel::normalMap(std::string fileName);
 	void GModel::normalMap(bool has);
@@ -32,7 +32,7 @@ public:
 	std::wstring modelTextureFilepath; //THis holds the texture's file-path
 	//struct with vertex positions held by FbxDawg
 	void load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext); //<-- Loads the model. Means that modelLoader is called.
-	DirectX::XMMATRIX objectWorldMatrix;
+
 };
 
 //>>>>>>>USER MANUAL<<<<<<<<<<<
