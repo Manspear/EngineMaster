@@ -14,8 +14,6 @@ class GModel
 private:
 	DirectX::XMMATRIX objectWorldMatrix;
 	int noOfTextures;
-	std::string diffuseTex;
-	std::string normalTex;
 	FbxDawg modelLoader;
 public:
 	struct modelWorldStruct {

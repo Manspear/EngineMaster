@@ -92,7 +92,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	if (normalPath == NULL)
 	{
 		noOfTextures = 1;
-		modelTextureView[1] = nullptr;
+		hr = DirectX::CreateWICTextureFromFile(gDevice, L"finland", NULL, &modelTextureView[1]);
 	}else{
 		noOfTextures = 2;
 		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]);
