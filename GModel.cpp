@@ -35,9 +35,11 @@ void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDevic
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 };
 //struct with vertex positions held by FbxDawg
-void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, bool hasNormal) //This is used in the default-constructor of Engine.
+void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath) //give diffuse/normal NULL for default values
 {
-	FbxDawg modelLoader;
+	
+
+	this->hasNormal = hasNormal;
 	modelLoader.loadModels(fbxFilePath);
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
 	this->modelVertices = modelLoader.modelVertexList; 
@@ -80,13 +82,18 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	ID3D11ShaderResourceView * Texture;
 	CoInitialize(NULL);
 	//Need to have this be part of the Render-looping-through-objects-loop. That is: not having modelList[0]
-	if (hasNormal)
-	{
+	if (diffusePath == NULL)
 		hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);
-		hr = DirectX::CreateWICTextureFromFile(gDevice, L"./Images/normal_map.jpg", NULL, &modelTextureView[1]);
+	else
+		hr = DirectX::CreateWICTextureFromFile(gDevice, diffusePath, NULL, &modelTextureView[0]);
+
+	if (normalPath == NULL)
+	{
+		noOfTextures = 1;
 	}else{
-		hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);//wstring äger functionen c_str som är en getFucntion till wchar_t* som finns redan
-		hr = DirectX::CreateWICTextureFromFile(gDevice, L"./Images/normal_map.jpg", NULL, &modelTextureView[1]);
+		noOfTextures = 2;
+		//wstring äger functionen c_str som är en getFucntion till wchar_t* som finns redan
+		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]);
 		//(d3d11DeviceInterface, d3d11DeviceContextInterface, L"test.bmp", 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0, &pTex2D, NULL);
 	}
 	#pragma endregion 
@@ -96,18 +103,10 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 
 int GModel::getNumberOfTextures()
 {
-	return 0;
+	return noOfTextures;
 }
 
-void GModel::normalMap(bool has)
-{
 
-}
-
-void GModel::normalMap(std::string FileName)
-{
-
-}
 
 void GModel::renderModel()
 {

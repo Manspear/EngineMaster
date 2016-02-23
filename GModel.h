@@ -12,7 +12,11 @@ using namespace DirectX;
 class GModel
 {
 private:
-
+	bool hasNormal;
+	int noOfTextures;
+	std::string diffuseTex;
+	std::string normalTex;
+	FbxDawg modelLoader;
 public:
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
@@ -26,12 +30,10 @@ public:
 	void setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext);
 	int getNumberOfTextures();
 	void renderModel();
-	void GModel::normalMap(std::string fileName);
-	void GModel::normalMap(bool has);
 	std::vector<MyVertexStruct> modelVertices; //This holds the vertices.
 	std::wstring modelTextureFilepath; //THis holds the texture's file-path
 	//struct with vertex positions held by FbxDawg
-	void load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext); //<-- Loads the model. Means that modelLoader is called.
+	void load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath); //<-- Loads the model. Means that modelLoader is called.
 	DirectX::XMMATRIX objectWorldMatrix;
 };
 

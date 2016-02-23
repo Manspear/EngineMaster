@@ -190,7 +190,7 @@ void Engine::Render()
 		gDeviceContext->GSSetConstantBuffers(1, 1, &modelList[bufferCounter].modelConstantBuffer);
 
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
-		gDeviceContext->PSSetShaderResources(0, 1, modelList[bufferCounter].modelTextureView);
+		gDeviceContext->PSSetShaderResources(0, this->modelList->getNumberOfTextures(), modelList[bufferCounter].modelTextureView);
 
 		gDeviceContext->IASetVertexBuffers(0, 1, &modelList[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
 
@@ -226,7 +226,7 @@ void Engine::Update() {
 	input->getKeyboardState();
 	input->GetMouseLoc();
 
-	if (input->keyState[DIK_LALT])
+	if (input->keyState[DIK_LCONTROL])
 	{
 		camera->rotate(XAXIS, input->mouseX*MOUSE_SENSITIVITY*dt);
 		camera->rotate(YAXIS, -input->mouseY*MOUSE_SENSITIVITY*dt);
@@ -341,12 +341,12 @@ void Engine::InitializeModels() {
 	this->numberOfModels = 5;
 	this->modelList = new GModel[numberOfModels];
 
-	this->modelList[0].load(".\\ItsBoxxyTextured.fbx", gDevice, gDeviceContext, false);
-	this->modelList[1].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext, false);
-	this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext, false);
+	this->modelList[0].load(".\\ItsBoxxyTextured.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
+	this->modelList[1].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
+	this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
 	//this->modelList[3].load(".\\itsBoxxy", gDevice);
-	this->modelList[3].load(".\\erect.fbx", gDevice, gDeviceContext, true);
-	this->modelList[4].load(".\\slak.fbx", gDevice, gDeviceContext, true);
+	//this->modelList[3].load(".\\erect.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", NULL);
+	//this->modelList[4].load(".\\slak.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", NULL);
 	
 
 	modelList[0].setPosition(XMFLOAT4(2, 0, 0, 1), gDeviceContext);
