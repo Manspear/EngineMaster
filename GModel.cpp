@@ -3,6 +3,7 @@
 
 GModel::GModel()
 {
+
 	this->objectWorldMatrix = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
 }
 
@@ -11,12 +12,14 @@ GModel::~GModel()
 	//modelVertexBuffer->Release(); //This gets released...Somewhere.
 	//modelTextureView[0]->Release();
 	//modelTextureView[1]->Release();
+
+
 }
 void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext)
 {
 	//For this to work, we'll need our own world matrix, which we've got created in the GModel constructor.
 	XMMATRIX translation = XMMatrixTranslation(position.x, position.y, position.z);
-	translation = XMMatrixTranspose(translation); 
+	translation = XMMatrixTranspose(translation);
 	XMMATRIX identity = XMMatrixIdentity();
 	identity = XMMatrixTranspose(identity);
 	objectWorldMatrix = identity * translation; //multiply transposed matrix with transposed matrix --> result is transposed (I think)
@@ -40,7 +43,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	this->modelVertices = modelLoader.modelVertexList; 
 	this->modelTextureFilepath = modelLoader.textureFilepath;
 
-	D3D11_BUFFER_DESC bufferDesc;
+	D3D11_BUFFER_DESC bufferDesc; 
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -77,12 +80,34 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	ID3D11ShaderResourceView * Texture;
 	CoInitialize(NULL);
 	//Need to have this be part of the Render-looping-through-objects-loop. That is: not having modelList[0]
-	hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);//wstring äger functionen c_str som är en getFucntion till wchar_t* som finns redan
-	hr = DirectX::CreateWICTextureFromFile(gDevice, L"./Images/normal_map.jpg", NULL, &modelTextureView[1]);
-	//(d3d11DeviceInterface, d3d11DeviceContextInterface, L"test.bmp", 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0, &pTex2D, NULL);
+	if (hasNormal)
+	{
+		hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);
+		hr = DirectX::CreateWICTextureFromFile(gDevice, L"./Images/normal_map.jpg", NULL, &modelTextureView[1]);
+	}else{
+		hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);//wstring äger functionen c_str som är en getFucntion till wchar_t* som finns redan
+		hr = DirectX::CreateWICTextureFromFile(gDevice, L"./Images/normal_map.jpg", NULL, &modelTextureView[1]);
+		//(d3d11DeviceInterface, d3d11DeviceContextInterface, L"test.bmp", 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0, &pTex2D, NULL);
+	}
 	#pragma endregion 
 }; 
 
+
+
+int GModel::getNumberOfTextures()
+{
+	return 0;
+}
+
+void GModel::normalMap(bool has)
+{
+
+}
+
+void GModel::normalMap(std::string FileName)
+{
+
+}
 
 void GModel::renderModel()
 {

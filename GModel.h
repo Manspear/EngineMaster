@@ -4,13 +4,15 @@
 #include "FbxDawg.h"
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <string>
 
 using namespace DirectX;
+
 
 class GModel
 {
 private:
-	
+
 public:
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
@@ -19,10 +21,13 @@ public:
 	~GModel();
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
-	ID3D11ShaderResourceView* modelTextureView[2]; //texture and normal map
+	ID3D11ShaderResourceView* modelTextureView[2]; //texture then normal map
 	//share projection and view, but have different world-view.
 	void setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext);
+	int getNumberOfTextures();
 	void renderModel();
+	void GModel::normalMap(std::string fileName);
+	void GModel::normalMap(bool has);
 	std::vector<MyVertexStruct> modelVertices; //This holds the vertices.
 	std::wstring modelTextureFilepath; //THis holds the texture's file-path
 	//struct with vertex positions held by FbxDawg

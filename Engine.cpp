@@ -190,7 +190,7 @@ void Engine::Render()
 		gDeviceContext->GSSetConstantBuffers(1, 1, &modelList[bufferCounter].modelConstantBuffer);
 
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
-		gDeviceContext->PSSetShaderResources(0, 2, modelList[bufferCounter].modelTextureView);
+		gDeviceContext->PSSetShaderResources(0, 1, modelList[bufferCounter].modelTextureView);
 
 		gDeviceContext->IASetVertexBuffers(0, 1, &modelList[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
 
@@ -338,17 +338,21 @@ void Engine::InitializeCamera()
 
 void Engine::InitializeModels() {
 	//Here create the dynamic GModel-Array:
-	this->numberOfModels = 3;
+	this->numberOfModels = 5;
 	this->modelList = new GModel[numberOfModels];
 
-	this->modelList[0].load(".\\ItsBoxxyTextured.fbx", gDevice, gDeviceContext);
-	this->modelList[1].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
-	this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext);
+	this->modelList[0].load(".\\ItsBoxxyTextured.fbx", gDevice, gDeviceContext, false);
+	this->modelList[1].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext, false);
+	this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext, false);
 	//this->modelList[3].load(".\\itsBoxxy", gDevice);
+	this->modelList[3].load(".\\erect.fbx", gDevice, gDeviceContext, true);
+	this->modelList[4].load(".\\slak.fbx", gDevice, gDeviceContext, true);
+	
 
 	modelList[0].setPosition(XMFLOAT4(2, 0, 0, 1), gDeviceContext);
 	modelList[1].setPosition(XMFLOAT4(0, 0, 2, 1), gDeviceContext);
-	
+	modelList[3].setPosition(XMFLOAT4(-14, 0, 1, 1), gDeviceContext);
+	modelList[4].setPosition(XMFLOAT4(-7, 0, 1, 1), gDeviceContext);
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
