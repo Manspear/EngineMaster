@@ -169,7 +169,7 @@ void DCM::BuildCubeFaceCamera(float x, float y, float z, float w)
 	//cubeMap_targets[5] = new GCamera(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1));// -Z
 }
 
-void DCM::DrawScene(ID3D11DeviceContext *gDeviceContext)
+void DCM::DrawScene(GCamera *mCubeMapCamera, bool answer)
 {
 	ID3D11RenderTargetView* renderTargets[1];
 
@@ -181,8 +181,18 @@ void DCM::DrawScene(ID3D11DeviceContext *gDeviceContext)
 	{
 		gDeviceContext->ClearRenderTargetView(mDynamicCubeMapRTV[i], reinterpret_cast<const float*>(&Colors::Silver));//fortsätt läsa sid 486
 		gDeviceContext->ClearDepthStencilView(mDynamicCubeMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		gDeviceContext->ClearDepthStencilView(mDynamicCubeMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+		//Bind cube map face as render target
+		renderTargets[0] = mDynamicCubeMapRTV[i];
+		gDeviceContext->OMSetRenderTargets(1, renderTargets, mDynamicCubeMapDSV);
 
+		//Draw the scene with exception of the center sphere, to this cube map face
+		//DrawScene(mCubeMapCamera[i], false);
 	}
+	// Restore old viewport and render targets.
+	gDeviceContext->RSSetViewports(1,&mScreenViewport);
+	renderTargets[0] = mDynamicCubeMapRTV;
+
 
 }
