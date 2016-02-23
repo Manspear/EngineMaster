@@ -26,8 +26,6 @@ public:
 	void setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext);
 	XMMATRIX getPosition();
 	void renderModel();
-	void GModel::normalMap(std::string fileName);
-	void GModel::normalMap(bool has);
 	std::vector<MyVertexStruct> modelVertices; //This holds the vertices.
 	std::wstring modelTextureFilepath; //THis holds the texture's file-path
 	//struct with vertex positions held by FbxDawg
