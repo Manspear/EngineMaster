@@ -126,7 +126,70 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	#pragma endregion 
 }; 
 
+void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext)
+{
+	modelLoader.loadModels(fbxFilePath);
+	//Note: Doing this may cause problems according to Martin, since it's vector = vector
+	this->modelVertices = modelLoader.modelVertexList;
+	this->modelTextureFilepath = modelLoader.textureFilepath;
+#pragma region VertexBuffer
+	D3D11_BUFFER_DESC bufferDesc;
+	memset(&bufferDesc, 0, sizeof(bufferDesc));
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = modelVertices.size()*sizeof(MyVertexStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem = modelVertices.data();
 
+	gDevice->CreateBuffer(&bufferDesc, &data, &modelVertexBuffer);
+#pragma endregion VertexBuffer
+
+#pragma region IndexBuffer
+
+
+
+	this->IndexArray = new int[modelVertices.size()]; //Making it 123... for now. change will be made.
+	for (int i = 0; i < modelVertices.size(); i++)
+		IndexArray[i] = i;
+
+
+	D3D11_BUFFER_DESC indexBufferDesc;
+	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
+
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = modelVertices.size()*sizeof(int); //This is the size of the Index Array. 23 feb
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA indexInitData;
+	indexInitData.pSysMem = this->IndexArray;
+
+	gDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &this->modelIndexBuffer);
+#pragma endregion IndexBuffer
+#pragma region ConstantBuffer
+	//Creating constant buffer holding only worldmatrix
+	//D3D11_BUFFER_DESC bufferDesc;
+	memset(&bufferDesc, 0, sizeof(bufferDesc));
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.ByteWidth = sizeof(modelWorldStruct);
+	gDevice->CreateBuffer(&bufferDesc, NULL, &modelConstantBuffer);
+
+	//Giving the constant buffer data
+
+	D3D11_MAPPED_SUBRESOURCE gMappedResource;
+	modelWorldStruct* dataPtr;
+
+	gDeviceContext->Map(modelConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
+	dataPtr = (modelWorldStruct*)gMappedResource.pData;
+
+	dataPtr->worldMatrix = objectWorldMatrix;
+
+	gDeviceContext->Unmap(modelConstantBuffer, NULL);
+#pragma endregion ConstantBuffer
+};
 
 int GModel::getNumberOfTextures()
 {

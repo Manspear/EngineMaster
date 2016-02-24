@@ -15,6 +15,7 @@ private:
 	DirectX::XMMATRIX objectWorldMatrix;
 	int noOfTextures;
 	FbxDawg modelLoader;
+	bool blendShape;
 public:
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
@@ -36,7 +37,7 @@ public:
 	int getNumberOfTextures();
 	//struct with vertex positions held by FbxDawg
 	void load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath); //<-- Loads the model. Means that modelLoader is called.
-
+	void loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext);
 };
 
 //>>>>>>>USER MANUAL<<<<<<<<<<<
@@ -50,13 +51,6 @@ public:
 //then a draw()-call is initialized, the number of vertices drawn equal to the number of vertices in
 //the GModel::modelVertices - vector - array.
 
-
-class BlendShape : public GModel
-{
-	
-
-
-};
 
 
 
