@@ -244,8 +244,9 @@ void FbxDawg::loadModels(const char* filePath)
 
 								UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
 								//printf("%d \n", UVIndex);
+								IndexVector[polyIndexCounter].uvIndex = UVIndex;
 								temp.uvIndex = UVIndex;
-								printf("%d\n", UVIndex);
+								//printf("%d\n", UVIndex);
 								//here i am print here
 								//temp.uvCoord[0] = UVValue[0];
 								//temp.uvCoord[1] = UVValue[1];
