@@ -200,6 +200,7 @@ void Engine::Render()
 	//the shadow volume that is behind the last object that it hits, and positive values 
 	//represent the shadow-volume before it hits it's "object-that-will-get-shadow-on-it".
 
+
 	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);

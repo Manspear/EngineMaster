@@ -1,7 +1,13 @@
 #include "DCM.h"
 
+DCM::DCM(GCamera &camera)
+{
+	this->camera = camera;
+
+}
 DCM::DCM()
 {
+
 }
 
 DCM::~DCM()
@@ -202,7 +208,7 @@ void DCM::DrawScene()
 	gDeviceContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
 	gDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	DrawScene2(mCam,true);
+	DrawScene2(camera,true);
 	mSwapChain->Present(0, 0);
 
 
