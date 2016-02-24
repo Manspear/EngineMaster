@@ -194,8 +194,10 @@ void Engine::Render()
 		gDeviceContext->PSSetShaderResources(0, listOfModels[bufferCounter].getNumberOfTextures(), listOfModels[bufferCounter].modelTextureView);
 
 		gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
+		gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-		gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
+		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
+		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0); //Uses indexbuffer
 	}
 }
 

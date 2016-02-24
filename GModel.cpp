@@ -46,7 +46,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
 	this->modelVertices = modelLoader.modelVertexList; 
 	this->modelTextureFilepath = modelLoader.textureFilepath;
-
+#pragma region VertexBuffer
 	D3D11_BUFFER_DESC bufferDesc; 
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -56,7 +56,32 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	data.pSysMem = modelVertices.data();
 
 	gDevice->CreateBuffer(&bufferDesc, &data, &modelVertexBuffer);
+#pragma endregion VertexBuffer
+
+#pragma region IndexBuffer
 	
+
+
+	this->IndexArray= new int[modelVertices.size() ]; //Making it 123... for now. change will be made.
+	for (int i = 0; i < modelVertices.size(); i++)
+		IndexArray[i] = i;
+
+
+	D3D11_BUFFER_DESC indexBufferDesc;
+	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
+
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = modelVertices.size()*sizeof(int); //This is the size of the Index Array. 23 feb
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA indexInitData;
+	indexInitData.pSysMem = this->IndexArray;
+
+	gDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &this->modelIndexBuffer);
+#pragma endregion IndexBuffer
+#pragma region ConstantBuffer
 	//Creating constant buffer holding only worldmatrix
 	//D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
@@ -77,7 +102,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	dataPtr->worldMatrix = objectWorldMatrix;
 
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
-
+#pragma endregion ConstantBuffer
 	//Import from File
 	#pragma region
 	HRESULT hr;
