@@ -30,6 +30,7 @@ struct MyVertexStruct
 struct MyIndexStruct
 {
 	int posIndex, norIndex, uvIndex;
+	char* UVSetName;
 };
 #pragma endregion structs
 

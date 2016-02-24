@@ -66,6 +66,7 @@ void FbxDawg::loadModels(const char* filePath)
 			std::vector<MyUV> MyUVVector; //contain all UVs
 			std::vector<MyIndexStruct> IndexVector;
 			IndexVector.resize(36);
+			static int offsets[] = { 1, 0, 2 }; //offset made because directX is left-hand-oriented else the textures and vertices get mirrored.
 			
 #pragma region >>VERTEX POSITION<<
 			
@@ -80,9 +81,9 @@ void FbxDawg::loadModels(const char* filePath)
 					int controlPointIndex = mesh->GetPolygonVertex(t, v);//
 					
 					MyPosition vertex;
-					vertex.pos[0] = (float)Vertices[controlPointIndex].mData[0];
-					vertex.pos[1] = (float)Vertices[controlPointIndex].mData[1];
-					vertex.pos[2] = (float)Vertices[controlPointIndex].mData[2];
+					//vertex.pos[0] = (float)Vertices[controlPointIndex].mData[0];
+					//vertex.pos[1] = (float)Vertices[controlPointIndex].mData[1];
+					//vertex.pos[2] = (float)Vertices[controlPointIndex].mData[2];
 					vertex.vertexIndex = controlPointIndex;
 					//printf("%d \n", controlPointIndex);
 					IndexVector[vertexPassed].posIndex = controlPointIndex;
@@ -178,14 +179,15 @@ void FbxDawg::loadModels(const char* filePath)
 
 			FbxStringList UVSetNameList;  //Gets all UV sets
 			mesh->GetUVSetNames(UVSetNameList);
-
+			FbxGeometryElementUV* UVElement;
+			
 			int UvPassed = 0;
 			for (int UVSetIndex = 0; UVSetIndex < UVSetNameList.GetCount(); UVSetIndex++) //Iterates through the UV sets. Meshes can have multiple textures, every texture got a different UV set
 			{
 
 				char* UVSetName = UVSetNameList.GetStringAt(UVSetIndex); //Gets name of the current UV set
 
-				FbxGeometryElementUV* UVElement = mesh->GetElementUV(UVSetName); //Gets the UV-element with the name that UVSetName holds
+				UVElement = mesh->GetElementUV(UVSetName); //Gets the UV-element with the name that UVSetName holds
 
 				if (!UVElement) {
 					continue;
@@ -218,7 +220,9 @@ void FbxDawg::loadModels(const char* filePath)
 
 							UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
 							IndexVector[UvPassed].uvIndex = UVIndex;
-							temp.uvIndex = UVIndex;
+							IndexVector[UvPassed].UVSetName = UVSetName;
+							printf("%s\n", IndexVector[UvPassed].UVSetName);
+							//temp.uvIndex = UVIndex;
 							//printf("%d \n", UVIndex);
 
 							temp.uvCoord[0] = UVValue[0];
@@ -228,6 +232,7 @@ void FbxDawg::loadModels(const char* filePath)
 						}
 					}
 				}
+				
 				else if (UVElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
 				{
 					int polyIndexCounter = 0;
@@ -248,11 +253,13 @@ void FbxDawg::loadModels(const char* filePath)
 								temp.uvIndex = UVIndex;
 								//printf("%d\n", UVIndex);
 								//here i am print here
-								//temp.uvCoord[0] = UVValue[0];
-								//temp.uvCoord[1] = UVValue[1];
-								//MyUVVector.push_back(temp);
+								temp.uvCoord[0] = UVValue[0];
+								temp.uvCoord[1] = UVValue[1];
+								MyUVVector.push_back(temp);
 
+								printf("%s\n", IndexVector[UvPassed].UVSetName);
 								IndexVector[polyIndex].uvIndex = UVIndex;
+								IndexVector[polyIndex].UVSetName = UVSetName;
 
 								polyIndexCounter++;
 							}
@@ -291,13 +298,40 @@ void FbxDawg::loadModels(const char* filePath)
 			MyVertexStruct tempVertex;
 			MyIndexStruct tempIndex;
 
+			FbxVector4 normals;
+			//MyPosition vertex;
 			for (int i=0; i < 36; i++)
 			{
+
 				printf("pos %d nor %d uv %d\n", IndexVector[i].posIndex, IndexVector[i].norIndex, IndexVector[i].uvIndex);
+				normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
+				tempVertex.norX = normals[0];
+				tempVertex.norY = normals[1];
+				tempVertex.norY = normals[2];
+				
+				tempVertex.x = (float)Vertices[IndexVector[i].posIndex].mData[0];
+				tempVertex.y = (float)Vertices[IndexVector[i].posIndex].mData[1];
+				tempVertex.z = (float)Vertices[IndexVector[i].posIndex].mData[2];
+
+
+				
+				
+
+				UVElement = mesh->GetElementUV(IndexVector[i].UVSetName);
+
+				//tempVertex.u = uv
+				//tempVertex.v = UVValue.mData[1];
+
+				FbxVector2 UVValue = UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
+				tempVertex.u = UVValue.mData[0];
+				tempVertex.v = UVValue.mData[1];
+
+				this->modelVertexList.push_back(tempVertex);
+
 			}
+			
 		
 
-				static int offsets[] = { 1, 0, 2 }; //offset made because directX is left-hand-oriented else the textures and vertices get mirrored.
 				
 #pragma endregion >>ASSEMBLY OF VERTEXDATA<<
 				
