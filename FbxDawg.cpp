@@ -65,10 +65,12 @@ void FbxDawg::loadModels(const char* filePath)
 			std::vector<MyNormal> MyNormalVector; //contains all normals.
 			std::vector<MyUV> MyUVVector; //contain all UVs
 			std::vector<MyIndexStruct> IndexVector;
+			IndexVector.resize(36);
 			
 #pragma region >>VERTEX POSITION<<
 			
 			FbxVector4* Vertices = mesh->GetControlPoints();//
+			int vertexPassed=0;
 			for (int t = 0; t < mesh->GetPolygonCount(); t++)//
 			{
 				int totalVertices = mesh->GetPolygonSize(t);//
@@ -82,7 +84,11 @@ void FbxDawg::loadModels(const char* filePath)
 					vertex.pos[1] = (float)Vertices[controlPointIndex].mData[1];
 					vertex.pos[2] = (float)Vertices[controlPointIndex].mData[2];
 					vertex.vertexIndex = controlPointIndex;
+					//printf("%d \n", controlPointIndex);
+					IndexVector[vertexPassed].posIndex = controlPointIndex;
+					
 					MyPositionVector.push_back(vertex);
+					vertexPassed++;
 				}
 			}
 #pragma endregion >>VERTEX POSITION<<
@@ -113,13 +119,14 @@ void FbxDawg::loadModels(const char* filePath)
 						}
 
 						normals = normalElement->GetDirectArray().GetAt(normalIndex);
-
+						//printf("Normalindex: %d ", normalIndex);
+						IndexVector[indexByPolygonVertex].norIndex = normalIndex;
 						temp.normalIndex = normalIndex;
-						temp.direction[0] = normals[0];
-						temp.direction[1] = normals[1];
-						temp.direction[2] = normals[2];
+						//temp.direction[0] = normals[0];
+						//temp.direction[1] = normals[1];
+						//temp.direction[2] = normals[2];
 
-						MyNormalVector.push_back(temp);
+						//MyNormalVector.push_back(temp);
 
 
 						indexByPolygonVertex++;
@@ -136,6 +143,7 @@ void FbxDawg::loadModels(const char* filePath)
 
 				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
 				{
+					
 					int polygonSize = mesh->GetPolygonSize(polygonIndex);
 
 					for (int i = 0; i < polygonSize; i++) //For every vertex in triangle
@@ -150,13 +158,14 @@ void FbxDawg::loadModels(const char* filePath)
 						}
 						//printf("%d \n",normalIndex);
 						normals = normalElement->GetDirectArray().GetAt(normalIndex);
-
+						//printf("Normalindex: %d ", normalIndex);
+						IndexVector[indexByPolygonVertex].norIndex=normalIndex;
 						temp.normalIndex = normalIndex;
-						temp.direction[0] = normals[0];
-						temp.direction[1] = normals[1];
-						temp.direction[2] = normals[2];
+						//temp.direction[0] = normals[0];
+						//temp.direction[1] = normals[1];
+						//temp.direction[2] = normals[2];
 
-						MyNormalVector.push_back(temp);
+						//MyNormalVector.push_back(temp);
 
 						indexByPolygonVertex++;
 					}
@@ -164,13 +173,13 @@ void FbxDawg::loadModels(const char* filePath)
 			}
 			#pragma endregion >> NORMALS <<
 
-			#pragma region >>UV<<
+#pragma region >>UV<<
 
 
 			FbxStringList UVSetNameList;  //Gets all UV sets
 			mesh->GetUVSetNames(UVSetNameList);
 
-
+			int UvPassed = 0;
 			for (int UVSetIndex = 0; UVSetIndex < UVSetNameList.GetCount(); UVSetIndex++) //Iterates through the UV sets. Meshes can have multiple textures, every texture got a different UV set
 			{
 
@@ -208,12 +217,14 @@ void FbxDawg::loadModels(const char* filePath)
 							int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyVertIndex) : polyVertIndex;//<----questionmark and : again...
 
 							UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
+							IndexVector[UvPassed].uvIndex = UVIndex;
 							temp.uvIndex = UVIndex;
-							printf("%d \n", UVIndex);
+							//printf("%d \n", UVIndex);
 
 							temp.uvCoord[0] = UVValue[0];
 							temp.uvCoord[1] = UVValue[1];
 							MyUVVector.push_back(temp);
+							UvPassed++;
 						}
 					}
 				}
@@ -232,11 +243,15 @@ void FbxDawg::loadModels(const char* filePath)
 								int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyIndexCounter) : polyIndexCounter;
 
 								UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
-								printf("%d \n", UVIndex);
-								temp.uvIndex = UVIndex;//here i am print here
-								temp.uvCoord[0] = UVValue[0];
-								temp.uvCoord[1] = UVValue[1];
-								MyUVVector.push_back(temp);
+								//printf("%d \n", UVIndex);
+								temp.uvIndex = UVIndex;
+								printf("%d\n", UVIndex);
+								//here i am print here
+								//temp.uvCoord[0] = UVValue[0];
+								//temp.uvCoord[1] = UVValue[1];
+								//MyUVVector.push_back(temp);
+
+								IndexVector[polyIndex].uvIndex = UVIndex;
 
 								polyIndexCounter++;
 							}
@@ -269,49 +284,21 @@ void FbxDawg::loadModels(const char* filePath)
 				}
 			}
 
-			#pragma endregion >>UV<<
+#pragma endregion >>UV<<
 
-			#pragma region >>ASSEMBLY OF VERTEXDATA<<
+#pragma region >>ASSEMBLY OF VERTEXDATA<<
 			MyVertexStruct tempVertex;
 			MyIndexStruct tempIndex;
 
-			/*for (int triangleCounter = 0; triangleCounter < MyPositionVector.size(); triangleCounter += 3)
+			for (int i=0; i < 36; i++)
 			{
+				printf("pos %d nor %d uv %d\n", IndexVector[i].posIndex, IndexVector[i].norIndex, IndexVector[i].uvIndex);
+			}
+		
 
 				static int offsets[] = { 1, 0, 2 }; //offset made because directX is left-hand-oriented else the textures and vertices get mirrored.
-				for (int i = 0; i < 3; ++i)
-				{
-					int vertex = triangleCounter + offsets[i];
-
-					tempVertex.x = MyPositionVector[vertex].pos[0];//v x
-					tempVertex.y = MyPositionVector[vertex].pos[1];//v y
-					tempVertex.z = -MyPositionVector[vertex].pos[2];//v z
-
-					tempVertex.norX = MyNormalVector[vertex].direction[0];//v x
-					tempVertex.norY = MyNormalVector[vertex].direction[1];//v y
-					tempVertex.norZ = -MyNormalVector[vertex].direction[2];//v z
-
-					tempVertex.u = MyUVVector[vertex].uvCoord[0];// u
-					tempVertex.v = 1 - MyUVVector[vertex].uvCoord[1];// v
-
-
-					this->modelVertexList.push_back(tempVertex);
-				}
-
-				for (int i = 0; i < 3; ++i) //get this triangles indices
-				{
-					int vertex = triangleCounter + offsets[i];
-
-					tempIndex.posIndex = MyPositionVector[vertex].vertexIndex;
-					tempIndex.norIndex = MyNormalVector[vertex].normalIndex;
-					tempIndex.uvIndex = MyUVVector[vertex].uvIndex;
-
-					//printf("The indices: %d %d %d\n", tempIndex.posIndex, tempIndex.norIndex, tempIndex.uvIndex);
-
-					this->myIndexList.push_back(tempIndex); //vi samlar alla triangelns indices och lägger dem i listan myIndexList
-				}
-			}*/
-			#pragma endregion >>ASSEMBLY OF VERTEXDATA<<
+				
+#pragma endregion >>ASSEMBLY OF VERTEXDATA<<
 				
 
 
