@@ -48,7 +48,12 @@ public:
 //the GModel::modelVertices - vector - array.
 
 
+class BlendShape : public GModel
+{
+	
 
+
+};
 
 
 
