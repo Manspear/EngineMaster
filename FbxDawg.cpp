@@ -60,26 +60,23 @@ void FbxDawg::loadModels(const char* filePath)
 			FbxMesh* mesh = (FbxMesh*)FbxChildNode->GetNodeAttribute();//we are sure that there was a mesh that went through, we get the content of the node.
 			#pragma endregion init+ isMesh
 
-			//These three vectors are reset each loop iteration, that way they
-			//1. Don't get unneccesarily big and 
-			//2. they get looped through correctly in the ">>>ASSEMBLY<<<"-stage. 
+			
 			std::vector<MyPosition> MyPositionVector; //containes all vertex positions
 			std::vector<MyNormal> MyNormalVector; //contains all normals.
 			std::vector<MyUV> MyUVVector; //contain all UVs
-
-			#pragma region >>VERTEX POSITION<<
+			std::vector<MyIndexStruct> IndexVector;
 			
-			FbxVector4* Vertices = mesh->GetControlPoints();//... and amongs that contet, lays the vertices. 
-
+#pragma region >>VERTEX POSITION<<
 			
-
-			for (int t = 0; t < mesh->GetPolygonCount(); t++)//...  for every polygon in the polygonCount tex 25 000 tris or 40 000 quads
+			FbxVector4* Vertices = mesh->GetControlPoints();//
+			for (int t = 0; t < mesh->GetPolygonCount(); t++)//
 			{
-				int totalVertices = mesh->GetPolygonSize(t);//.... Here we get the amount of vertices in the polygon. A polygon can be a QUAD or a TRI.
-				assert(totalVertices == 3);//....	(We ONLY work with TRIS)
-				for (int v = 0; v < totalVertices; v++)//... for every vertex in that TRI
+				int totalVertices = mesh->GetPolygonSize(t);//
+				assert(totalVertices == 3);//
+				for (int v = 0; v < totalVertices; v++)//
 				{
-					int controlPointIndex = mesh->GetPolygonVertex(t, v);//t = TRI, v = VERTEX, går igenom en vertex i taget för en triangel.
+					int controlPointIndex = mesh->GetPolygonVertex(t, v);//
+					
 					MyPosition vertex;
 					vertex.pos[0] = (float)Vertices[controlPointIndex].mData[0];
 					vertex.pos[1] = (float)Vertices[controlPointIndex].mData[1];
@@ -88,7 +85,7 @@ void FbxDawg::loadModels(const char* filePath)
 					MyPositionVector.push_back(vertex);
 				}
 			}
-			#pragma endregion >>VERTEX POSITION<<
+#pragma endregion >>VERTEX POSITION<<
 
 			#pragma region >>NORMALS<<
 
@@ -99,7 +96,7 @@ void FbxDawg::loadModels(const char* filePath)
 				int indexByPolygonVertex = 0;
 				MyNormal temp;
 
-				//normals of polygonvertex are stored per polygon. Meaning that even if a cube's got 8 vertices, it'll get one normal per vertex per triangle. So instead of 24 normals, we'll get 36.
+				
 				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
 				{
 					int polygonSize = mesh->GetPolygonSize(polygonIndex);
@@ -151,7 +148,7 @@ void FbxDawg::loadModels(const char* filePath)
 						if (normalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
 							normalIndex = normalElement->GetIndexArray().GetAt(indexByPolygonVertex);
 						}
-
+						//printf("%d \n",normalIndex);
 						normals = normalElement->GetDirectArray().GetAt(normalIndex);
 
 						temp.normalIndex = normalIndex;
@@ -212,6 +209,8 @@ void FbxDawg::loadModels(const char* filePath)
 
 							UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
 							temp.uvIndex = UVIndex;
+							printf("%d \n", UVIndex);
+
 							temp.uvCoord[0] = UVValue[0];
 							temp.uvCoord[1] = UVValue[1];
 							MyUVVector.push_back(temp);
@@ -233,8 +232,8 @@ void FbxDawg::loadModels(const char* filePath)
 								int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyIndexCounter) : polyIndexCounter;
 
 								UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
-
-								temp.uvIndex = UVIndex;//here i am
+								printf("%d \n", UVIndex);
+								temp.uvIndex = UVIndex;//here i am print here
 								temp.uvCoord[0] = UVValue[0];
 								temp.uvCoord[1] = UVValue[1];
 								MyUVVector.push_back(temp);
@@ -276,7 +275,7 @@ void FbxDawg::loadModels(const char* filePath)
 			MyVertexStruct tempVertex;
 			MyIndexStruct tempIndex;
 
-			for (int triangleCounter = 0; triangleCounter < MyPositionVector.size(); triangleCounter += 3)
+			/*for (int triangleCounter = 0; triangleCounter < MyPositionVector.size(); triangleCounter += 3)
 			{
 
 				static int offsets[] = { 1, 0, 2 }; //offset made because directX is left-hand-oriented else the textures and vertices get mirrored.
@@ -311,183 +310,18 @@ void FbxDawg::loadModels(const char* filePath)
 
 					this->myIndexList.push_back(tempIndex); //vi samlar alla triangelns indices och lägger dem i listan myIndexList
 				}
-			}
+			}*/
 			#pragma endregion >>ASSEMBLY OF VERTEXDATA<<
 				
 
 
 
-			makeIndexList(MyPositionVector, MyNormalVector, MyUVVector);
+			
 		}//for mesh
 	}//if fbxnode
 	Fbx_Importer->Destroy(); //need be destroyed at the end
 
 } //end of loader
-
-
-
-void FbxDawg::makeIndexList(std::vector<MyPosition> MyPositionVector,std::vector<MyNormal> MyNormalVector, std::vector<MyUV> MyUVVector)
-{
-
-
-/*
-#pragma region Vertex
-	std::vector <MyPosition> unorderedPosList, orderedPosList;
-	bool indexAlreadyExists = false;
-
-	for (int PosVecCount = 0; PosVecCount < MyPositionVector.size(); PosVecCount++) //per position of MyPositionVector/ per vertex.
-	{
-		for (int unorderedPosCount = 0; unorderedPosCount <unorderedPosList.size(); unorderedPosCount++) //loop through unorderedNorList to check if it already contains the index of MyPositionVector[NormVecCount ]
-		{
-			if (unorderedPosList[unorderedPosCount].vertexIndex == MyPositionVector[PosVecCount].vertexIndex) //checks if the index is already saved 
-			{
-				indexAlreadyExists = true;
-				continue;
-			}
-		}
-		if (indexAlreadyExists == false)
-			unorderedPosList.push_back(MyPositionVector[PosVecCount]);
-
-		indexAlreadyExists = false; //reset
-	}
-
-
-
-
-	int searchedIndex = 0;
-
-	while (orderedPosList.size() != unorderedPosList.size()) //until all in unorderdered are in ordered.
-	{
-		for (int ordCount = 0; ordCount < unorderedPosList.size(); ordCount++)
-		{
-			if (unorderedPosList[ordCount].vertexIndex == searchedIndex)
-			{
-				orderedPosList.push_back(unorderedPosList[ordCount]);
-				searchedIndex++;
-				//printf("Pos: %d \n", unorderedPosList[ordCount].vertexIndex);
-				continue;
-			}
-		}
-	}
-#pragma endregion Vertex
-
-#pragma region make normallist
-	std::vector <MyNormal> unorderedNorList, orderedNorList;
-
-	for (int NorVecCount = 0; NorVecCount < MyNormalVector.size(); NorVecCount++) //per position of MyPositionVector/ per vertex.
-	{
-		for (int unorderedNorCount = 0; unorderedNorCount < unorderedNorList.size(); unorderedNorCount++) //loop through unorderedNorList to check if it already contains the index of MyPositionVector[NormVecCount ]
-		{
-			if (unorderedNorList[unorderedNorCount].normalIndex == MyNormalVector[NorVecCount].normalIndex) //checks if the index is already saved 
-			{
-				indexAlreadyExists = true;
-				//printf("kill\n");
-				continue;
-			}
-		}
-		if (indexAlreadyExists == false)
-			unorderedNorList.push_back(MyNormalVector[NorVecCount]); //if the index isn't present in unorderedNorList, add the vertex.
-
-		indexAlreadyExists = false; //reset
-	}
-
-
-
-
-	searchedIndex = 0;
-	while (orderedNorList.size() != unorderedNorList.size()) //until all in unorderdered are in ordered.
-	{
-		for (int ordCount = 0; ordCount < unorderedNorList.size(); ordCount++)
-		{
-			if (unorderedNorList[ordCount].normalIndex == searchedIndex)
-			{
-				orderedNorList.push_back(unorderedNorList[ordCount]);
-				searchedIndex++;
-				//printf("Normal: %d \n", unorderedNorList[ordCount].normalIndex);
-				continue;
-			}
-		}
-	}
-
-#pragma endregion MakeNormalList
-
-#pragma region make UVList
-
-	std::vector <MyUV> unorderedUVList, orderedUVList; //Getting all of the vertices with unique indices.
-													   //bool indexAlreadyExists = false;
-
-	for (int UVecCount = 0; UVecCount < MyUVVector.size(); UVecCount++) //per position of MyPositionVector/ per vertex.
-	{
-		for (int unorderedUVCount = 0; unorderedUVCount < unorderedUVList.size(); unorderedUVCount++) //loop through unorderedNorList to check if it already contains the index of MyPositionVector[NormVecCount ]
-		{
-			if (unorderedNorList[unorderedUVCount].normalIndex == MyUVVector[UVecCount].uvIndex) //checks if the index is already saved 
-			{
-				indexAlreadyExists = true;
-				continue;
-			}
-		}
-		if (indexAlreadyExists == false)
-			unorderedUVList.push_back(MyUVVector[UVecCount]); //if the index isn't present in unorderedNorList, add the vertex.
-
-		indexAlreadyExists = false; //reset
-	}
-
-
-	//Now that we've isolated the values needed, we need to order them by index.
-
-	searchedIndex = 0;
-	while (orderedUVList.size() != unorderedUVList.size()) //until all in unorderdered are in ordered.
-	{
-		for (int ordCount = 0; ordCount < unorderedUVList.size(); ordCount++)
-		{
-			if (unorderedUVList[ordCount].uvIndex == searchedIndex)
-			{
-				orderedUVList.push_back(unorderedUVList[ordCount]);
-				searchedIndex++;
-				//printf(" UV: %d \n", unorderedUVList[ordCount].uvIndex);
-				continue;
-			}
-		}
-	}
-#pragma endregion MakeUVList
-
-
-
-
-	MyVertexStruct tempVertex;
-
-
-	/*this->modelVertexList.clear();
-
-	for (int i = 0; i < myIndexList.size(); i++)
-	{
-	printf("The indices: %d %d %d\n", myIndexList[i].posIndex, myIndexList[i].norIndex, myIndexList[i].uvIndex);
-	//printf("%d", orderedPosList[i].pos[0] );
-	tempVertex.x = orderedPosList[myIndexList[i].posIndex].pos[0];
-	tempVertex.y = orderedPosList[myIndexList[i].posIndex].pos[1];
-	tempVertex.z = orderedPosList[myIndexList[i].posIndex].pos[2];
-
-	tempVertex.norX = orderedNorList[myIndexList[i].norIndex].direction[0];
-	tempVertex.norY = orderedNorList[myIndexList[i].norIndex].direction[1];
-	tempVertex.norZ = orderedNorList[myIndexList[i].norIndex].direction[2];
-
-	tempVertex.u = orderedUVList[myIndexList[i].uvIndex].uvCoord[0];
-	tempVertex.v = orderedUVList[myIndexList[i].uvIndex].uvCoord[1];
-	//printf("pos: %f \n", tempVertex.y);
-	this->modelVertexList.push_back(tempVertex);
-	//printf("%f \n",modelVertexList[i].x);
-	}*/
-
-	/*this->myIndexList.clear();
-
-	indexArray = new int[modelVertexList.size()];
-	for (int i = 0; i < modelVertexList.size(); i++)
-	{
-		indexArray[i] = i;
-
-	}*/
-}
-
 
 
 
