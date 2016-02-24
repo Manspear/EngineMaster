@@ -12,10 +12,16 @@ class DCM
 {
 
 private:
-	GCamera *mCubeMapCamera[6];
+	GCamera mCubeMapCamera[6];
+	
+
 	D3D11_VIEWPORT mScreenViewport;
 	D3D11_VIEWPORT mCubeMapViewport;
+	ID3D11RenderTargetView* mRenderTargetView;
+	ID3D11DepthStencilView* mDepthStencilView;
+	IDXGISwapChain* mSwapChain;
 	
+	ID3D11ShaderResourceView* mDynamicCubeMapSRV;
 	ID3D11RenderTargetView* mDynamicCubeMapRTV[6];
 	ID3D11DepthStencilView* mDynamicCubeMapDSV;
 	ID3D11DeviceContext *gDeviceContext;
@@ -26,7 +32,8 @@ public:
 	~DCM();
 	void Dynamic_Cube_Map(ID3D11Device *gDevice);
 	void BuildCubeFaceCamera(float x, float y, float z, float w);
-	void DrawScene(GCamera *mCubeMapCamera, bool answer);
+	void DrawScene();
+	void DrawScene2(const GCamera& mCubeMapCamera, bool drawCenterSphere);
 };
 #endif
 

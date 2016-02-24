@@ -10,7 +10,8 @@
 
 #pragma endregion
 
-Engine::Engine(){
+Engine::Engine()
+{
 	//EMPTY
 }
 
@@ -23,7 +24,6 @@ Engine::~Engine()
 
 void Engine::CreateShaders()
 {
-
 	//create vertex shader
 	ID3DBlob* pVS = nullptr;
 	D3DCompileFromFile(
@@ -92,16 +92,6 @@ void Engine::CreateShaders()
 
 void Engine::CreateTriangleData()
 {
-	//struct TriangleVertex
-	//{
-	//	float x, y, z;
-	//	float u, v;
-	//};
-	//TriangleVertex poop[6]{
-	//
-	//};
-
-	//std::vector<MyVertexStruct> templist = fbxobj->modelVertexList;
 	int shit = fbxobj->modelVertexList.size();
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
@@ -117,34 +107,6 @@ void Engine::CreateTriangleData()
 void Engine::CreateTexture() {
 	#pragma region // Import texture from memory
 	HRESULT hr;
-	/*D3D11_TEXTURE2D_DESC textureDesc;
-	ZeroMemory(&textureDesc, sizeof(textureDesc));
-	textureDesc.Width = BTH_IMAGE_WIDTH;
-	textureDesc.Height = BTH_IMAGE_HEIGHT;
-	textureDesc.MipLevels = textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	textureDesc.MiscFlags = 0;
-	textureDesc.CPUAccessFlags = 0;
-
-	ID3D11Texture2D *pTexture = NULL;
-	D3D11_SUBRESOURCE_DATA data;
-	ZeroMemory(&data, sizeof(data));
-	data.pSysMem = (void*)BTH_IMAGE_DATA;
-	data.SysMemPitch = BTH_IMAGE_WIDTH * 4 * sizeof(char);
-	hr = gDevice->CreateTexture2D(&textureDesc, &data, &pTexture);
-	//resource view description
-	D3D11_SHADER_RESOURCE_VIEW_DESC resViewDesc;
-	ZeroMemory(&resViewDesc, sizeof(resViewDesc));
-	resViewDesc.Format = textureDesc.Format;
-	resViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	resViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
-	resViewDesc.Texture2D.MostDetailedMip = 0;
-
-	gDevice->CreateShaderResourceView(pTexture, &resViewDesc, &gTextureView);
-	pTexture->Release();*/
 	
 	#pragma endregion
 
@@ -251,8 +213,6 @@ void Engine::Render()
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	gDeviceContext->IASetInputLayout(gVertexLayout);
 
-
-
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 	gDeviceContext->Draw(fbxobj->modelVertexList.size(), 0);
 }
@@ -264,11 +224,6 @@ void Engine::Update() {
 	XMFLOAT4X4 worldMatrix;
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
-
-	//JESPER FIXA MINNESLÄCKAN 3 rader framåt
-	//FbxDawg fbxobj;
-	//std::vector<FbxDawg::MyPosition>* MyPositionVector = new std::vector<FbxDawg::MyPosition>;
-	//fbxobj.loadModels(MyPositionVector);
 
 	//world matrix
 	static float radianRotation = 0.00;
@@ -312,49 +267,6 @@ void Engine::Update() {
 
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
-
-//LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-//{
-//	switch (message)
-//	{
-//	case WM_DESTROY:
-//		PostQuitMessage(0);
-//		break;
-//	}
-//
-//	return DefWindowProc(hWnd, message, wParam, lParam);
-//}
-//
-//HWND InitWindow(HINSTANCE hInstance)
-//{
-//	WNDCLASSEX wcex = { 0 };
-//	wcex.cbSize = sizeof(WNDCLASSEX);
-//	wcex.style = CS_HREDRAW | CS_VREDRAW;
-//	wcex.lpfnWndProc = WndProc;
-//	wcex.hInstance = hInstance;
-//	wcex.lpszClassName = L"BTH_D3D_DEMO";
-//	if (!RegisterClassEx(&wcex))
-//		return false;
-//
-//	RECT rc = { 0, 0, 640, 480 };
-//	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-//
-//	HWND handle = CreateWindow(
-//		L"BTH_D3D_DEMO",
-//		L"BTH Direct3D Demo",
-//		WS_OVERLAPPEDWINDOW,
-//		CW_USEDEFAULT,
-//		CW_USEDEFAULT,
-//		rc.right - rc.left,
-//		rc.bottom - rc.top,
-//		nullptr,
-//		nullptr,
-//		hInstance,
-//		nullptr);
-//
-//	return handle;
-//}
-
 
 HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 {
@@ -461,6 +373,5 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	CreateConstantBuffer();
 
 	InitializeCamera();
-
 
 }

@@ -60,7 +60,7 @@ void DCM::Dynamic_Cube_Map(ID3D11Device *gDevice)
 	// Create a shader resource view to the cube map.
 	//
 
-	ID3D11ShaderResourceView* mDynamicCubeMapSRV;
+	
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = texDesc.Format;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
@@ -159,7 +159,7 @@ void DCM::BuildCubeFaceCamera(float x, float y, float z, float w)
 	//void GCamera::LookAt(XMFLOAT4 pos, XMFLOAT4 target, XMFLOAT4 worldUp)
 	for (int i = 0; i < 6; ++i)
 	{
-		mCubeMapCamera[i]->LookAt(center, targets[i], ups[i]);
+		mCubeMapCamera[i].LookAt(center, targets[i], ups[i]);
 	}
 	//cubeMap_targets[0] = new GCamera(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1));// X
 	//cubeMap_targets[1] = new GCamera(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1));// -X
@@ -169,7 +169,7 @@ void DCM::BuildCubeFaceCamera(float x, float y, float z, float w)
 	//cubeMap_targets[5] = new GCamera(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1));// -Z
 }
 
-void DCM::DrawScene(GCamera *mCubeMapCamera, bool answer)
+void DCM::DrawScene()
 {
 	ID3D11RenderTargetView* renderTargets[1];
 
@@ -188,11 +188,32 @@ void DCM::DrawScene(GCamera *mCubeMapCamera, bool answer)
 		gDeviceContext->OMSetRenderTargets(1, renderTargets, mDynamicCubeMapDSV);
 
 		//Draw the scene with exception of the center sphere, to this cube map face
-		//DrawScene(mCubeMapCamera[i], false);
+		DrawScene2(mCubeMapCamera[i], false);
 	}
 	// Restore old viewport and render targets.
 	gDeviceContext->RSSetViewports(1,&mScreenViewport);
-	renderTargets[0] = mDynamicCubeMapRTV;
+	renderTargets[0] = mRenderTargetView;
+	gDeviceContext->OMSetRenderTargets(1, renderTargets, mDepthStencilView);
+	
+	//Have hardware generate lower mipmap levels of cube map.
+	gDeviceContext->GenerateMips(mDynamicCubeMapSRV);
+
+	//Now draw the scene as normal
+	gDeviceContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
+	gDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	DrawScene2(mCam,true);
+	mSwapChain->Present(0, 0);
+
+
+
+}
+
+//vi använder const för att göra det extra tydligt att vi inte ska ändra på något hos kameraobjektet i drawscene2 funktionen
+//vi  använder & för att skicka in det faktiska objektet och inte en kopia utav det. För det vore onödigt med tanke på minnet
+void DCM::DrawScene2(const GCamera& mCubeMapCamera, bool drawCenterSphere)
+{
+
 
 
 }
