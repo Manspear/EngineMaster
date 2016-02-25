@@ -74,7 +74,7 @@ void FbxDawg::loadModels(const char* filePath)
 				for (int v = 0; v < totalVertices; v++)//
 				{
 					int controlPointIndex = mesh->GetPolygonVertex(t, v);
-					IndexVector[(t*totalVertices) + offsets[v]].posIndex = controlPointIndex; //adding index to a list. To create vertex later.
+					IndexVector[(t*3) + offsets[v]].posIndex = controlPointIndex; //adding index to a list. To create vertex later.
 					
 				}
 				
