@@ -40,8 +40,6 @@ XMMATRIX GModel::getPosition() {
 //struct with vertex positions held by FbxDawg
 void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath) //give diffuse/normal NULL for default values
 {
-	
-
 	modelLoader.loadModels(fbxFilePath);
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
 	this->modelVertices = modelLoader.modelVertexList; 
@@ -60,11 +58,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 
 #pragma region IndexBuffer
 	
-
-
-	this->IndexArray= new int[modelVertices.size() ]; //Making it 123... for now. change will be made.
-	for (int i = 0; i < modelVertices.size(); i++)
-		IndexArray[i] = i;
+	this->IndexArray= modelLoader.FBXIndexArray; //Making it 123... for now. change will be made.
 
 
 	D3D11_BUFFER_DESC indexBufferDesc;

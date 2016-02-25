@@ -15,7 +15,7 @@ FbxDawg::~FbxDawg()
 
 void FbxDawg::loadModels(const char* filePath)
 {
-	#pragma region init+ isMesh
+	
 	FbxManager *SDK_Manager = FbxManager::Create(); //FbxManager is an object that handles memory management.
 
 	FbxIOSettings *ios = FbxIOSettings::Create(SDK_Manager, IOSROOT); //FbxIOSettings is a collection of import/export options
@@ -45,8 +45,6 @@ void FbxDawg::loadModels(const char* filePath)
 
 		for (int i = 0; i < FBXRootNode->GetChildCount(); i++)//For each and every childnode...
 		{
-
-
 			FbxNode* FbxChildNode = FBXRootNode->GetChild(i);//... initialize the childnode we are at
 			
 			if (FbxChildNode->GetNodeAttribute() == NULL)//... and then check if its an unset attribute. (special node that we dont want now) (A NULL node attribute is set by calling function FbxNode::SetNodeAttribute() with a NULL pointer)
@@ -58,49 +56,39 @@ void FbxDawg::loadModels(const char* filePath)
 				continue;// Go to next child/mesh
 
 			FbxMesh* mesh = (FbxMesh*)FbxChildNode->GetNodeAttribute();//we are sure that there was a mesh that went through, we get the content of the node.
-			#pragma endregion init+ isMesh
 
-			
 			std::vector<MyPosition> MyPositionVector; //containes all vertex positions
 			std::vector<MyNormal> MyNormalVector; //contains all normals.
 			std::vector<MyUV> MyUVVector; //contain all UVs
-			std::vector<MyIndexStruct> IndexVector;
-			IndexVector.resize(36);
+			std::vector<MyIndexStruct> IndexVector; IndexVector.resize(mesh->GetPolygonCount() * 3);
+			
 			static int offsets[] = { 1, 0, 2 }; //offset made because directX is left-hand-oriented else the textures and vertices get mirrored.
 			
 #pragma region >>VERTEX POSITION<<
 			
-			FbxVector4* Vertices = mesh->GetControlPoints();//
-			int vertexPassed=0;
 			for (int t = 0; t < mesh->GetPolygonCount(); t++)//
 			{
 				int totalVertices = mesh->GetPolygonSize(t);//
 				assert(totalVertices == 3);//
+
 				for (int v = 0; v < totalVertices; v++)//
 				{
-					int controlPointIndex = mesh->GetPolygonVertex(t, v);//
+					int controlPointIndex = mesh->GetPolygonVertex(t, v);
+					IndexVector[(t*totalVertices) + offsets[v]].posIndex = controlPointIndex; //adding index to a list. To create vertex later.
 					
-					MyPosition vertex;
-					
-					vertex.vertexIndex = controlPointIndex;
-					IndexVector[vertexPassed].posIndex = controlPointIndex;
-					
-					MyPositionVector.push_back(vertex);
-					vertexPassed++;
 				}
+				
 			}
 #pragma endregion >>VERTEX POSITION<<
 
-			#pragma region >>NORMALS<<
-
+#pragma region >>NORMALS<<
+			FbxVector4 normals;
 			FbxGeometryElementNormal* normalElement = mesh->GetElementNormal();
 			if (normalElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
 			{
 				FbxVector4 normals;
 				int indexByPolygonVertex = 0;
-				MyNormal temp;
-
-				
+			
 				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
 				{
 					int polygonSize = mesh->GetPolygonSize(polygonIndex);
@@ -117,11 +105,7 @@ void FbxDawg::loadModels(const char* filePath)
 						}
 
 						normals = normalElement->GetDirectArray().GetAt(normalIndex);
-						IndexVector[indexByPolygonVertex].norIndex = normalIndex;
-						temp.normalIndex = normalIndex;
-						
-
-
+						IndexVector[polygonIndex * 3 + offsets[i]].norIndex = normalIndex;
 						indexByPolygonVertex++;
 					}
 				}
@@ -132,7 +116,7 @@ void FbxDawg::loadModels(const char* filePath)
 			{
 				FbxVector4 normals;
 				int indexByPolygonVertex = 0;
-				MyNormal temp;
+				
 
 				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
 				{
@@ -151,15 +135,13 @@ void FbxDawg::loadModels(const char* filePath)
 						}
 						
 						normals = normalElement->GetDirectArray().GetAt(normalIndex);
-						
-						IndexVector[indexByPolygonVertex].norIndex=normalIndex;
-						temp.normalIndex = normalIndex;
-
+						IndexVector[polygonIndex * 3 + offsets[i]].norIndex = normalIndex;
 						indexByPolygonVertex++;
 					}
+					
 				}
 			}
-			#pragma endregion >> NORMALS <<
+#pragma endregion >> NORMALS <<
 
 #pragma region >>UV<<
 
@@ -189,8 +171,6 @@ void FbxDawg::loadModels(const char* filePath)
 
 				int polyCount = mesh->GetPolygonCount();
 
-				MyUV temp; //fill this, and then append to MyNormalVector
-
 				int polyIndexCounter = 0;
 				if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
 				{
@@ -207,10 +187,11 @@ void FbxDawg::loadModels(const char* filePath)
 							int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyVertIndex) : polyVertIndex;//<----questionmark and : again...
 
 							UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
-							IndexVector[polyIndexCounter].uvIndex = UVIndex;
-							IndexVector[polyIndexCounter].UVSetName = UVSetName;
-							IndexVector[polyIndexCounter].UVElement = UVElement;
+							IndexVector[polyIndex*polySize + offsets[vertIndex]].uvIndex = UVIndex;
+							IndexVector[polyIndex*polySize + offsets[vertIndex]].UVSetName = UVSetName;
+							IndexVector[polyIndex*polySize + offsets[vertIndex]].UVElement = UVElement;
 							polyIndexCounter++;
+							
 						}
 					}
 				}
@@ -221,27 +202,29 @@ void FbxDawg::loadModels(const char* filePath)
 					for (int polyIndex = 0; polyIndex < polyCount; ++polyIndex)
 					{
 						int polySize = mesh->GetPolygonSize(polyIndex);
-						for (int vertexIndex = 0; vertexIndex < polySize; ++vertexIndex)
+						for (int vertIndex = 0; vertIndex < polySize; ++vertIndex)
 						{
 							if (polyIndexCounter < indexCount)
 							{
 								FbxVector2 UVValue;
-								//The UV index depends on the reference-mode
 								int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyIndexCounter) : polyIndexCounter;
 
 								UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
-								//printf("%d \n", UVIndex);
 								
-								IndexVector[polyIndexCounter].uvIndex = UVIndex;
-								IndexVector[polyIndexCounter].UVSetName = UVSetName;
-								IndexVector[polyIndexCounter].UVElement = UVElement;
+								IndexVector[polyIndex*polySize+ offsets[vertIndex]].uvIndex = UVIndex;
+								IndexVector[polyIndex*polySize+ offsets[vertIndex]].UVSetName = UVSetName;
+								IndexVector[polyIndex*polySize+ offsets[vertIndex]].UVElement = UVElement;
 								polyIndexCounter++;
+							
 							}
+							
 						}
 					}
 				}
+				
 
 			}//uv
+
 			 //>>>>>>>>>Texture filepath<<<<<<<<<<<<<<<
 			int material_Count = mesh->GetSrcObjectCount<FbxSurfaceMaterial>();
 			int matCount = FbxChildNode->GetMaterialCount();
@@ -271,33 +254,30 @@ void FbxDawg::loadModels(const char* filePath)
 #pragma region >>ASSEMBLY OF VERTEXDATA<<
 			MyVertexStruct tempVertex;
 			MyIndexStruct tempIndex;
-
-			FbxVector4 normals;
-			//MyPosition vertex;
-			
+			FbxVector4* Vertices = mesh->GetControlPoints();
 			for (int i=0; i < 36; i++)
 			{
 
-				printf("pos %d nor %d uv %d\n", IndexVector[i].posIndex, IndexVector[i].norIndex, IndexVector[i].uvIndex);
+				//printf("pos %d nor %d uv %d\n", IndexVector[i].posIndex, IndexVector[i].norIndex, IndexVector[i].uvIndex);
 				normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
 				tempVertex.norX = normals[0];
 				tempVertex.norY = normals[1];
-				tempVertex.norY = normals[2];
+				tempVertex.norZ = (-1)*(normals[2]);
 				
 				tempVertex.x = (float)Vertices[IndexVector[i].posIndex].mData[0];
 				tempVertex.y = (float)Vertices[IndexVector[i].posIndex].mData[1];
-				tempVertex.z = (float)Vertices[IndexVector[i].posIndex].mData[2];
+				tempVertex.z = -1*((float)Vertices[IndexVector[i].posIndex].mData[2]);
 
 
 				FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
 				tempVertex.u = UVValue.mData[0];
-				tempVertex.v = UVValue.mData[1];
+				tempVertex.v = 1-UVValue.mData[1];
 
 				this->modelVertexList.push_back(tempVertex);
 
 			}
 			
-		
+			this->makeIndexList();
 
 				
 #pragma endregion >>ASSEMBLY OF VERTEXDATA<<
@@ -311,6 +291,13 @@ void FbxDawg::loadModels(const char* filePath)
 	Fbx_Importer->Destroy(); //need be destroyed at the end
 
 } //end of loader
+
+void FbxDawg::makeIndexList()
+{
+	this->FBXIndexArray = new int[this->modelVertexList.size()]; //Making it 123... for now. change will be made.
+	for (int i = 0; i < this->modelVertexList.size(); i++)
+		FBXIndexArray[i] = i;
+}
 
 
 
