@@ -81,11 +81,8 @@ void FbxDawg::loadModels(const char* filePath)
 					int controlPointIndex = mesh->GetPolygonVertex(t, v);//
 					
 					MyPosition vertex;
-					//vertex.pos[0] = (float)Vertices[controlPointIndex].mData[0];
-					//vertex.pos[1] = (float)Vertices[controlPointIndex].mData[1];
-					//vertex.pos[2] = (float)Vertices[controlPointIndex].mData[2];
+					
 					vertex.vertexIndex = controlPointIndex;
-					//printf("%d \n", controlPointIndex);
 					IndexVector[vertexPassed].posIndex = controlPointIndex;
 					
 					MyPositionVector.push_back(vertex);
@@ -120,14 +117,9 @@ void FbxDawg::loadModels(const char* filePath)
 						}
 
 						normals = normalElement->GetDirectArray().GetAt(normalIndex);
-						//printf("Normalindex: %d ", normalIndex);
 						IndexVector[indexByPolygonVertex].norIndex = normalIndex;
 						temp.normalIndex = normalIndex;
-						//temp.direction[0] = normals[0];
-						//temp.direction[1] = normals[1];
-						//temp.direction[2] = normals[2];
-
-						//MyNormalVector.push_back(temp);
+						
 
 
 						indexByPolygonVertex++;
@@ -157,16 +149,11 @@ void FbxDawg::loadModels(const char* filePath)
 						if (normalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
 							normalIndex = normalElement->GetIndexArray().GetAt(indexByPolygonVertex);
 						}
-						//printf("%d \n",normalIndex);
+						
 						normals = normalElement->GetDirectArray().GetAt(normalIndex);
-						//printf("Normalindex: %d ", normalIndex);
+						
 						IndexVector[indexByPolygonVertex].norIndex=normalIndex;
 						temp.normalIndex = normalIndex;
-						//temp.direction[0] = normals[0];
-						//temp.direction[1] = normals[1];
-						//temp.direction[2] = normals[2];
-
-						//MyNormalVector.push_back(temp);
 
 						indexByPolygonVertex++;
 					}
@@ -181,7 +168,7 @@ void FbxDawg::loadModels(const char* filePath)
 			mesh->GetUVSetNames(UVSetNameList);
 			FbxGeometryElementUV* UVElement;
 			
-			int UvPassed = 0;
+			
 			for (int UVSetIndex = 0; UVSetIndex < UVSetNameList.GetCount(); UVSetIndex++) //Iterates through the UV sets. Meshes can have multiple textures, every texture got a different UV set
 			{
 
@@ -204,6 +191,7 @@ void FbxDawg::loadModels(const char* filePath)
 
 				MyUV temp; //fill this, and then append to MyNormalVector
 
+				int polyIndexCounter = 0;
 				if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
 				{
 					for (int polyIndex = 0; polyIndex < polyCount; polyIndex++)
@@ -219,23 +207,17 @@ void FbxDawg::loadModels(const char* filePath)
 							int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyVertIndex) : polyVertIndex;//<----questionmark and : again...
 
 							UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
-							IndexVector[UvPassed].uvIndex = UVIndex;
-							IndexVector[UvPassed].UVSetName = UVSetName;
-							printf("%s\n", IndexVector[UvPassed].UVSetName);
-							//temp.uvIndex = UVIndex;
-							//printf("%d \n", UVIndex);
-
-							temp.uvCoord[0] = UVValue[0];
-							temp.uvCoord[1] = UVValue[1];
-							MyUVVector.push_back(temp);
-							UvPassed++;
+							IndexVector[polyIndexCounter].uvIndex = UVIndex;
+							IndexVector[polyIndexCounter].UVSetName = UVSetName;
+							IndexVector[polyIndexCounter].UVElement = UVElement;
+							polyIndexCounter++;
 						}
 					}
 				}
 				
 				else if (UVElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
 				{
-					int polyIndexCounter = 0;
+					
 					for (int polyIndex = 0; polyIndex < polyCount; ++polyIndex)
 					{
 						int polySize = mesh->GetPolygonSize(polyIndex);
@@ -249,18 +231,10 @@ void FbxDawg::loadModels(const char* filePath)
 
 								UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
 								//printf("%d \n", UVIndex);
+								
 								IndexVector[polyIndexCounter].uvIndex = UVIndex;
-								temp.uvIndex = UVIndex;
-								//printf("%d\n", UVIndex);
-								//here i am print here
-								temp.uvCoord[0] = UVValue[0];
-								temp.uvCoord[1] = UVValue[1];
-								MyUVVector.push_back(temp);
-
-								printf("%s\n", IndexVector[UvPassed].UVSetName);
-								IndexVector[polyIndex].uvIndex = UVIndex;
-								IndexVector[polyIndex].UVSetName = UVSetName;
-
+								IndexVector[polyIndexCounter].UVSetName = UVSetName;
+								IndexVector[polyIndexCounter].UVElement = UVElement;
 								polyIndexCounter++;
 							}
 						}
@@ -300,6 +274,7 @@ void FbxDawg::loadModels(const char* filePath)
 
 			FbxVector4 normals;
 			//MyPosition vertex;
+			
 			for (int i=0; i < 36; i++)
 			{
 
@@ -314,15 +289,7 @@ void FbxDawg::loadModels(const char* filePath)
 				tempVertex.z = (float)Vertices[IndexVector[i].posIndex].mData[2];
 
 
-				
-				
-
-				UVElement = mesh->GetElementUV(IndexVector[i].UVSetName);
-
-				//tempVertex.u = uv
-				//tempVertex.v = UVValue.mData[1];
-
-				FbxVector2 UVValue = UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
+				FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
 				tempVertex.u = UVValue.mData[0];
 				tempVertex.v = UVValue.mData[1];
 

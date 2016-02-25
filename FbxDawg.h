@@ -31,6 +31,7 @@ struct MyIndexStruct
 {
 	int posIndex, norIndex, uvIndex;
 	char* UVSetName;
+	FbxGeometryElementUV* UVElement;
 };
 #pragma endregion structs
 
