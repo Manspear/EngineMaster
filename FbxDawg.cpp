@@ -320,7 +320,7 @@ void FbxDawg::makeIndexList()
 			}
 
 
-		}//printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
+		}printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
 		
 		
 	
