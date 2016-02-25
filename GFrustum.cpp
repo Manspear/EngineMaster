@@ -12,13 +12,22 @@ GFrustum::~GFrustum()
 
 }
 
-void GFrustum::updateFrustum(const DirectX::XMMATRIX &cameraProjection)
+void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection)
 {
-	//Now make the Frustum follow the camera. How? By creating it with the camera's Frustum!
 	frustum.CreateFromMatrix(frustum, cameraProjection);
-	
-	//collision-detection. Loop through bounding-boxes, doing the frustum.contains(boundingbox)
-	//To create a bounding-box you need: a list of vertices that the bounding-box need to include. 
-	//The list is of type XMFLOAT3
+}
+
+bool GFrustum::isCollision(const DirectX::BoundingBox& modelBBox)
+{
+	//Now make the Frustum follow the camera. How? By creating it with the camera's Frustum!	
+	//Uhmm...What to do when a collision has actually happened? I cannot do it here, can I? No. I gotta send back a bool to main, and there handle the "model-ignoring"	
+	//will do it by simply not sending the vertex-buffer of the object into the vertex shader. Smart. Easy. Good thinking. Proud of you.
+	bool collision = false;
+	if (frustum.Contains(modelBBox) == 2) { 
+		//the values returned by the Contains()-function mean: 0 = not intersection 1 = intersects 2 = contains
+		//read for return value meaning: https://msdn.microsoft.com/en-us/library/microsoft.directx_sdk.directxcollision.containmenttype(v=vs.85).aspx
+		collision = true;
+	}
+	return collision;
 }
 

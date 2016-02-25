@@ -18,6 +18,8 @@
 
 #include "GModelList.h"
 
+#include "GFrustum.h"
+
 #include <vector>
 
 #ifndef ENGINE_H
@@ -77,6 +79,7 @@ public:
 	GModelList * modelListObject = nullptr;
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
+	GFrustum * cullingFrustum = nullptr;
 	
 
 	FbxDawg * fbxobj = nullptr;
@@ -107,6 +110,7 @@ public:
 	void Update();
 	void Clean(); //releases all resources
 	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once
+	void InitializeFrustum();
 	void InitializeCamera();
 	void InitializeModels();
 	HRESULT CreateDirect3DContext(HWND wndHandle);

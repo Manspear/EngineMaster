@@ -4,6 +4,8 @@
 #include "FbxDawg.h"
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <DirectXCollision.h>
+#include <stdlib.h>
 
 using namespace DirectX;
 
@@ -19,6 +21,7 @@ public:
 	~GModel();
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
+	BoundingBox modelBBox;
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture and normal map
 	//share projection and view, but have different world-view.
 	void setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext);

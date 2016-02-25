@@ -1,5 +1,8 @@
 #include "GModel.h"
 #include "WICTextureLoader.h"
+#include <limits>
+#include <algorithm>
+
 
 GModel::GModel()
 {
@@ -30,6 +33,9 @@ void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDevic
 	dataPtr->worldMatrix = objectWorldMatrix;
 
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
+
+	//multiply the BoundingBox with the object's new world-matrix, so that it follows the object. 
+	modelBBox.Transform(modelBBox, (FXMMATRIX)objectWorldMatrix);
 };
 XMMATRIX GModel::getPosition() {
 	return this->objectWorldMatrix;
@@ -84,6 +90,33 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	hr = DirectX::CreateWICTextureFromFile(gDevice, L"./Images/normal_map.jpg", NULL, &modelTextureView[1]);
 	//(d3d11DeviceInterface, d3d11DeviceContextInterface, L"test.bmp", 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0, &pTex2D, NULL);
 	#pragma endregion 
+
+	//Loop through the vertices to get the minimum and maximum xyz values to be used for BBox creation.
+	//This could be done in the FbxDawg-class, to spare the CPU when you're loading lots of models.
+	float maxX = FLT_MIN;
+	float minX = FLT_MAX;
+	float maxY = FLT_MIN;
+	float minY = FLT_MAX;
+	float maxZ = FLT_MIN;
+	float minZ = FLT_MAX;
+	for (int i = 0; i < modelVertices.size(); i++) {
+		//get the min and max values of the model
+		if (maxX < modelVertices[i].x)
+			maxX = modelVertices[i].x;
+		if (minX > modelVertices[i].x)
+			minX = modelVertices[i].x;
+		if (maxY < modelVertices[i].y)
+			maxY = modelVertices[i].y;
+		if (minY > modelVertices[i].y)
+			minY = modelVertices[i].y;
+		if (maxZ < modelVertices[i].y)
+			maxZ = modelVertices[i].y;
+	}
+	//make two XMVECTORs that we will create the bbox from
+	XMVECTOR maxPos = XMVectorSet(maxX, maxY, maxZ, 1); 
+	XMVECTOR minPos = XMVectorSet(minX, minY, minZ, 1);
+	modelBBox.CreateFromPoints(modelBBox, maxPos, minPos);
+	//now when I've got a bbox, I can do collision-detection with the frustum in the Frustum-class.
 }; 
 
 

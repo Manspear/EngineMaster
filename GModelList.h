@@ -14,5 +14,6 @@ public:
 
 private:
 	GModel * modelList = nullptr;
+	BoundingBox * boundingBoxList = nullptr;
 };
 

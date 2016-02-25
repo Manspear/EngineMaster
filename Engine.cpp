@@ -184,9 +184,12 @@ void Engine::Render()
 
 	GModel* listOfModels = modelListObject->getModelList();
 
+	cullingFrustum->updateFrustumPos(camera->getProjMatrix());
+
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
-		
+		if (cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
+			continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
 
 		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
 
@@ -331,6 +334,7 @@ void Engine::Clean() {
 	delete camera;
 	delete input;
 	delete modelListObject;
+	delete cullingFrustum;
 	//delete[] loops through the new-objects in the array, and deletes them!
 }
 void Engine::InitializeCamera()
@@ -363,6 +367,14 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	CreateConstantBuffer();
 
 	InitializeCamera();
+
+	InitializeFrustum();
+
+}
+
+void Engine::InitializeFrustum()
+{
+	cullingFrustum = new(GFrustum);
 }
 
 void Engine::renderText(std::wstring text)

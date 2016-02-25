@@ -37,9 +37,6 @@ void FbxDawg::loadModels(const char* filePath)
 
 	FbxNode* FBXRootNode = Fbx_Scene->GetRootNode(); // FbxCamera, FbxLight, FbxMesh, etc... elements organized in a hierarchical tree. Root is the mother and by FbxNode::GetChild() we work our way down
 
-
-
-
 	if (FBXRootNode)
 	{
 
