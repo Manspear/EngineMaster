@@ -15,7 +15,7 @@ FbxDawg::~FbxDawg()
 
 void FbxDawg::loadModels(const char* filePath)
 {
-	#pragma region init+ isMesh
+	
 	FbxManager *SDK_Manager = FbxManager::Create(); //FbxManager is an object that handles memory management.
 
 	FbxIOSettings *ios = FbxIOSettings::Create(SDK_Manager, IOSROOT); //FbxIOSettings is a collection of import/export options
@@ -45,8 +45,6 @@ void FbxDawg::loadModels(const char* filePath)
 
 		for (int i = 0; i < FBXRootNode->GetChildCount(); i++)//For each and every childnode...
 		{
-
-
 			FbxNode* FbxChildNode = FBXRootNode->GetChild(i);//... initialize the childnode we are at
 			
 			if (FbxChildNode->GetNodeAttribute() == NULL)//... and then check if its an unset attribute. (special node that we dont want now) (A NULL node attribute is set by calling function FbxNode::SetNodeAttribute() with a NULL pointer)
@@ -58,48 +56,39 @@ void FbxDawg::loadModels(const char* filePath)
 				continue;// Go to next child/mesh
 
 			FbxMesh* mesh = (FbxMesh*)FbxChildNode->GetNodeAttribute();//we are sure that there was a mesh that went through, we get the content of the node.
-			#pragma endregion init+ isMesh
 
-			//These three vectors are reset each loop iteration, that way they
-			//1. Don't get unneccesarily big and 
-			//2. they get looped through correctly in the ">>>ASSEMBLY<<<"-stage. 
 			std::vector<MyPosition> MyPositionVector; //containes all vertex positions
 			std::vector<MyNormal> MyNormalVector; //contains all normals.
 			std::vector<MyUV> MyUVVector; //contain all UVs
-
-			#pragma region >>VERTEX POSITION<<
+			std::vector<MyIndexStruct> IndexVector; IndexVector.resize(mesh->GetPolygonCount() * 3);
 			
-			FbxVector4* Vertices = mesh->GetControlPoints();//... and amongs that contet, lays the vertices. 
-
+			static int offsets[] = { 1, 0, 2 }; //offset made because directX is left-hand-oriented else the textures and vertices get mirrored.
 			
-
-			for (int t = 0; t < mesh->GetPolygonCount(); t++)//...  for every polygon in the polygonCount tex 25 000 tris or 40 000 quads
+#pragma region >>VERTEX POSITION<<
+			
+			for (int t = 0; t < mesh->GetPolygonCount(); t++)//
 			{
-				int totalVertices = mesh->GetPolygonSize(t);//.... Here we get the amount of vertices in the polygon. A polygon can be a QUAD or a TRI.
-				assert(totalVertices == 3);//....	(We ONLY work with TRIS)
-				for (int v = 0; v < totalVertices; v++)//... for every vertex in that TRI
+				int totalVertices = mesh->GetPolygonSize(t);//
+				assert(totalVertices == 3);//
+
+				for (int v = 0; v < totalVertices; v++)//
 				{
-					int controlPointIndex = mesh->GetPolygonVertex(t, v);//t = TRI, v = VERTEX, går igenom en vertex i taget för en triangel.
-					MyPosition vertex;
-					vertex.pos[0] = (float)Vertices[controlPointIndex].mData[0];
-					vertex.pos[1] = (float)Vertices[controlPointIndex].mData[1];
-					vertex.pos[2] = (float)Vertices[controlPointIndex].mData[2];
-					vertex.vertexIndex = controlPointIndex;
-					MyPositionVector.push_back(vertex);
+					int controlPointIndex = mesh->GetPolygonVertex(t, v);
+					IndexVector[(t*3) + offsets[v]].posIndex = controlPointIndex; //adding index to a list. To create vertex later.
+					
 				}
+				
 			}
-			#pragma endregion >>VERTEX POSITION<<
+#pragma endregion >>VERTEX POSITION<<
 
-			#pragma region >>NORMALS<<
-
+#pragma region >>NORMALS<<
+			FbxVector4 normals;
 			FbxGeometryElementNormal* normalElement = mesh->GetElementNormal();
 			if (normalElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
 			{
 				FbxVector4 normals;
 				int indexByPolygonVertex = 0;
-				MyNormal temp;
-
-				//normals of polygonvertex are stored per polygon. Meaning that even if a cube's got 8 vertices, it'll get one normal per vertex per triangle. So instead of 24 normals, we'll get 36.
+			
 				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
 				{
 					int polygonSize = mesh->GetPolygonSize(polygonIndex);
@@ -116,15 +105,7 @@ void FbxDawg::loadModels(const char* filePath)
 						}
 
 						normals = normalElement->GetDirectArray().GetAt(normalIndex);
-
-						temp.normalIndex = normalIndex;
-						temp.direction[0] = normals[0];
-						temp.direction[1] = normals[1];
-						temp.direction[2] = normals[2];
-
-						MyNormalVector.push_back(temp);
-
-
+						IndexVector[polygonIndex * 3 + offsets[i]].norIndex = normalIndex;
 						indexByPolygonVertex++;
 					}
 				}
@@ -135,10 +116,11 @@ void FbxDawg::loadModels(const char* filePath)
 			{
 				FbxVector4 normals;
 				int indexByPolygonVertex = 0;
-				MyNormal temp;
+				
 
 				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
 				{
+					
 					int polygonSize = mesh->GetPolygonSize(polygonIndex);
 
 					for (int i = 0; i < polygonSize; i++) //For every vertex in triangle
@@ -151,35 +133,30 @@ void FbxDawg::loadModels(const char* filePath)
 						if (normalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
 							normalIndex = normalElement->GetIndexArray().GetAt(indexByPolygonVertex);
 						}
-
+						
 						normals = normalElement->GetDirectArray().GetAt(normalIndex);
-
-						temp.normalIndex = normalIndex;
-						temp.direction[0] = normals[0];
-						temp.direction[1] = normals[1];
-						temp.direction[2] = normals[2];
-
-						MyNormalVector.push_back(temp);
-
+						IndexVector[polygonIndex * 3 + offsets[i]].norIndex = normalIndex;
 						indexByPolygonVertex++;
 					}
+					
 				}
 			}
-			#pragma endregion >> NORMALS <<
+#pragma endregion >> NORMALS <<
 
-			#pragma region >>UV<<
+#pragma region >>UV<<
 
 
 			FbxStringList UVSetNameList;  //Gets all UV sets
 			mesh->GetUVSetNames(UVSetNameList);
-
-
+			FbxGeometryElementUV* UVElement;
+			
+			
 			for (int UVSetIndex = 0; UVSetIndex < UVSetNameList.GetCount(); UVSetIndex++) //Iterates through the UV sets. Meshes can have multiple textures, every texture got a different UV set
 			{
 
 				char* UVSetName = UVSetNameList.GetStringAt(UVSetIndex); //Gets name of the current UV set
 
-				FbxGeometryElementUV* UVElement = mesh->GetElementUV(UVSetName); //Gets the UV-element with the name that UVSetName holds
+				UVElement = mesh->GetElementUV(UVSetName); //Gets the UV-element with the name that UVSetName holds
 
 				if (!UVElement) {
 					continue;
@@ -194,8 +171,7 @@ void FbxDawg::loadModels(const char* filePath)
 
 				int polyCount = mesh->GetPolygonCount();
 
-				MyUV temp; //fill this, and then append to MyNormalVector
-
+				int polyIndexCounter = 0;
 				if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
 				{
 					for (int polyIndex = 0; polyIndex < polyCount; polyIndex++)
@@ -211,41 +187,44 @@ void FbxDawg::loadModels(const char* filePath)
 							int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyVertIndex) : polyVertIndex;//<----questionmark and : again...
 
 							UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
-							temp.uvIndex = UVIndex;
-							temp.uvCoord[0] = UVValue[0];
-							temp.uvCoord[1] = UVValue[1];
-							MyUVVector.push_back(temp);
+							IndexVector[polyIndex*polySize + offsets[vertIndex]].uvIndex = UVIndex;
+							IndexVector[polyIndex*polySize + offsets[vertIndex]].UVSetName = UVSetName;
+							IndexVector[polyIndex*polySize + offsets[vertIndex]].UVElement = UVElement;
+							polyIndexCounter++;
+							
 						}
 					}
 				}
+				
 				else if (UVElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
 				{
-					int polyIndexCounter = 0;
+					
 					for (int polyIndex = 0; polyIndex < polyCount; ++polyIndex)
 					{
 						int polySize = mesh->GetPolygonSize(polyIndex);
-						for (int vertexIndex = 0; vertexIndex < polySize; ++vertexIndex)
+						for (int vertIndex = 0; vertIndex < polySize; ++vertIndex)
 						{
 							if (polyIndexCounter < indexCount)
 							{
 								FbxVector2 UVValue;
-								//The UV index depends on the reference-mode
 								int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyIndexCounter) : polyIndexCounter;
 
 								UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
-
-								temp.uvIndex = UVIndex;//here i am
-								temp.uvCoord[0] = UVValue[0];
-								temp.uvCoord[1] = UVValue[1];
-								MyUVVector.push_back(temp);
-
+								
+								IndexVector[polyIndex*polySize+ offsets[vertIndex]].uvIndex = UVIndex;
+								IndexVector[polyIndex*polySize+ offsets[vertIndex]].UVSetName = UVSetName;
+								IndexVector[polyIndex*polySize+ offsets[vertIndex]].UVElement = UVElement;
 								polyIndexCounter++;
+							
 							}
+							
 						}
 					}
 				}
+				
 
 			}//uv
+
 			 //>>>>>>>>>Texture filepath<<<<<<<<<<<<<<<
 			int material_Count = mesh->GetSrcObjectCount<FbxSurfaceMaterial>();
 			int matCount = FbxChildNode->GetMaterialCount();
@@ -270,224 +249,85 @@ void FbxDawg::loadModels(const char* filePath)
 				}
 			}
 
-			#pragma endregion >>UV<<
+#pragma endregion >>UV<<
 
-			#pragma region >>ASSEMBLY OF VERTEXDATA<<
+#pragma region >>ASSEMBLY OF VERTEXDATA<<
 			MyVertexStruct tempVertex;
 			MyIndexStruct tempIndex;
-
-			for (int triangleCounter = 0; triangleCounter < MyPositionVector.size(); triangleCounter += 3)
+			FbxVector4* Vertices = mesh->GetControlPoints();
+			for (int i=0; i < 36; i++)
 			{
 
-				static int offsets[] = { 1, 0, 2 }; //offset made because directX is left-hand-oriented else the textures and vertices get mirrored.
-				for (int i = 0; i < 3; ++i)
-				{
-					int vertex = triangleCounter + offsets[i];
-
-					tempVertex.x = MyPositionVector[vertex].pos[0];//v x
-					tempVertex.y = MyPositionVector[vertex].pos[1];//v y
-					tempVertex.z = -MyPositionVector[vertex].pos[2];//v z
-
-					tempVertex.norX = MyNormalVector[vertex].direction[0];//v x
-					tempVertex.norY = MyNormalVector[vertex].direction[1];//v y
-					tempVertex.norZ = -MyNormalVector[vertex].direction[2];//v z
-
-					tempVertex.u = MyUVVector[vertex].uvCoord[0];// u
-					tempVertex.v = 1 - MyUVVector[vertex].uvCoord[1];// v
+				//printf("pos %d nor %d uv %d\n", IndexVector[i].posIndex, IndexVector[i].norIndex, IndexVector[i].uvIndex);
+				normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
+				tempVertex.norX = normals[0];
+				tempVertex.norY = normals[1];
+				tempVertex.norZ = (-1)*(normals[2]);
+				
+				tempVertex.x = (float)Vertices[IndexVector[i].posIndex].mData[0];
+				tempVertex.y = (float)Vertices[IndexVector[i].posIndex].mData[1];
+				tempVertex.z = -1*((float)Vertices[IndexVector[i].posIndex].mData[2]);
 
 
-					this->modelVertexList.push_back(tempVertex);
-				}
+				FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
+				tempVertex.u = UVValue.mData[0];
+				tempVertex.v = 1-UVValue.mData[1];
 
-				for (int i = 0; i < 3; ++i) //get this triangles indices
-				{
-					int vertex = triangleCounter + offsets[i];
+				this->modelVertexList.push_back(tempVertex);
 
-					tempIndex.posIndex = MyPositionVector[vertex].vertexIndex;
-					tempIndex.norIndex = MyNormalVector[vertex].normalIndex;
-					tempIndex.uvIndex = MyUVVector[vertex].uvIndex;
-
-					//printf("The indices: %d %d %d\n", tempIndex.posIndex, tempIndex.norIndex, tempIndex.uvIndex);
-
-					this->myIndexList.push_back(tempIndex); //vi samlar alla triangelns indices och lägger dem i listan myIndexList
-				}
 			}
-			#pragma endregion >>ASSEMBLY OF VERTEXDATA<<
+			
+			this->makeIndexList();
+
+				
+#pragma endregion >>ASSEMBLY OF VERTEXDATA<<
 				
 
 
 
-			makeIndexList(MyPositionVector, MyNormalVector, MyUVVector);
+			
 		}//for mesh
 	}//if fbxnode
 	Fbx_Importer->Destroy(); //need be destroyed at the end
 
 } //end of loader
 
-
-
-void FbxDawg::makeIndexList(std::vector<MyPosition> MyPositionVector,std::vector<MyNormal> MyNormalVector, std::vector<MyUV> MyUVVector)
+void FbxDawg::makeIndexList()
 {
-
-
-/*
-#pragma region Vertex
-	std::vector <MyPosition> unorderedPosList, orderedPosList;
-	bool indexAlreadyExists = false;
-
-	for (int PosVecCount = 0; PosVecCount < MyPositionVector.size(); PosVecCount++) //per position of MyPositionVector/ per vertex.
+	this->FBXIndexArray = new int[this->modelVertexList.size()]; //Making it 123... for now. change will be made.
+	
+	for (int i = 0; i < this->modelVertexList.size(); i++)
+		FBXIndexArray[i] = i;
+	
+	for (int vertex = 0; vertex< this->modelVertexList.size(); vertex++)
 	{
-		for (int unorderedPosCount = 0; unorderedPosCount <unorderedPosList.size(); unorderedPosCount++) //loop through unorderedNorList to check if it already contains the index of MyPositionVector[NormVecCount ]
+		for (int other = vertex + 1; other < modelVertexList.size(); other++)
 		{
-			if (unorderedPosList[unorderedPosCount].vertexIndex == MyPositionVector[PosVecCount].vertexIndex) //checks if the index is already saved 
+			if (modelVertexList[vertex].norX == modelVertexList[other].norX &&
+				modelVertexList[vertex].norY == modelVertexList[other].norY &&
+				modelVertexList[vertex].norZ == modelVertexList[other].norZ
+				&&
+
+				modelVertexList[vertex].u == modelVertexList[other].u &&
+				modelVertexList[vertex].v == modelVertexList[other].v
+				&&
+
+				modelVertexList[vertex].x == modelVertexList[other].x &&
+				modelVertexList[vertex].y == modelVertexList[other].y &&
+				modelVertexList[vertex].z == modelVertexList[other].z)
 			{
-				indexAlreadyExists = true;
-				continue;
+				FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
 			}
-		}
-		if (indexAlreadyExists == false)
-			unorderedPosList.push_back(MyPositionVector[PosVecCount]);
-
-		indexAlreadyExists = false; //reset
-	}
 
 
-
-
-	int searchedIndex = 0;
-
-	while (orderedPosList.size() != unorderedPosList.size()) //until all in unorderdered are in ordered.
-	{
-		for (int ordCount = 0; ordCount < unorderedPosList.size(); ordCount++)
-		{
-			if (unorderedPosList[ordCount].vertexIndex == searchedIndex)
-			{
-				orderedPosList.push_back(unorderedPosList[ordCount]);
-				searchedIndex++;
-				//printf("Pos: %d \n", unorderedPosList[ordCount].vertexIndex);
-				continue;
-			}
-		}
-	}
-#pragma endregion Vertex
-
-#pragma region make normallist
-	std::vector <MyNormal> unorderedNorList, orderedNorList;
-
-	for (int NorVecCount = 0; NorVecCount < MyNormalVector.size(); NorVecCount++) //per position of MyPositionVector/ per vertex.
-	{
-		for (int unorderedNorCount = 0; unorderedNorCount < unorderedNorList.size(); unorderedNorCount++) //loop through unorderedNorList to check if it already contains the index of MyPositionVector[NormVecCount ]
-		{
-			if (unorderedNorList[unorderedNorCount].normalIndex == MyNormalVector[NorVecCount].normalIndex) //checks if the index is already saved 
-			{
-				indexAlreadyExists = true;
-				//printf("kill\n");
-				continue;
-			}
-		}
-		if (indexAlreadyExists == false)
-			unorderedNorList.push_back(MyNormalVector[NorVecCount]); //if the index isn't present in unorderedNorList, add the vertex.
-
-		indexAlreadyExists = false; //reset
-	}
-
-
-
-
-	searchedIndex = 0;
-	while (orderedNorList.size() != unorderedNorList.size()) //until all in unorderdered are in ordered.
-	{
-		for (int ordCount = 0; ordCount < unorderedNorList.size(); ordCount++)
-		{
-			if (unorderedNorList[ordCount].normalIndex == searchedIndex)
-			{
-				orderedNorList.push_back(unorderedNorList[ordCount]);
-				searchedIndex++;
-				//printf("Normal: %d \n", unorderedNorList[ordCount].normalIndex);
-				continue;
-			}
-		}
-	}
-
-#pragma endregion MakeNormalList
-
-#pragma region make UVList
-
-	std::vector <MyUV> unorderedUVList, orderedUVList; //Getting all of the vertices with unique indices.
-													   //bool indexAlreadyExists = false;
-
-	for (int UVecCount = 0; UVecCount < MyUVVector.size(); UVecCount++) //per position of MyPositionVector/ per vertex.
-	{
-		for (int unorderedUVCount = 0; unorderedUVCount < unorderedUVList.size(); unorderedUVCount++) //loop through unorderedNorList to check if it already contains the index of MyPositionVector[NormVecCount ]
-		{
-			if (unorderedNorList[unorderedUVCount].normalIndex == MyUVVector[UVecCount].uvIndex) //checks if the index is already saved 
-			{
-				indexAlreadyExists = true;
-				continue;
-			}
-		}
-		if (indexAlreadyExists == false)
-			unorderedUVList.push_back(MyUVVector[UVecCount]); //if the index isn't present in unorderedNorList, add the vertex.
-
-		indexAlreadyExists = false; //reset
-	}
-
-
-	//Now that we've isolated the values needed, we need to order them by index.
-
-	searchedIndex = 0;
-	while (orderedUVList.size() != unorderedUVList.size()) //until all in unorderdered are in ordered.
-	{
-		for (int ordCount = 0; ordCount < unorderedUVList.size(); ordCount++)
-		{
-			if (unorderedUVList[ordCount].uvIndex == searchedIndex)
-			{
-				orderedUVList.push_back(unorderedUVList[ordCount]);
-				searchedIndex++;
-				//printf(" UV: %d \n", unorderedUVList[ordCount].uvIndex);
-				continue;
-			}
-		}
-	}
-#pragma endregion MakeUVList
-
-
-
-
-	MyVertexStruct tempVertex;
-
-
-	/*this->modelVertexList.clear();
-
-	for (int i = 0; i < myIndexList.size(); i++)
-	{
-	printf("The indices: %d %d %d\n", myIndexList[i].posIndex, myIndexList[i].norIndex, myIndexList[i].uvIndex);
-	//printf("%d", orderedPosList[i].pos[0] );
-	tempVertex.x = orderedPosList[myIndexList[i].posIndex].pos[0];
-	tempVertex.y = orderedPosList[myIndexList[i].posIndex].pos[1];
-	tempVertex.z = orderedPosList[myIndexList[i].posIndex].pos[2];
-
-	tempVertex.norX = orderedNorList[myIndexList[i].norIndex].direction[0];
-	tempVertex.norY = orderedNorList[myIndexList[i].norIndex].direction[1];
-	tempVertex.norZ = orderedNorList[myIndexList[i].norIndex].direction[2];
-
-	tempVertex.u = orderedUVList[myIndexList[i].uvIndex].uvCoord[0];
-	tempVertex.v = orderedUVList[myIndexList[i].uvIndex].uvCoord[1];
-	//printf("pos: %f \n", tempVertex.y);
-	this->modelVertexList.push_back(tempVertex);
-	//printf("%f \n",modelVertexList[i].x);
-	}*/
-
-	/*this->myIndexList.clear();
-
-	indexArray = new int[modelVertexList.size()];
-	for (int i = 0; i < modelVertexList.size(); i++)
-	{
-		indexArray[i] = i;
-
-	}*/
+		}//printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
+		
+		
+	
+	}//All vertexes have been compared
+	
+	
 }
-
 
 
 

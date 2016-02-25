@@ -14,7 +14,7 @@ void GModelList::initializeModels(ID3D11Device* gDevice, ID3D11DeviceContext * g
 	//Here create the dynamic GModel-Array:
 	this->numberOfModels = 2;
 	this->modelList = new GModel[this->numberOfModels];
-
+	
 	//this->modelList[0].load(".\\Objects/box2.fbx", gDevice, gDeviceContext); 
 	this->modelList[0].load(".\\Objects/itsBoxxyTextured.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
 	this->modelList[1].load(".\\Objects/box2.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
