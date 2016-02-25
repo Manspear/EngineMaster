@@ -201,6 +201,26 @@ void Engine::Render()
 	//represent the shadow-volume before it hits it's "object-that-will-get-shadow-on-it".
 
 
+	//vvvvvvvvvv	< Dynamic cube map >	vvvvvvvvvvvvv
+
+	SetViewport();// iställte för " gDeviceContext->RSSetViewports(1, &mScreenViewport); mScreenViewport/vp " som fanns i dcm
+
+	gDeviceContext->OMSetRenderTargets(1, &mDynamicCubeMapRTV[i], depthStencilView);//här unbindar jag eftersom jag sätter en anna rendertarget
+	//det kan bara vara en renderTarget åt gången, mDynamicCubeMapRTV är i dcm funktionen mindfuck
+
+	//Have hardware generate lower mipmap levels of cube map.
+	//unbinda rendertarget
+	gDeviceContext->GenerateMips(mDynamicCubeMapSRV);
+
+	//Now draw the scene as normal
+	gDeviceContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
+	gDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	DrawScene2(camera, true);
+	mSwapChain->Present(0, 0);
+
+	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);

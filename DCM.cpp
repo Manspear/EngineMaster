@@ -1,10 +1,5 @@
 #include "DCM.h"
 
-DCM::DCM(GCamera &camera)
-{
-	this->camera = camera;
-
-}
 DCM::DCM()
 {
 
@@ -83,10 +78,7 @@ void DCM::Dynamic_Cube_Map(ID3D11Device *gDevice)
 	//that match the resolution of a cube map face.
 	//
 
-
 	//static const int CubeMapSize = 256;
-
-
 
 	D3D11_TEXTURE2D_DESC depthTexDesc;
 	depthTexDesc.Width = CubeMapSize;
@@ -177,7 +169,7 @@ void DCM::BuildCubeFaceCamera(float x, float y, float z, float w)
 
 void DCM::DrawScene()
 {
-	ID3D11RenderTargetView* renderTargets[1];
+
 
 	//Generate the cube map by rendering to each cube map face.
 
@@ -190,26 +182,20 @@ void DCM::DrawScene()
 		gDeviceContext->ClearDepthStencilView(mDynamicCubeMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 		//Bind cube map face as render target
-		renderTargets[0] = mDynamicCubeMapRTV[i];
-		gDeviceContext->OMSetRenderTargets(1, renderTargets, mDynamicCubeMapDSV);
+		gDeviceContext->OMSetRenderTargets(1, &mDynamicCubeMapRTV[i], mDynamicCubeMapDSV);
 
 		//Draw the scene with exception of the center sphere, to this cube map face
 		DrawScene2(mCubeMapCamera[i], false);
 	}
-	// Restore old viewport and render targets.
-	gDeviceContext->RSSetViewports(1,&mScreenViewport);
-	renderTargets[0] = mRenderTargetView;
-	gDeviceContext->OMSetRenderTargets(1, renderTargets, mDepthStencilView);
+
 	
-	//Have hardware generate lower mipmap levels of cube map.
-	gDeviceContext->GenerateMips(mDynamicCubeMapSRV);
+	
+	// Restore old viewport and render targets. kan flyttas
+	/////////////////////////////////////////
 
-	//Now draw the scene as normal
-	gDeviceContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
-	gDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	DrawScene2(camera,true);
-	mSwapChain->Present(0, 0);
+
+	////////////////////////////////////////
 
 
 
