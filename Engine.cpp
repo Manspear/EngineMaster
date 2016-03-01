@@ -77,6 +77,9 @@ void Engine::CreateShaders()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION1", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL1", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
+		{ "TEXCOORD1", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	gDevice->CreateInputLayout(inputDescBS, ARRAYSIZE(inputDescBS), pVSbs->GetBufferPointer(), pVSbs->GetBufferSize(), &gVertexLayoutBS);
 	// we do not need anymore this COM object, so we release it.
@@ -198,7 +201,7 @@ void Engine::Render()
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+	
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
@@ -207,7 +210,7 @@ void Engine::Render()
 	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
 	
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->IASetInputLayout(gVertexLayout);
+	
 	
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
@@ -215,7 +218,20 @@ void Engine::Render()
 
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
-		
+		if (listOfModels[bufferCounter].hasBlendShape())
+		{
+			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
+			UINT32 vertexSize = sizeof(float) * 16;
+
+		}else{
+			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayout);
+			UINT32 vertexSize = sizeof(float) * 8;
+		}
+
+		gDeviceContext->IASetInputLayout(gVertexLayout);
+
 		int test = listOfModels[bufferCounter].getNumberOfTextures();
 		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
 

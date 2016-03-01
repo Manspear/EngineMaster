@@ -3,6 +3,7 @@
 
 GModel::GModel()
 {
+	this->blendShape = false;
 	noOfTextures = 1;
 	this->objectWorldMatrix = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
 }
@@ -104,9 +105,9 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 #pragma endregion ConstantBuffer
 	//Import from File
-	#pragma region
+#pragma region
 	HRESULT hr;
-	ID3D11ShaderResourceView * Texture;
+
 	CoInitialize(NULL);
 	//Need to have this be part of the Render-looping-through-objects-loop. That is: not having modelList[0]
 	if (diffusePath == NULL)
@@ -123,21 +124,48 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]);
 
 	}
-	#pragma endregion 
+#pragma endregion 
 }; 
 
-void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext)
+void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath)
 {
+	this->blendShape = true;
 	modelLoader.loadModels(fbxFilePath);
 	//Note: Doing this may cause problems according to Martin, since it's vector = vector
 	this->modelVertices = modelLoader.modelVertexList;
 	this->modelTextureFilepath = modelLoader.textureFilepath;
+	for (int i = 0; i < this->modelVertices.size(); i++)
+	{
+		this->modelWithBSstruct[i].x = modelVertices[i].x;
+		this->modelWithBSstruct[i].y = modelVertices[i].y;
+		this->modelWithBSstruct[i].z = modelVertices[i].z;
+		this->modelWithBSstruct[i].norX = modelVertices[i].norX;
+		this->modelWithBSstruct[i].norY = modelVertices[i].norY;
+		this->modelWithBSstruct[i].norZ = modelVertices[i].norZ;
+		this->modelWithBSstruct[i].u = modelVertices[i].u;
+		this->modelWithBSstruct[i].v = modelVertices[i].v;
+	}
+
+	modelLoader.loadModels(fbxBS);
+	this->BSmodelVertices = modelLoader.modelVertexList;
+	for (int i = 0; i < this->BSmodelVertices.size(); i++)
+	{
+		this->modelWithBSstruct[i].bsx = BSmodelVertices[i].x;
+		this->modelWithBSstruct[i].bsy = BSmodelVertices[i].y;
+		this->modelWithBSstruct[i].bsz = BSmodelVertices[i].z;
+		this->modelWithBSstruct[i].bsnorX = BSmodelVertices[i].norX;
+		this->modelWithBSstruct[i].bsnorY = BSmodelVertices[i].norY;
+		this->modelWithBSstruct[i].bsnorZ = BSmodelVertices[i].norZ;
+		this->modelWithBSstruct[i].bsu = BSmodelVertices[i].u;
+		this->modelWithBSstruct[i].bsv = BSmodelVertices[i].v;
+	}
+
 #pragma region VertexBuffer
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = modelVertices.size()*sizeof(MyVertexStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
+	bufferDesc.ByteWidth = modelVertices.size()*sizeof(MyBSStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = modelVertices.data();
 
@@ -189,7 +217,29 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 #pragma endregion ConstantBuffer
+#pragma region
+	HRESULT hr;
+
+	CoInitialize(NULL);
+	//Need to have this be part of the Render-looping-through-objects-loop. That is: not having modelList[0]
+	if (diffusePath == NULL)
+		hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);
+	else
+		hr = DirectX::CreateWICTextureFromFile(gDevice, diffusePath, NULL, &modelTextureView[0]);
+
+	if (normalPath == NULL)
+	{
+		noOfTextures = 1;
+		hr = DirectX::CreateWICTextureFromFile(gDevice, L"finland", NULL, &modelTextureView[1]);
+	}
+	else {
+		noOfTextures = 2;
+		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]);
+
+	}
+#pragma endregion 
 };
+
 
 int GModel::getNumberOfTextures()
 {

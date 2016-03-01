@@ -27,6 +27,12 @@ struct MyVertexStruct
 	float x, y, z, norX, norY, norZ, u, v;
 };
 
+struct MyBSStruct
+{
+	float x, y, z, norX, norY, norZ, u, v;
+	float bsx, bsy, bsz, bsnorX, bsnorY, bsnorZ, bsu, bsv;
+};
+
 struct MyIndexStruct
 {
 	int posIndex, norIndex, uvIndex;

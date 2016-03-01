@@ -3,7 +3,9 @@ struct VS_IN //Input to vertex shader. Must match struct of vertex buffer.
 	float3 Pos : POSITION;
 	float3 normal : NORMAL;
 	float2 uv : TEXCOORD;
-	float3 bs : TEXCOORD1;
+	float3 bsPos : POSITION1;
+	float3 bsn : NORMAL1;
+	float2 bsuv : TEXCOORD1;
 };
 
 struct VS_OUT //Output. Must match input of pixel shader. 

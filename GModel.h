@@ -32,12 +32,17 @@ public:
 	void setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext);
 	XMMATRIX getPosition();
 	void renderModel();
-	std::vector<MyVertexStruct> modelVertices; //This holds the vertices.
+	std::vector<MyVertexStruct> modelVertices;
+	std::vector<MyVertexStruct> BSmodelVertices;
+	std::vector<MyBSStruct> modelWithBSstruct;
+	std::vector<MyVertexStruct> bsVertices;//This holds the vertices.
 	std::wstring modelTextureFilepath; //THis holds the texture's file-path
 	int getNumberOfTextures();
+	const bool& hasBlendShape() const { return blendShape; }
 	//struct with vertex positions held by FbxDawg
 	void load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath); //<-- Loads the model. Means that modelLoader is called.
-	void loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext);
+	void loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath);
+	
 };
 
 //>>>>>>>USER MANUAL<<<<<<<<<<<

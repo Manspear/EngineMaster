@@ -19,15 +19,14 @@ void GModelList::initializeModels(ID3D11Device* gDevice, ID3D11DeviceContext * g
 	this->modelList[0].load(".\\Objects/itsBoxxyTextured.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
 	this->modelList[1].load(".\\Objects/box2.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
 	
-	this->modelList[2].load(".\\erect.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", L"./Images/normal_4.png");
-	this->modelList[3].load(".\\slak.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", L"./Images/normal_4.png");
+	this->modelList[2].loadBlendShape(".\\slak.fbx", ".\\erect.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", L"./Images/normal_4.png");
+	//this->modelList[3].load(".\\slak.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", L"./Images/normal_4.png");
 	//this->modelList[3].load(".\\itsBoxxy", gDevice);
 
 	modelList[0].setPosition(XMFLOAT4(2, 0, 0, 1), gDeviceContext);
 	modelList[1].setPosition(XMFLOAT4(0, 0, 0, 1), gDeviceContext);
 
 	modelList[2].setPosition(XMFLOAT4(-14, 0, 1, 1), gDeviceContext);
-	modelList[3].setPosition(XMFLOAT4(-7, 0, 1, 1), gDeviceContext);
 
 }
 
