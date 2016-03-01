@@ -16,6 +16,8 @@
 
 #include <DirectXColors.h>
 
+#include "DCM.h"
+
 
 
 
@@ -67,6 +69,7 @@ public:
 	GInput * input = nullptr;
 
 	FbxDawg * fbxobj = nullptr;
+	DCM dynamicCubeMap;
 
 	int wHEIGHT = 480;
 	int wWIDTH = 640;

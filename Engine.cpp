@@ -199,25 +199,15 @@ void Engine::Render()
 	//The values it holds are both positive and negative, where negative values represent 
 	//the shadow volume that is behind the last object that it hits, and positive values 
 	//represent the shadow-volume before it hits it's "object-that-will-get-shadow-on-it".
-
+	
 
 	//vvvvvvvvvv	< Dynamic cube map >	vvvvvvvvvvvvv
+	SetViewport();
 
-	SetViewport();// iställte för " gDeviceContext->RSSetViewports(1, &mScreenViewport); mScreenViewport/vp " som fanns i dcm
-
-	gDeviceContext->OMSetRenderTargets(1, &mDynamicCubeMapRTV[i], depthStencilView);//här unbindar jag eftersom jag sätter en anna rendertarget
-	//det kan bara vara en renderTarget åt gången, mDynamicCubeMapRTV är i dcm funktionen mindfuck
+	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);// jag gör ju detta där nere, måste jag göra det igen här?
 
 	//Have hardware generate lower mipmap levels of cube map.
-	//unbinda rendertarget
-	gDeviceContext->GenerateMips(mDynamicCubeMapSRV);
-
-	//Now draw the scene as normal
-	gDeviceContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Silver));
-	gDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-	DrawScene2(camera, true);
-	mSwapChain->Present(0, 0);
+	gDeviceContext->GenerateMips(dynamicCubeMap.GetSubResourceView());
 
 	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -320,19 +310,22 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 
 	if (SUCCEEDED(hr))
 	{
-
-		// get the address of the back buffer
+		//1. get the address of the back buffer
 		ID3D11Texture2D* pBackBuffer = nullptr;
 		gSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
-		// use the back buffer address to create the render target
+		//2. use the back buffer adress to create the render target
+		//A render target is a buffer where the video card draws pixels for a scene.
+		//The default render target is called the back buffer, this is the part of 
+		//video memory that contains the next frame to be drawn
 		gDevice->CreateRenderTargetView(pBackBuffer, NULL, &gBackbufferRTV);
 		pBackBuffer->Release();
-		//gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, NULL);
 
+		//Bind 1 or more render targets atomically and the depth-stencil buffer to the output-merger stage.
+		//The maximum number of active render targets a device can have active at any given time is set by a 
+		//#define in D3D11.h called D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT
 		CreateDepthStencilBuffer();
-		gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);
-
+		gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);	
 	}
 	return hr;
 }

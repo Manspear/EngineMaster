@@ -40,6 +40,9 @@ public:
 	void BuildCubeFaceCamera(float x, float y, float z, float w);
 	void DrawScene();
 	void DrawScene2(const GCamera& mCubeMapCamera, bool drawCenterSphere);
+
+	ID3D11ShaderResourceView *GetSubResourceView();
+	
 };
 #endif
 

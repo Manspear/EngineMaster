@@ -14,9 +14,13 @@ void DCM::Dynamic_Cube_Map(ID3D11Device *gDevice)
 	static const int CubeMapSize = 256;
 
 	//
-	// Cubemap is a special texture array with 6 elements. We
+	// Cubemap is a special texture array with 6 elements (one for each face). We
 	// bind this as a render target to draw to the cube faces,
 	// and also as a shader resource, so we can use it in a pixel shader.
+	//
+	//This TEXTURE2D description with the D3D11_RESOURCE_MISC_TEXTURECUBE miscFlag included tells DirX to "tolka" the texture as a cube map
+	//The D3D11_RESOURCE_MISC_GENERATE_MIPS right beside allows us to generateMips() later on in the engine.cpp
+	//A mip map is that pyramid with textures, from high res to low res and the top. For distances
 	//
 
 	D3D11_TEXTURE2D_DESC texDesc;
@@ -35,8 +39,19 @@ void DCM::Dynamic_Cube_Map(ID3D11Device *gDevice)
 	gDevice->CreateTexture2D(&texDesc, 0, &cubeTex);
 
 	//
-	// Create a render target view to each cube map face
-	// (i.e., each element in the texture array).
+	// Create a render target view to each cube map face (each element in the texture array).
+	//
+	// *Reminder*. A render target is a buffer where the video card draws pixels for a scene.
+	// The default render target is called the back buffer, this is the part of 
+	// video memory that contains the next frame to be drawn.
+	//
+	// We need to add a render target for each face of the cube, making the face act like a screen.
+	// This is done later on with this line inside of a for loop 
+	// gDeviceContext->OMSetRenderTargets(1, &mDynamicCubeMapRTV[i], mDynamicCubeMapDSV);
+	//
+	// *Reminder* Bind 1 or more render targets atomically and the depth-stencil buffer to the output-merger stage.
+	// The maximum number of active render targets a device can have active at any given time is set by a 
+	// #define in D3D11.h called D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT
 	//
 
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
@@ -44,7 +59,7 @@ void DCM::Dynamic_Cube_Map(ID3D11Device *gDevice)
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
 	rtvDesc.Texture2DArray.MipSlice = 0;
 
-	// Only create a view to one array element.
+	// Only create a view to one array element. BÖRJA HÄR PÅ ONSDAG JESPER. DETTA ÄR KUL
 	rtvDesc.Texture2DArray.ArraySize = 1;
 
 	for (int i = 0; i < 6; ++i)
@@ -179,7 +194,6 @@ void DCM::DrawScene()
 	{
 		gDeviceContext->ClearRenderTargetView(mDynamicCubeMapRTV[i], reinterpret_cast<const float*>(&Colors::Silver));//fortsätt läsa sid 486
 		gDeviceContext->ClearDepthStencilView(mDynamicCubeMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-		gDeviceContext->ClearDepthStencilView(mDynamicCubeMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 		//Bind cube map face as render target
 		gDeviceContext->OMSetRenderTargets(1, &mDynamicCubeMapRTV[i], mDynamicCubeMapDSV);
@@ -187,25 +201,17 @@ void DCM::DrawScene()
 		//Draw the scene with exception of the center sphere, to this cube map face
 		DrawScene2(mCubeMapCamera[i], false);
 	}
-
-	
-	
 	// Restore old viewport and render targets. kan flyttas
-	/////////////////////////////////////////
-
-
-
-	////////////////////////////////////////
-
-
-
+	//Det jag skrev här använde gDeviceContext och funktioner som redan används i engine. Jag flyttade därför dessa rader till render() i eng och tog bort de som gjordes dubbelt
 }
 
 //vi använder const för att göra det extra tydligt att vi inte ska ändra på något hos kameraobjektet i drawscene2 funktionen
 //vi  använder & för att skicka in det faktiska objektet och inte en kopia utav det. För det vore onödigt med tanke på minnet
-void DCM::DrawScene2(const GCamera& mCubeMapCamera, bool drawCenterSphere)
+//void DCM::DrawScene2(const GCamera& mCubeMapCamera, bool drawCenterSphere)
+//{
+//}
+
+ID3D11ShaderResourceView* DCM::GetSubResourceView()
 {
-
-
-
+	return this->mDynamicCubeMapSRV;
 }
