@@ -15,6 +15,7 @@ private:
 	DirectX::XMMATRIX objectWorldMatrix;
 	int noOfTextures;
 	FbxDawg modelLoader;
+	FbxDawg BSLoader;
 	bool blendShape;
 public:
 	struct modelWorldStruct {

@@ -136,18 +136,21 @@ void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11De
 	this->modelTextureFilepath = modelLoader.textureFilepath;
 	for (int i = 0; i < this->modelVertices.size(); i++)
 	{
-		this->modelWithBSstruct[i].x = modelVertices[i].x;
-		this->modelWithBSstruct[i].y = modelVertices[i].y;
-		this->modelWithBSstruct[i].z = modelVertices[i].z;
-		this->modelWithBSstruct[i].norX = modelVertices[i].norX;
-		this->modelWithBSstruct[i].norY = modelVertices[i].norY;
-		this->modelWithBSstruct[i].norZ = modelVertices[i].norZ;
-		this->modelWithBSstruct[i].u = modelVertices[i].u;
-		this->modelWithBSstruct[i].v = modelVertices[i].v;
+		MyBSStruct temp;
+		temp.x = modelVertices[i].x;
+		temp.y = modelVertices[i].y;
+		temp.z = modelVertices[i].z;
+		temp.norX = modelVertices[i].norX;
+		temp.norY = modelVertices[i].norY;
+		temp.norZ = modelVertices[i].norZ;
+		temp.u = modelVertices[i].u;
+		temp.v = modelVertices[i].v;
+
+		modelWithBSstruct.push_back(temp);
 	}
 
-	modelLoader.loadModels(fbxBS);
-	this->BSmodelVertices = modelLoader.modelVertexList;
+	BSLoader.loadModels(fbxBS);
+	this->BSmodelVertices = BSLoader.modelVertexList;
 	for (int i = 0; i < this->BSmodelVertices.size(); i++)
 	{
 		this->modelWithBSstruct[i].bsx = BSmodelVertices[i].x;
@@ -165,9 +168,9 @@ void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11De
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = modelVertices.size()*sizeof(MyBSStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
+	bufferDesc.ByteWidth = modelWithBSstruct.size()*sizeof(MyBSStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
 	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = modelVertices.data();
+	data.pSysMem = modelWithBSstruct.data();
 
 	gDevice->CreateBuffer(&bufferDesc, &data, &modelVertexBuffer);
 #pragma endregion VertexBuffer
