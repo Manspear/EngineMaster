@@ -206,7 +206,7 @@ void Engine::Render()
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-	UINT32 vertexSize = sizeof(float) * 8;
+	UINT32 vertexSize;
 	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
 	
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -222,17 +222,17 @@ void Engine::Render()
 		{
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
-			UINT32 vertexSize = sizeof(float) * 16;
+			vertexSize = sizeof(float) * 16;
 
 		}else{
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
-			UINT32 vertexSize = sizeof(float) * 8;
+			vertexSize = sizeof(float) * 8;
 		}
 
 		gDeviceContext->IASetInputLayout(gVertexLayout);
 
-		int test = listOfModels[bufferCounter].getNumberOfTextures();
+		
 		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
 
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
@@ -242,7 +242,8 @@ void Engine::Render()
 		gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
-		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0); //Uses indexbuffer
+
+		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
 	}
 }
 
