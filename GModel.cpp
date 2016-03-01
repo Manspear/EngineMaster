@@ -116,6 +116,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	XMVECTOR maxPos = XMVectorSet(maxX, maxY, maxZ, 1); 
 	XMVECTOR minPos = XMVectorSet(minX, minY, minZ, 1);
 	modelBBox.CreateFromPoints(modelBBox, maxPos, minPos);
+	modelBBox.Transform(modelBBox, (FXMMATRIX)objectWorldMatrix); //moves the box into worldspace. 
 	//now when I've got a bbox, I can do collision-detection with the frustum in the Frustum-class.
 }; 
 
