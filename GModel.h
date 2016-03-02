@@ -12,7 +12,7 @@ using namespace DirectX;
 class GModel
 {
 private:
-	DirectX::XMMATRIX objectWorldMatrix;
+	
 public:
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
@@ -21,6 +21,7 @@ public:
 	~GModel();
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
+	DirectX::XMMATRIX objectWorldMatrix;
 	BoundingBox modelBBox;
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture and normal map
 	//share projection and view, but have different world-view.

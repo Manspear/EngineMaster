@@ -184,11 +184,13 @@ void Engine::Render()
 
 	GModel* listOfModels = modelListObject->getModelList();
 
-	cullingFrustum->updateFrustumPos(camera->getProjMatrix());
+	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
+
+	
 
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
-		if (cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
+		if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
 			continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
 
 		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);

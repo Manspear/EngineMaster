@@ -35,7 +35,7 @@ void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDevic
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 
 	//multiply the BoundingBox with the object's new world-matrix, so that it follows the object. 
-	modelBBox.Transform(modelBBox, (FXMMATRIX)objectWorldMatrix);
+	modelBBox.Transform(modelBBox, objectWorldMatrix);
 };
 XMMATRIX GModel::getPosition() {
 	return this->objectWorldMatrix;
