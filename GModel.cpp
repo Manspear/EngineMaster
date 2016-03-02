@@ -2,7 +2,7 @@
 #include "WICTextureLoader.h"
 #include <limits>
 #include <algorithm>
-
+using namespace DirectX;
 
 GModel::GModel()
 {
@@ -33,9 +33,10 @@ void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDevic
 	dataPtr->worldMatrix = objectWorldMatrix;
 
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
-
+	FXMVECTOR ass = XMVectorSet(position.x, position.y, position.z, position.w);
+	FXMVECTOR asdf = XMQuaternionIdentity();
 	//multiply the BoundingBox with the object's new world-matrix, so that it follows the object. 
-	modelBBox.Transform(modelBBox, (FXMMATRIX)objectWorldMatrix);
+	modelBBox.Transform(modelBBox, 1.0f, asdf, ass);
 };
 XMMATRIX GModel::getPosition() {
 	return this->objectWorldMatrix;
