@@ -190,9 +190,10 @@ void Engine::Render()
 
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
-		if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
-			continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
-
+		//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
+		//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
+		if (!cullingFrustum->hasCollided(listOfModels[bufferCounter].bBox))
+			continue;
 		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
 
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.

@@ -2,6 +2,7 @@
 #define GMODEL_H
 //#include "Engine.h"
 #include "FbxDawg.h"
+#include "GBoundingBox.h"
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <DirectXCollision.h>
@@ -21,8 +22,9 @@ public:
 	~GModel();
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
-	DirectX::XMMATRIX objectWorldMatrix;
+	XMMATRIX* objectWorldMatrix;
 	BoundingBox modelBBox;
+	GBoundingBox bBox;
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture and normal map
 	//share projection and view, but have different world-view.
 	void setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext);

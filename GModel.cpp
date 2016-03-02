@@ -6,7 +6,8 @@ using namespace DirectX;
 
 GModel::GModel()
 {
-	this->objectWorldMatrix = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
+	this->objectWorldMatrix = new XMMATRIX;
+	this->objectWorldMatrix[0] = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
 }
 
 GModel::~GModel()
@@ -14,15 +15,19 @@ GModel::~GModel()
 	//modelVertexBuffer->Release(); //This gets released...Somewhere.
 	//modelTextureView[0]->Release();
 	//modelTextureView[1]->Release();
+	delete objectWorldMatrix;
 }
 void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext)
 {
 	//For this to work, we'll need our own world matrix, which we've got created in the GModel constructor.
-	XMMATRIX translation = XMMatrixTranslation(position.x, position.y, position.z);
-	translation = XMMatrixTranspose(translation); 
-	XMMATRIX identity = XMMatrixIdentity();
-	identity = XMMatrixTranspose(identity);
-	objectWorldMatrix = identity * translation; //multiply transposed matrix with transposed matrix --> result is transposed 
+	//XMMATRIX translation = XMMatrixTranslation(position.x, position.y, position.z);
+	//translation = XMMatrixTranspose(translation); 
+	//XMMATRIX identity = XMMatrixIdentity();
+	//identity = XMMatrixTranspose(identity);
+
+	this->objectWorldMatrix[0] = XMMatrixTranspose(XMMatrixIdentity() * XMMatrixTranslation(position.x, position.y, position.z)); //multiply transposed matrix with transposed matrix --> result is transposed 
+	//this->objectWorldMatrix = XMMatrixTranspose(objectWorldMatrix);
+	
 
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
 	modelWorldStruct* dataPtr;
@@ -30,16 +35,22 @@ void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDevic
 	gDeviceContext->Map(modelConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (modelWorldStruct*)gMappedResource.pData;
 
-	dataPtr->worldMatrix = objectWorldMatrix;
+	dataPtr->worldMatrix = objectWorldMatrix[0];
 
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 	FXMVECTOR ass = XMVectorSet(position.x, position.y, position.z, position.w);
 	FXMVECTOR asdf = XMQuaternionIdentity();
+	
 	//multiply the BoundingBox with the object's new world-matrix, so that it follows the object. 
 	modelBBox.Transform(modelBBox, 1.0f, asdf, ass);
+
+	//my bbox-code
+	XMFLOAT4X4 poop;
+	XMStoreFloat4x4(&poop, XMMatrixTranspose(XMMatrixIdentity() * XMMatrixTranslation(position.x, position.y, position.z)));
+	bBox.setAtMeshPosition(&poop); //send XMMATRIX in a package.
 };
 XMMATRIX GModel::getPosition() {
-	return this->objectWorldMatrix;
+	return this->objectWorldMatrix[0];
 }
 //struct with vertex positions held by FbxDawg
 void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext) //This is used in the default-constructor of Engine.
@@ -77,7 +88,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	gDeviceContext->Map(modelConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (modelWorldStruct*)gMappedResource.pData;
 
-	dataPtr->worldMatrix = objectWorldMatrix;
+	dataPtr->worldMatrix = objectWorldMatrix[0];
 
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 
@@ -120,6 +131,9 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	XMVECTOR minPos = XMVectorSet(minX, minY, minZ, 1);
 	modelBBox.CreateFromPoints(modelBBox, maxPos, minPos);
 	//now when I've got a bbox, I can do collision-detection with the frustum in the Frustum-class.
+
+	//Create the bbox (my version)
+	bBox.CreateBBox(XMFLOAT3(minX, minY, minZ), XMFLOAT3(maxX, maxY, maxZ));
 }; 
 
 
