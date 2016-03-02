@@ -131,12 +131,16 @@ void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11De
 {
 	this->blendShape = true;
 	modelLoader.loadModels(fbxFilePath);
+	BSLoader.loadModels(fbxBS);
+
 	//Note: Doing this may cause problems according to Martin, since it's vector = vector
 	this->modelVertices = modelLoader.modelVertexList;
+	this->BSmodelVertices = BSLoader.modelVertexList;
 	this->modelTextureFilepath = modelLoader.textureFilepath;
 	for (int i = 0; i < this->modelVertices.size(); i++)
 	{
 		MyBSStruct temp;
+
 		temp.x = modelVertices[i].x;
 		temp.y = modelVertices[i].y;
 		temp.z = modelVertices[i].z;
@@ -145,24 +149,22 @@ void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11De
 		temp.norZ = modelVertices[i].norZ;
 		temp.u = modelVertices[i].u;
 		temp.v = modelVertices[i].v;
+		temp.bsx = BSmodelVertices[i].x;
+		temp.bsy = BSmodelVertices[i].y;
+		temp.bsz = BSmodelVertices[i].z;
+		temp.bsnorX = BSmodelVertices[i].norX;
+		temp.bsnorY = BSmodelVertices[i].norY;
+		temp.bsnorZ = BSmodelVertices[i].norZ;
+		temp.bsu = BSmodelVertices[i].u;
+		temp.bsv = BSmodelVertices[i].v;
+
+		
 
 		modelWithBSstruct.push_back(temp);
-	}
-
-	BSLoader.loadModels(fbxBS);
-	this->BSmodelVertices = BSLoader.modelVertexList;
-	for (int i = 0; i < this->BSmodelVertices.size(); i++)
-	{
-		this->modelWithBSstruct[i].bsx = BSmodelVertices[i].x;
-		this->modelWithBSstruct[i].bsy = BSmodelVertices[i].y;
-		this->modelWithBSstruct[i].bsz = BSmodelVertices[i].z;
-		this->modelWithBSstruct[i].bsnorX = BSmodelVertices[i].norX;
-		this->modelWithBSstruct[i].bsnorY = BSmodelVertices[i].norY;
-		this->modelWithBSstruct[i].bsnorZ = BSmodelVertices[i].norZ;
-		this->modelWithBSstruct[i].bsu = BSmodelVertices[i].u;
-		this->modelWithBSstruct[i].bsv = BSmodelVertices[i].v;
 		printf("%f      %f \n", modelWithBSstruct[i].bsx, modelWithBSstruct[i].x);
 	}
+
+	printf("%d      %d \n", modelWithBSstruct.size(), modelVertices.size());
 
 #pragma region VertexBuffer
 	D3D11_BUFFER_DESC bufferDesc;
