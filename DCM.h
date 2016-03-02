@@ -26,8 +26,8 @@ private:
 
 	D3D11_VIEWPORT mCubeMapViewport;
 	D3D11_VIEWPORT mScreenViewport;// finns ingen viewport som jag kan skicka med till dcm classen
-	ID3D11ShaderResourceView* mDynamicCubeMapSRV;
-	ID3D11RenderTargetView* mDynamicCubeMapRTV[6];
+	ID3D11ShaderResourceView* DCM_ShaderResourceView;
+	ID3D11RenderTargetView* DCM_RenderTargetView[6];
 	ID3D11DepthStencilView* mDynamicCubeMapDSV;
 
 
