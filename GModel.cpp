@@ -161,6 +161,7 @@ void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11De
 		this->modelWithBSstruct[i].bsnorZ = BSmodelVertices[i].norZ;
 		this->modelWithBSstruct[i].bsu = BSmodelVertices[i].u;
 		this->modelWithBSstruct[i].bsv = BSmodelVertices[i].v;
+		printf("%f      %f \n", modelWithBSstruct[i].bsx, modelWithBSstruct[i].x);
 	}
 
 #pragma region VertexBuffer
