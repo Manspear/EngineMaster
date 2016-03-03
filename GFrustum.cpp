@@ -20,11 +20,24 @@ float retLength(XMFLOAT3 input) {
 void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, const DirectX::XMMATRIX &cameraView)
 {
 	frustum.CreateFromMatrix(frustum, cameraProjection);
-	frustum.Transform(frustum, XMMatrixInverse(nullptr, cameraView));
+	frustum.Transform(frustum, cameraView); 
 
 	//Manual frustum inc. 
-	XMMATRIX fMatrix = cameraProjection * XMMatrixInverse(nullptr, cameraView);//gets the frustum into world-space. 
-																			   //fMatrix = XMMatrixTranspose(fMatrix); //Seeing if this helps...
+	//these are transposed, since they're both left-handed
+	//And they're in the right order (supposedly...)
+	XMMATRIX fMatrix =  cameraView * cameraProjection;
+	
+	/*XMMATRIX projTest = cameraProjection;
+	XMFLOAT4X4 projectionDerp;
+	XMStoreFloat4x4(&projectionDerp, projTest);
+	float zMin, r;
+	zMin = -projectionDerp._43 / projectionDerp._33;
+	r = 20 / (20 - zMin);
+	projectionDerp._33 = r;
+	projectionDerp._43 = -r * zMin;
+	projTest = XMLoadFloat4x4(&projectionDerp);
+	XMMATRIX TFMat;
+	TFMat = cameraView * projTest;*/
 	XMFLOAT4X4 TFM;
 	XMStoreFloat4x4(&TFM, fMatrix);
 	//get the planes
@@ -32,7 +45,7 @@ void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, cons
 	//when the matrices are non-transposed I get larger d-values.
 	//All of the planes need D-values, or else the planes lie in the origin
 	//and nothing can fit inside the origin... Duh.
-
+	
 	//left plane
 	fPlanes[0].normal.x = -(TFM._14 + TFM._11);
 	fPlanes[0].normal.y = -(TFM._24 + TFM._21);
@@ -120,7 +133,7 @@ bool GFrustum::hasCollided(GBoundingBox& modelBox)
 	//if all of the points are inside the frustum, we have a contain.
 	//if no point is inside the frustum, we have a nonCollision.
 
-	bool intersectionJudge[8];
+	bool intersectionJudge[8] = { true, true, true, true, true, true, true, true }; //I never set this to true... Hmm...
 
 	bool containmentJudge[6];
 
@@ -132,7 +145,7 @@ bool GFrustum::hasCollided(GBoundingBox& modelBox)
 		//modelBox.vertices.BBoxPoint[i];
 		for (int k = 0; k < 6; k++) //check against the frustum planes
 		{
-			float indicator = (fPlanes[k].normal.x * modelBox.vertices.BBoxPoint[i].x) + (fPlanes[k].normal.y * modelBox.vertices.BBoxPoint[i].y) + (fPlanes[k].normal.z * modelBox.vertices.BBoxPoint[i].z) + fPlanes[k].distance;
+			float indicator = (fPlanes[k].normal.x) * (modelBox.vertices.BBoxPoint[i].x) + (fPlanes[k].normal.y) * (modelBox.vertices.BBoxPoint[i].y) + (fPlanes[k].normal.z) * (modelBox.vertices.BBoxPoint[i].z) + fPlanes[k].distance;
 			if (indicator <= 0) //if the point is inside or behind this plane
 				containmentJudge[k] = true;
 			else

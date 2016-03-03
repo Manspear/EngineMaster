@@ -141,8 +141,8 @@ void GCamera::InitProjMatrix(const float angle, const float height, const float 
 //CON/DESTRUCTOR
 GCamera::GCamera()
 {
-	cPosition = XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f);
-	cTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	cPosition = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	cTarget = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f);
 	cUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 
 	this->initViewMatrix();

@@ -85,7 +85,7 @@ public:
 	FbxDawg * fbxobj = nullptr;
 
 	int wHEIGHT = 480;
-	int wWIDTH = 640;
+	int wWIDTH = 480;//was 640
 	byte * keys;
 
 	//Delta Time Stuff

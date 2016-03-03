@@ -186,7 +186,11 @@ void Engine::Render()
 
 	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
 
-
+	//struct frustumVert {
+//		float x, y, z, xn, yn, zn, u, v;
+//	};
+//	frustumVert frustumVertices[6]; //...
+	
 
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
@@ -343,9 +347,9 @@ void Engine::Clean() {
 void Engine::InitializeCamera()
 {
 	camera = new GCamera;//										vv far plane	dessa är 400 gånger ifrån varandra. Det är okej att ha runt 10 000 - 20 000
-	camera->InitProjMatrix(XM_PI * 0.45, wHEIGHT, wWIDTH, 0.05, 20);
+	camera->InitProjMatrix(XM_PI * 0.5, wHEIGHT, wWIDTH, 0.000001, 20);
 	//													  ^^ near plane  förut var det 0.5 här
-
+	//pi * 0.45, wHEIGHT, wWiDTH, 0.05, 20
 }
 
 void Engine::InitializeModels() {
