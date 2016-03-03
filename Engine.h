@@ -113,7 +113,7 @@ public:
 	void Clean(); //releases all resources
 	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once
 	void InitializeCamera();
-	void initializeMousePicking();
+	void initializeMousePicking(HWND wndHandle);
 	void InitializeModels();
 	HRESULT CreateDirect3DContext(HWND wndHandle);
 

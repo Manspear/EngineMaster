@@ -249,6 +249,7 @@ void Engine::Render()
 
 
 void Engine::Update() {
+	MousePickingObject->getCursorPosition();
 	frameCount++;
 	if (getTime() > 1.0f)
 	{
@@ -388,9 +389,9 @@ void Engine::InitializeCamera()
 
 }
 
-void Engine::initializeMousePicking()
+void Engine::initializeMousePicking(HWND wndHandle)
 {
-	MousePickingObject = new MousePicking;
+	MousePickingObject = new MousePicking(wndHandle);
 
 
 }
@@ -427,6 +428,8 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	CreateConstantBuffer();
 
 	InitializeCamera();
+
+	initializeMousePicking(wndHandle);
 }
 
 void Engine::renderText(std::wstring text)

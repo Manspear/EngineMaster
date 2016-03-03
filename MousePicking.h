@@ -6,17 +6,14 @@
 
 #include <directXMath.h>
 #include <d3dcompiler.h> 
+#include <stdio.h>
 
 using namespace DirectX;
 class MousePicking
 {
-public:
-	struct ScreenPos
-	{
-		int x=0;
-		int y=0;
-	};
+//http://www.braynzarsoft.net/viewtutorial/q16390-24-picking
 
+public:
 	struct Ray
 	{
 		int x=0;
@@ -24,9 +21,10 @@ public:
 		int z=0;
 	};
 
-
-	MousePicking();
+	HWND* wndHandle= NULL;
+	MousePicking(HWND wndHandle);
 	~MousePicking();
+	void getCursorPosition();
 
 };
 #endif
