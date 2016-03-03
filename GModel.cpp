@@ -26,8 +26,8 @@ void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDevic
 	//identity = XMMatrixTranspose(identity);
 
 	this->objectWorldMatrix[0] = XMMatrixTranspose(XMMatrixIdentity() * XMMatrixTranslation(position.x, position.y, position.z)); //multiply transposed matrix with transposed matrix --> result is transposed 
-	//this->objectWorldMatrix = XMMatrixTranspose(objectWorldMatrix);
-	
+																																  //this->objectWorldMatrix = XMMatrixTranspose(objectWorldMatrix);
+
 
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
 	modelWorldStruct* dataPtr;
@@ -40,7 +40,7 @@ void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDevic
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 	FXMVECTOR ass = XMVectorSet(position.x, position.y, position.z, position.w);
 	FXMVECTOR asdf = XMQuaternionIdentity();
-	
+
 	//multiply the BoundingBox with the object's new world-matrix, so that it follows the object. 
 	modelBBox.Transform(modelBBox, 1.0f, asdf, ass);
 
@@ -58,7 +58,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	FbxDawg modelLoader;
 	modelLoader.loadModels(fbxFilePath);
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
-	this->modelVertices = modelLoader.modelVertexList; 
+	this->modelVertices = modelLoader.modelVertexList;
 	this->modelTextureFilepath = modelLoader.textureFilepath;
 
 	D3D11_BUFFER_DESC bufferDesc;
@@ -70,7 +70,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	data.pSysMem = modelVertices.data();
 
 	gDevice->CreateBuffer(&bufferDesc, &data, &modelVertexBuffer);
-	
+
 	//Creating constant buffer holding only worldmatrix
 	//D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
@@ -93,7 +93,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 
 	//Import from File
-	#pragma region
+#pragma region
 	HRESULT hr;
 	ID3D11ShaderResourceView * Texture;
 	CoInitialize(NULL);
@@ -101,7 +101,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);//wstring äger functionen c_str som är en getFucntion till wchar_t* som finns redan
 	hr = DirectX::CreateWICTextureFromFile(gDevice, L"./Images/normal_map.jpg", NULL, &modelTextureView[1]);
 	//(d3d11DeviceInterface, d3d11DeviceContextInterface, L"test.bmp", 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0, &pTex2D, NULL);
-	#pragma endregion 
+#pragma endregion 
 
 	//Loop through the vertices to get the minimum and maximum xyz values to be used for BBox creation.
 	//This could be done in the FbxDawg-class, to spare the CPU when you're loading lots of models.
@@ -127,15 +127,14 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 			minZ = modelVertices[i].z;
 	}
 	//make two XMVECTORs that we will create the bbox from
-	XMVECTOR maxPos = XMVectorSet(maxX, maxY, maxZ, 1); 
+	XMVECTOR maxPos = XMVectorSet(maxX, maxY, maxZ, 1);
 	XMVECTOR minPos = XMVectorSet(minX, minY, minZ, 1);
 	modelBBox.CreateFromPoints(modelBBox, maxPos, minPos);
-	modelBBox.Transform(modelBBox, (FXMMATRIX)objectWorldMatrix); //moves the box into worldspace. 
 	//now when I've got a bbox, I can do collision-detection with the frustum in the Frustum-class.
 
 	//Create the bbox (my version)
 	bBox.CreateBBox(XMFLOAT3(minX, minY, minZ), XMFLOAT3(maxX, maxY, maxZ));
-}; 
+};
 
 
 void GModel::renderModel()

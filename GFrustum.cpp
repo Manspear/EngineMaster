@@ -13,29 +13,6 @@ GFrustum::~GFrustum()
 
 }
 
-<<<<<<< HEAD
-void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, const DirectX::XMMATRIX & cameraView)
-{
-	//the camera-projection-frustum seem to need the camera's projection-matrix too. 
-	//since the projection matrix doesn't move by itself. 
-	frustum.CreateFromMatrix(frustum, cameraProjection); 
-
-	frustum.Transform(frustum, XMMatrixInverse(nullptr, cameraView));//The view-matrix transforms between world to view-space
-	
-	//Sebastian said: matrices aren't ever IN a space, they transform between spaces.
-	//nullptr is a stand-in for the determinant variable
-	//the determinant is related to volume. The determinant is 1 for orthogonal unit vectors.
-	//You get the volume of the 3D paraboloid. 
-	//the parallelogram in 2D you get a from cross-product.
-
-	collisionFrustum = cameraProjection * cameraView;
-	//left clipping plane
-	XMFLOAT4X4 CF;
-	XMStoreFloat4x4(&CF, collisionFrustum);
-	planes[0].normal.x = -(CF._14 + CF._11);
-	planes[1].normal.y = -(CF._24 + CF._21);
-	//follow the powerpoint!
-=======
 float retLength(XMFLOAT3 input) {
 	return sqrt((input.x * input.x) + (input.y * input.y) + (input.z * input.z));
 }
@@ -47,7 +24,7 @@ void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, cons
 
 	//Manual frustum inc. 
 	XMMATRIX fMatrix = cameraProjection * XMMatrixInverse(nullptr, cameraView);//gets the frustum into world-space. 
-	//fMatrix = XMMatrixTranspose(fMatrix); //Seeing if this helps...
+																			   //fMatrix = XMMatrixTranspose(fMatrix); //Seeing if this helps...
 	XMFLOAT4X4 TFM;
 	XMStoreFloat4x4(&TFM, fMatrix);
 	//get the planes
@@ -101,7 +78,6 @@ void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, cons
 	//by multiplying them with just the new, updated view-frustum? Or do I have to  
 	//remake my frustum entirely every frame?
 	//Answer: You have to remake this every frame. 
->>>>>>> origin/Albin's-Lair-3
 }
 
 bool GFrustum::isCollision(const DirectX::BoundingBox& modelBBox)
@@ -110,24 +86,12 @@ bool GFrustum::isCollision(const DirectX::BoundingBox& modelBBox)
 	//Uhmm...What to do when a collision has actually happened? I cannot do it here, can I? No. I gotta send back a bool to main, and there handle the "model-ignoring"	
 	//will do it by simply not sending the vertex-buffer of the object into the vertex shader. Smart. Easy. Good thinking. Proud of you.
 	bool collision = false;
-	if (frustum.Contains(modelBBox) == 0) { 
-<<<<<<< HEAD
-		//the values returned by the Contains()-function mean: 0 = not intersection 1 = intersects 2 = contains
-		//read for return value meaning: https://msdn.microsoft.com/en-us/library/microsoft.directx_sdk.directxcollision.containmenttype(v=vs.85).aspx
-		collision = false;
-		printf("in 0\n");
-	}
-	else if (frustum.Contains(modelBBox) == 1) {
-		collision = true; printf("in 1\n");
-	}
-	else {
-		collision = true; printf("in 2\n");
-=======
+	if (frustum.Contains(modelBBox) == 0) {
 		//the values returned by the Contains()-function mean: 0 = not intersection 1 = intersects 2 = contains
 		//read for return value meaning: https://msdn.microsoft.com/en-us/library/microsoft.directx_sdk.directxcollision.containmenttype(v=vs.85).aspx
 		collision = false;
 		printf("collision 0\n");
-		
+
 	}
 	if (frustum.Contains(modelBBox) == 1) {
 		//the values returned by the Contains()-function mean: 0 = not intersection 1 = intersects 2 = contains
@@ -135,7 +99,6 @@ bool GFrustum::isCollision(const DirectX::BoundingBox& modelBBox)
 		collision = true;
 		printf("collision 1\n");
 
->>>>>>> origin/Albin's-Lair-3
 	}
 	if (frustum.Contains(modelBBox) == 2) {
 		//the values returned by the Contains()-function mean: 0 = not intersection 1 = intersects 2 = contains
@@ -145,7 +108,7 @@ bool GFrustum::isCollision(const DirectX::BoundingBox& modelBBox)
 
 	}
 	bool hasCollided = false;
-	
+
 
 
 	return collision;
@@ -162,7 +125,7 @@ bool GFrustum::hasCollided(GBoundingBox& modelBox)
 	bool containmentJudge[6];
 
 	bool contains = true;
-	
+
 	for (int i = 0; i < 8; i++) //for every point in bBox
 	{
 		//herein do the collision-test... See if the points of the cube are contained inside the frustum.
@@ -174,7 +137,7 @@ bool GFrustum::hasCollided(GBoundingBox& modelBox)
 				containmentJudge[k] = true;
 			else
 				containmentJudge[k] = false;
-			
+
 		}
 		for (int p = 0; p < 6; p++) {
 			//if any bool is false, no containment.
@@ -187,15 +150,16 @@ bool GFrustum::hasCollided(GBoundingBox& modelBox)
 	if (contains) {
 		printf("Contains!\n");
 		return true;
-	}else
-		{
-			for (int c = 0; c < 8; c++) {
-				if (intersectionJudge[c]) { //if any point is inside the frustum, we have an intersection.
-					printf("Intersects!\n");
-					return true;
-				}
+	}
+	else
+	{
+		for (int c = 0; c < 8; c++) {
+			if (intersectionJudge[c]) { //if any point is inside the frustum, we have an intersection.
+				printf("Intersects!\n");
+				return true;
 			}
 		}
+	}
 	//if nothing intersected, no collision was made.
 	printf("Non-Collision!\n");
 	return false;

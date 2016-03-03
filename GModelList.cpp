@@ -18,7 +18,7 @@ void GModelList::initializeModels(ID3D11Device* gDevice, ID3D11DeviceContext * g
 	//this->modelList[0].load(".\\Objects/box2.fbx", gDevice, gDeviceContext); 
 	this->modelList[0].load(".\\Objects/itsBoxxyTextured.fbx", gDevice, gDeviceContext);
 	this->modelList[1].load(".\\Objects/box2.fbx", gDevice, gDeviceContext);
-	
+
 	//this->modelList[3].load(".\\itsBoxxy", gDevice);
 
 	modelList[0].setPosition(XMFLOAT4(2, 0, 0, 1), gDeviceContext);

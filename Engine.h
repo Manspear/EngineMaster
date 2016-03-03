@@ -38,7 +38,7 @@ class Engine
 
 private:
 
-	
+
 
 public:
 	struct MyVertexStruct
@@ -80,7 +80,7 @@ public:
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
 	GFrustum * cullingFrustum = nullptr;
-	
+
 
 	FbxDawg * fbxobj = nullptr;
 
@@ -118,7 +118,7 @@ public:
 	/*LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	HWND InitWindow(HINSTANCE hInstance, Engine* engine);*/
 
-	
+
 };
 
 #endif

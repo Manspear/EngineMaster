@@ -56,8 +56,8 @@ void GInput::getKeyboardState()
 {
 	HRESULT hr;
 
-	
-	hr = gKeyboard->GetDeviceState((sizeof(unsigned char)<<8), (void*)keyState);
+
+	hr = gKeyboard->GetDeviceState((sizeof(unsigned char) << 8), (void*)keyState);
 	if (hr != S_OK)
 		hr = gKeyboard->Acquire();
 
@@ -82,5 +82,5 @@ void GInput::GetMouseLoc()
 	//	mouseY = 0;
 	if (mouseY > gScreenHeight)
 		mouseY = gScreenHeight;
-	
+
 }
