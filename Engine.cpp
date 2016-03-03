@@ -214,15 +214,17 @@ void Engine::Render()
 	
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
-	GModel* listOfModels = modelListObject->getModelList();
+	listOfModels = modelListObject->getModelList();
 
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
 		if (listOfModels[bufferCounter].hasBlendShape())
 		{
+			gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
 			vertexSize = sizeof(float) * 16;
+
 
 		}else{
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
@@ -282,6 +284,21 @@ void Engine::Update() {
 	{
 		camera->rotate(XAXIS, input->mouseX*MOUSE_SENSITIVITY*dt);
 		camera->rotate(YAXIS, -input->mouseY*MOUSE_SENSITIVITY*dt);
+	}
+	static float weight;
+	if (input->keyState[DIK_UPARROW])
+	{
+		weight += 0.2*dt;
+		if (weight > 1.0)
+			weight = 1.0;
+		listOfModels[2].setBlendWeight(weight, gDeviceContext);
+	}
+	if (input->keyState[DIK_DOWNARROW])
+	{
+		weight -= 0.2*dt;
+		if (weight < 0.0)
+			weight = 0.0;
+		listOfModels[2].setBlendWeight(weight, gDeviceContext);
 	}
 
 	// kryssprodukten mellan upp vektor och riktings vektorn ger sidleds vektorn.

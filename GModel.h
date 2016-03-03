@@ -21,15 +21,18 @@ public:
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
 	};
-	struct bsWorldStruct {
-		XMMATRIX worldMatrix;
+	struct bsWeight {
 		float weight;
+		float padding0;
+		float padding1;
+		float padding2;
 	};
 	GModel();
 	~GModel();
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11Buffer* modelIndexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
+	ID3D11Buffer* bsWBuffer = nullptr;
 	int* IndexArray = nullptr;
 
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture then normal map
@@ -44,9 +47,10 @@ public:
 	std::wstring modelTextureFilepath; //THis holds the texture's file-path
 	int getNumberOfTextures();
 	const bool& hasBlendShape() const { return blendShape; }
+	void setBlendWeight(float weight, ID3D11DeviceContext* gDeviceContext);
 	//struct with vertex positions held by FbxDawg
 	void load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath); //<-- Loads the model. Means that modelLoader is called.
-	void loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath);
+	void loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath);
 	
 };
 

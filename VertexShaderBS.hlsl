@@ -8,6 +8,14 @@ struct VS_IN //Input to vertex shader. Must match struct of vertex buffer.
 	float2 bsuv : TEXCOORD1;
 };
 
+cbuffer weightBuff:register(b0)
+{
+	float weight;
+	float padding0;
+	float padding1;
+	float padding2;
+};
+
 struct VS_OUT //Output. Must match input of pixel shader. 
 {
 	float4 Pos : SV_POSITION;
@@ -25,7 +33,6 @@ VS_OUT VS_main(VS_IN input)
 
 	VS_OUT output = (VS_OUT)0; //Hmm... What is this? Am I zeroing-out my output?
 
-	float weight = 0.5;
 	float3 positionDiff = input.bsPos - input.Pos;
 
 	float3 position = input.Pos + weight * positionDiff;

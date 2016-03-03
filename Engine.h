@@ -35,7 +35,7 @@ class Engine
 {
 
 private:
-
+	GModel* listOfModels;
 	
 
 public:

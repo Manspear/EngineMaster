@@ -116,12 +116,11 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	}else{
 		noOfTextures = 2;
 		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]);
-
 	}
 #pragma endregion 
 }; 
 
-void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath)
+void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath)
 {
 	this->blendShape = true;
 	modelLoader.loadModels(fbxFilePath);
@@ -193,6 +192,15 @@ void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11De
 	gDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &this->modelIndexBuffer);
 #pragma endregion IndexBuffer
 #pragma region ConstantBuffer
+	
+	memset(&bufferDesc, 0, sizeof(bufferDesc));
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.ByteWidth = sizeof(bsWeight);
+	gDevice->CreateBuffer(&bufferDesc, NULL, &bsWBuffer);
+	
+
 	//Creating constant buffer holding only worldmatrix
 	//D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
@@ -218,7 +226,6 @@ void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11De
 	HRESULT hr;
 
 	CoInitialize(NULL);
-	//Need to have this be part of the Render-looping-through-objects-loop. That is: not having modelList[0]
 	if (diffusePath == NULL)
 		hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);
 	else
@@ -241,6 +248,19 @@ void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11De
 int GModel::getNumberOfTextures()
 {
 	return noOfTextures;
+}
+
+void GModel::setBlendWeight(float weight, ID3D11DeviceContext* gDeviceContext)
+{
+	D3D11_MAPPED_SUBRESOURCE gMappedResource;
+	bsWeight* dataPtr;
+
+	HRESULT hr = gDeviceContext->Map(bsWBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
+	dataPtr = (bsWeight*)gMappedResource.pData;
+
+	dataPtr->weight = weight;
+
+	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 }
 
 
