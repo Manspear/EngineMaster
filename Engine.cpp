@@ -165,7 +165,7 @@ void Engine::SetViewport()
 	vp.TopLeftY = 0;
 	gDeviceContext->RSSetViewports(1, &vp);
 }
-// SWAG
+
 void Engine::Render()
 {
 #pragma region //EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM
@@ -387,6 +387,15 @@ void Engine::InitializeCamera()
 	//													  ^^ near plane  förut var det 0.5 här
 
 }
+
+void Engine::initializeMousePicking()
+{
+	MousePickingObject = new MousePicking;
+
+
+}
+
+
 
 void Engine::InitializeModels() {
 	//Here create the dynamic GModel-Array:

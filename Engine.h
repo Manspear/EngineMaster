@@ -10,6 +10,8 @@
 
 #include "GCamera.h"
 
+#include "MousePicking.h"
+
 #include "GInput.h"
 
 #include "FbxDawg.h"
@@ -78,6 +80,7 @@ public:
 
 	GModelList * modelListObject = nullptr;
 	GCamera * camera = nullptr;
+	MousePicking* MousePickingObject=nullptr;
 	GInput * input = nullptr;
 	
 
@@ -110,6 +113,7 @@ public:
 	void Clean(); //releases all resources
 	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once
 	void InitializeCamera();
+	void initializeMousePicking();
 	void InitializeModels();
 	HRESULT CreateDirect3DContext(HWND wndHandle);
 
