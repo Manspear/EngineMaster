@@ -97,8 +97,10 @@ void DCM::Dynamic_Cube_Map(ID3D11Device *gDevice)
 	// but that doesnt mean that you want your sword in the game to have 4k resolution as well.
 	//
 	// The cube map needs a Depth Stencil View for the same reason as the main camera needs it.
-	// *Reminder* A Depth Stencil View
 	//
+	// *Reminder* A Depth Stencil View is used to sort out when two or more pixels take up the same location in the view frustum. Each pixels have a "z" value (xyz)
+	// angled towards where you're rendering from, light or camera. Thats called depth value and we use that to determine which pixel to keep
+	// 
 
 	D3D11_TEXTURE2D_DESC depthTexDesc;
 	depthTexDesc.Width = CubeMapSize;
@@ -116,31 +118,27 @@ void DCM::Dynamic_Cube_Map(ID3D11Device *gDevice)
 	ID3D11Texture2D* depthTex = 0;
 	gDevice->CreateTexture2D(&depthTexDesc, 0, &depthTex);
 
-	//and now for the Depth stencil view
+	// and now for the Depth stencil view
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
 	dsvDesc.Format = depthTexDesc.Format;
 	dsvDesc.Flags = 0;
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Texture2D.MipSlice = 0;
-	gDevice->CreateDepthStencilView(depthTex, &dsvDesc, &mDynamicCubeMapDSV);
+	gDevice->CreateDepthStencilView(depthTex, &dsvDesc, &DCM_DepthStencilView);
 
 	depthTex->Release();
 
 	//
-	//and finally the faces viewports
-	//
+	// and finally the faces viewports 
+	//		
 
-	mCubeMapViewport.TopLeftX = 0.0f;
-	mCubeMapViewport.TopLeftY = 0.0f;
-	mCubeMapViewport.Width = (float)CubeMapSize;
-	mCubeMapViewport.Height = (float)CubeMapSize;
-	mCubeMapViewport.MinDepth = 0.0f;
-	mCubeMapViewport.MaxDepth = 1.0f;
-
-	//
-	//those viewports need camera
-	//
+	DCM_CubeMapViewport.TopLeftX = 0.0f;
+	DCM_CubeMapViewport.TopLeftY = 0.0f;
+	DCM_CubeMapViewport.Width = (float)CubeMapSize;
+	DCM_CubeMapViewport.Height = (float)CubeMapSize;
+	DCM_CubeMapViewport.MinDepth = 0.0f;
+	DCM_CubeMapViewport.MaxDepth = 1.0f;
 }
 
 void DCM::BuildCubeFaceCamera(float x, float y, float z, float w)
@@ -174,17 +172,10 @@ void DCM::BuildCubeFaceCamera(float x, float y, float z, float w)
 		XMFLOAT4(0.0f, 1.0f, 0.0f, w) // -Z
 	};
 
-	//void GCamera::LookAt(XMFLOAT4 pos, XMFLOAT4 target, XMFLOAT4 worldUp)
 	for (int i = 0; i < 6; ++i)
 	{
-		mCubeMapCamera[i].LookAt(center, targets[i], ups[i]);
+		DCM_CubeMapCamera[i].LookAt(center, targets[i], ups[i]);
 	}
-	//cubeMap_targets[0] = new GCamera(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1));// X
-	//cubeMap_targets[1] = new GCamera(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1));// -X
-	//cubeMap_targets[2] = new GCamera(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1));// Y
-	//cubeMap_targets[3] = new GCamera(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1));// -Y
-	//cubeMap_targets[4] = new GCamera(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1));// Z
-	//cubeMap_targets[5] = new GCamera(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1), XMFLOAT4(1, 1, 1, 1));// -Z
 }
 
 void DCM::DrawScene()
@@ -193,20 +184,7 @@ void DCM::DrawScene()
 
 	//Generate the cube map by rendering to each cube map face.
 
-	gDeviceContext->RSSetViewports(1,&mCubeMapViewport);
 
-	for (int i = 0; i < 6; i++)
-	{
-		gDeviceContext->ClearRenderTargetView(DCM_RenderTargetView[i], reinterpret_cast<const float*>(&Colors::Silver));//fortsätt läsa sid 486
-		gDeviceContext->ClearDepthStencilView(mDynamicCubeMapDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-		//Bind cube map face as render target
-		gDeviceContext->OMSetRenderTargets(1, &DCM_RenderTargetView[i], mDynamicCubeMapDSV);
-
-		//Draw the scene with exception of the center sphere, to this cube map face
-		DrawScene2(mCubeMapCamera[i], false);
-	}
-	// Restore old viewport and render targets. kan flyttas
 	//Det jag skrev här använde gDeviceContext och funktioner som redan används i engine. Jag flyttade därför dessa rader till render() i eng och tog bort de som gjordes dubbelt
 }
 
@@ -216,7 +194,28 @@ void DCM::DrawScene()
 //{
 //}
 
-ID3D11ShaderResourceView* DCM::GetSubResourceView()
+ID3D11ShaderResourceView* DCM::getSubResourceView()
 {
 	return this->DCM_ShaderResourceView;
+}
+
+ID3D11RenderTargetView * DCM::getDCM_RenderTargetView(int i)
+{
+	return this->DCM_RenderTargetView[i];
+}
+
+
+ID3D11DepthStencilView * DCM::getDCM_DepthStencilView()
+{
+	return this->DCM_DepthStencilView;
+}
+
+GCamera DCM::getDCM_CubeMapCamera(int i)
+{
+	return this->DCM_CubeMapCamera[i];
+}
+
+D3D11_VIEWPORT DCM::getDCM_CubeMapViewport()
+{
+	return this->DCM_CubeMapViewport;
 }

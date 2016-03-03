@@ -69,7 +69,7 @@ public:
 	GInput * input = nullptr;
 
 	FbxDawg * fbxobj = nullptr;
-	DCM dynamicCubeMap;
+	DCM dcm;
 
 	int wHEIGHT = 480;
 	int wWIDTH = 640;

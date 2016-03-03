@@ -202,12 +202,28 @@ void Engine::Render()
 	
 
 	//vvvvvvvvvv	< Dynamic cube map >	vvvvvvvvvvvvv
+
+	gDeviceContext->RSSetViewports(1, &dcm.getDCM_CubeMapViewport());
+
+	for (int i = 0; i < 6; i++)
+	{
+		gDeviceContext->ClearRenderTargetView(dcm.getDCM_RenderTargetView(i), reinterpret_cast<const float*>(&Colors::Silver));//fortsätt läsa sid 486
+		gDeviceContext->ClearDepthStencilView(dcm.getDCM_DepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+		ID3D11RenderTargetView* rtv = dcm.getDCM_RenderTargetView(i); // för den ville ha //&DCM_RenderTargetView[i]
+		//Bind cube map face as render target
+		gDeviceContext->OMSetRenderTargets(1, &rtv, dcm.getDCM_DepthStencilView());
+
+		//Draw the scene with exception of the center sphere, to this cube map face
+		// DrawScene2(DCM_CubeMapCamera[i], false); Engines draw funktion
+	}
+
 	SetViewport();
 
 	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);// jag gör ju detta där nere, måste jag göra det igen här?
 
 	//Have hardware generate lower mipmap levels of cube map.
-	gDeviceContext->GenerateMips(dynamicCubeMap.GetSubResourceView());
+	gDeviceContext->GenerateMips(dcm.getSubResourceView());
 
 	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
