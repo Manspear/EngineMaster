@@ -28,7 +28,7 @@ VS_OUT VS_main(VS_IN input)
 	float weight = 1.0;
 	float3 positionDiff = input.bsPos - input.Pos;
 
-	float3 position = input.Pos + weight * positionDiff; //typecasting float3 to float4. The 1 is the w-part of the 4x1 point
+	float3 position = input.Pos + weight * positionDiff;
 	output.Pos = float4(position, 1);
 
 	output.normal = input.normal;
