@@ -21,8 +21,9 @@ public:
 		int z=0;
 	};
 
-	HWND* wndHandle= NULL;
-	MousePicking(HWND wndHandle);
+	HWND wndHandle2;
+	int height, width;
+	MousePicking(HWND wndHandle,int screenHeight, int screenWidth);
 	~MousePicking();
 	void getCursorPosition();
 

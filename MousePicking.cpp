@@ -1,9 +1,12 @@
 #include "MousePicking.h"
 
-MousePicking::MousePicking(HWND wndHandle)
+
+
+MousePicking::MousePicking(HWND wndHandle, int screenHeight, int screenWidth)
 {
-	this->wndHandle = &wndHandle;
-	this->getCursorPosition();
+	this->wndHandle2 = wndHandle;
+	this->height = screenHeight;
+	this->width = screenWidth;
 }
 
 MousePicking::~MousePicking()
@@ -13,16 +16,35 @@ MousePicking::~MousePicking()
 
 void MousePicking::getCursorPosition()
 {
-	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0)
+	
+	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) //if left mouse button down
 	{
-		POINT curMousePos;
+		POINT curMousePos; 
 		BOOL result = GetCursorPos(&curMousePos);
 		if (result)
 		{
+			
 			//The function call succeeded and curPos has valid data.
-			ScreenToClient(*this->wndHandle, &curMousePos);
+			result=ScreenToClient(this->wndHandle2, &curMousePos);
+
+
+			if (curMousePos.x > width)
+				curMousePos.x = width;
+
+			else if (curMousePos.x < 0)
+				curMousePos.x = 0;
+
+			if (curMousePos.y > height)
+				curMousePos.y = height;
+
+			else if (curMousePos.y < 0)
+				curMousePos.y = 0;
+
 			printf("(x: %d) (y: %d)\n", curMousePos.x, curMousePos.y);
 
+		
+
+			
 		}
 		else
 		{

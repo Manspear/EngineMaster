@@ -250,6 +250,7 @@ void Engine::Render()
 
 void Engine::Update() {
 	MousePickingObject->getCursorPosition();
+	
 	frameCount++;
 	if (getTime() > 1.0f)
 	{
@@ -391,7 +392,8 @@ void Engine::InitializeCamera()
 
 void Engine::initializeMousePicking(HWND wndHandle)
 {
-	MousePickingObject = new MousePicking(wndHandle);
+	printf("%d\n", this->wWIDTH);
+	MousePickingObject = new MousePicking(wndHandle, this->wHEIGHT,this->wWIDTH);
 
 
 }
