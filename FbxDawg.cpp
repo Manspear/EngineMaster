@@ -56,6 +56,10 @@ void FbxDawg::loadModels(const char* filePath)
 				continue;// Go to next child/mesh
 
 			FbxMesh* mesh = (FbxMesh*)FbxChildNode->GetNodeAttribute();//we are sure that there was a mesh that went through, we get the content of the node.
+			
+			
+			if (mesh->GetDeformerCount(FbxDeformer::eBlendShape) > 0)
+				this->bsLoader(mesh);
 
 			std::vector<MyPosition> MyPositionVector; //containes all vertex positions
 			std::vector<MyNormal> MyNormalVector; //contains all normals.
@@ -253,11 +257,14 @@ void FbxDawg::loadModels(const char* filePath)
 
 #pragma region >>ASSEMBLY OF VERTEXDATA<<
 			MyVertexStruct tempVertex;
+			MyBSposStruct tempBlendShape;
 			MyIndexStruct tempIndex;
-			FbxVector4* Vertices = mesh->GetControlPoints();
+			FbxVector4* Vertices;
+
+			Vertices = mesh->GetControlPoints();
+
 			for (int i=0; i < IndexVector.size(); i++)
 			{
-
 				//printf("pos %d nor %d uv %d\n", IndexVector[i].posIndex, IndexVector[i].norIndex, IndexVector[i].uvIndex);
 				normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
 				tempVertex.norX = normals[0];
@@ -274,9 +281,27 @@ void FbxDawg::loadModels(const char* filePath)
 				tempVertex.v = 1-UVValue.mData[1];
 
 				this->modelVertexList.push_back(tempVertex);
-
 			}
-			
+
+			for (int i = 0; i < bsVert.size(); i++)
+			{
+
+				//normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
+				//tempVertex.norX = normals[0];
+				//tempVertex.norY = normals[1];
+				//tempVertex.norZ = (-1)*(normals[2]);
+
+				tempBlendShape.x = (float)bsVert[i][IndexVector[i].posIndex].mData[0];
+				tempBlendShape.y = (float)bsVert[i][IndexVector[i].posIndex].mData[1];
+				tempBlendShape.z = -1 * ((float)bsVert[i][IndexVector[i].posIndex].mData[2]);
+
+				//FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
+				//tempVertex.u = UVValue.mData[0];
+				//tempVertex.v = 1 - UVValue.mData[1];
+
+				this->blendShapes.push_back(tempBlendShape);
+			}
+				
 			this->makeIndexList();
 
 				
@@ -329,5 +354,33 @@ void FbxDawg::makeIndexList()
 	
 }
 
+void FbxDawg::bsLoader(FbxMesh * mesh)
+{
+	int bShapeCount = mesh->GetDeformerCount(FbxDeformer::eBlendShape);
 
+	if (bShapeCount > 0)
+	{
+		printf("model has %d BlendShapes\n", bShapeCount);
+		for (int bsIndex = 0; bsIndex < bShapeCount; bsIndex++)
+		{
+			FbxBlendShape* lBlendShape = (FbxBlendShape*)mesh->GetDeformer(bsIndex, FbxDeformer::eBlendShape);
+
+			int lBlendShapeChannelCount = lBlendShape->GetBlendShapeChannelCount();
+			printf("bShape has %d BlendShape Channels\n", lBlendShapeChannelCount);
+
+			for (int lChannelIndex = 0; lChannelIndex < lBlendShapeChannelCount; lChannelIndex++)
+			{
+				FbxBlendShapeChannel* lChannel = lBlendShape->GetBlendShapeChannel(lChannelIndex);
+				
+				int lShapesCount = lChannel->GetTargetShapeCount();
+
+				for (int lShapeIndex = 0; lShapeIndex < lShapesCount; lShapeIndex++)
+				{
+					FbxShape * lShape = lChannel->GetTargetShape(lShapeIndex);
+					bsVert.push_back(lShape->GetControlPoints());
+				}
+			}
+		}
+	}
+}
 

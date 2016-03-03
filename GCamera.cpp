@@ -12,7 +12,6 @@ XMFLOAT4 GCamera::getCameraDirection()
 	return temp;
 }
 
-
 //VEIW
 void GCamera::initViewMatrix()
 {

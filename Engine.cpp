@@ -197,7 +197,7 @@ void Engine::Render()
 #pragma endregion
 	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
 	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
-	float clearColor[] = { 0, 0, 0, 1 };
+	float clearColor[] = { 1, 0.537, 0.812, 1 };
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 

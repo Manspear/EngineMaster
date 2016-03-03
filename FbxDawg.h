@@ -27,6 +27,11 @@ struct MyVertexStruct
 	float x, y, z, norX, norY, norZ, u, v;
 };
 
+struct MyBSposStruct
+{
+	float x, y, z;
+};
+
 struct MyBSStruct
 {
 	float x, y, z, norX, norY, norZ, u, v;
@@ -44,6 +49,7 @@ struct MyIndexStruct
 class FbxDawg
 {
 private:
+
 public:
 	FbxDawg();
 	~FbxDawg();
@@ -52,8 +58,12 @@ public:
 	void loadModels(const char* filePath); 
 	void makeIndexList();
 	int* FBXIndexArray = nullptr;
+	void bsLoader(FbxMesh * mesh);
 
+	std::vector<MyBSposStruct> blendShapes;
 	std::vector<MyVertexStruct> modelVertexList;
+	std::vector<FbxVector4 *> bsVert;
+
 	//std::vector<MyPosition> indexedPosList;
 	//std::vector<MyNormal> indexedNormalList;
 	//std::vector<MyUV> indexedUVList;

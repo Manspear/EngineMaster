@@ -152,13 +152,11 @@ void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11De
 		temp.bsu = BSmodelVertices[i].u;
 		temp.bsv = BSmodelVertices[i].v;
 
-		
-		printf("%d \n", i);
 		modelWithBSstruct.push_back(temp);
-		printf("%f      %f \n", modelWithBSstruct[i].bsx, modelWithBSstruct[i].x);
+
 	}
 
-	printf("%d      %d \n", modelWithBSstruct.size(), modelVertices.size());
+
 
 #pragma region VertexBuffer
 	D3D11_BUFFER_DESC bufferDesc;
