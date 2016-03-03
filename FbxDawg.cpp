@@ -255,7 +255,7 @@ void FbxDawg::loadModels(const char* filePath)
 			MyVertexStruct tempVertex;
 			MyIndexStruct tempIndex;
 			FbxVector4* Vertices = mesh->GetControlPoints();
-			for (int i=0; i < 36; i++)
+			for (int i=0; i < IndexVector.size(); i++)
 			{
 
 				//printf("pos %d nor %d uv %d\n", IndexVector[i].posIndex, IndexVector[i].norIndex, IndexVector[i].uvIndex);
@@ -299,32 +299,32 @@ void FbxDawg::makeIndexList()
 	for (int i = 0; i < this->modelVertexList.size(); i++)
 		FBXIndexArray[i] = i;
 	
-	for (int vertex = 0; vertex< this->modelVertexList.size(); vertex++)
-	{
-		for (int other = vertex + 1; other < modelVertexList.size(); other++)
-		{
-			if (modelVertexList[vertex].norX == modelVertexList[other].norX &&
-				modelVertexList[vertex].norY == modelVertexList[other].norY &&
-				modelVertexList[vertex].norZ == modelVertexList[other].norZ
-				&&
+	//for (int vertex = 0; vertex< this->modelVertexList.size(); vertex++)
+	//{
+	//	for (int other = vertex + 1; other < modelVertexList.size(); other++)
+	//	{
+	//		if (modelVertexList[vertex].norX == modelVertexList[other].norX &&
+	//			modelVertexList[vertex].norY == modelVertexList[other].norY &&
+	//			modelVertexList[vertex].norZ == modelVertexList[other].norZ
+	//			&&
 
-				modelVertexList[vertex].u == modelVertexList[other].u &&
-				modelVertexList[vertex].v == modelVertexList[other].v
-				&&
+	//			modelVertexList[vertex].u == modelVertexList[other].u &&
+	//			modelVertexList[vertex].v == modelVertexList[other].v
+	//			&&
 
-				modelVertexList[vertex].x == modelVertexList[other].x &&
-				modelVertexList[vertex].y == modelVertexList[other].y &&
-				modelVertexList[vertex].z == modelVertexList[other].z)
-			{
-				FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
-			}
+	//			modelVertexList[vertex].x == modelVertexList[other].x &&
+	//			modelVertexList[vertex].y == modelVertexList[other].y &&
+	//			modelVertexList[vertex].z == modelVertexList[other].z)
+	//		{
+	//			FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
+	//		}
 
 
-		}printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
-		
-		
-	
-	}//All vertexes have been compared
+	//	}printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
+	//	
+	//	
+	//
+	//}//All vertexes have been compared
 	
 	
 }
