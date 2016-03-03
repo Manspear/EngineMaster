@@ -36,6 +36,8 @@ struct MyBSStruct
 struct MyIndexStruct
 {
 	int posIndex, norIndex, uvIndex;
+	char* UVSetName;
+	FbxGeometryElementUV* UVElement;
 };
 #pragma endregion structs
 
@@ -48,13 +50,14 @@ public:
 
 	std::wstring textureFilepath;//När denna blir tilldelad så får den en kopia istället. Så vi kan utan problem radera den variablen som var med i tilldelningen.
 	void loadModels(const char* filePath); 
-	void makeIndexList(std::vector<MyPosition> MyPositionVector, std::vector<MyNormal> MyNormalVector, std::vector<MyUV> MyUVVector);
+	void makeIndexList();
+	int* FBXIndexArray = nullptr;
 
 	std::vector<MyVertexStruct> modelVertexList;
-	std::vector<MyPosition> indexedPosList;
-	std::vector<MyNormal> indexedNormalList;
-	std::vector<MyUV> indexedUVList;
-	std::vector<MyIndexStruct> myIndexList;
+	//std::vector<MyPosition> indexedPosList;
+	//std::vector<MyNormal> indexedNormalList;
+	//std::vector<MyUV> indexedUVList;
+	//std::vector<MyIndexStruct> myIndexList;
 };
 #endif
 
