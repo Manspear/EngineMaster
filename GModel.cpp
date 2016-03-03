@@ -125,32 +125,31 @@ void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11De
 {
 	this->blendShape = true;
 	modelLoader.loadModels(fbxFilePath);
-	BSLoader.loadModels(fbxBS);
+
 
 	//Note: Doing this may cause problems according to Martin, since it's vector = vector
 	this->modelVertices = modelLoader.modelVertexList;
-	this->BSmodelVertices = BSLoader.modelVertexList;
 	this->modelTextureFilepath = modelLoader.textureFilepath;
 	for (int i = 0; i < this->modelVertices.size(); i++)
 	{
 		MyBSStruct temp;
 
-		temp.x = modelVertices[i].x;
-		temp.y = modelVertices[i].y;
-		temp.z = modelVertices[i].z;
-		temp.norX = modelVertices[i].norX;
-		temp.norY = modelVertices[i].norY;
-		temp.norZ = modelVertices[i].norZ;
-		temp.u = modelVertices[i].u;
-		temp.v = modelVertices[i].v;
-		temp.bsx = BSmodelVertices[i].x;
-		temp.bsy = BSmodelVertices[i].y;
-		temp.bsz = BSmodelVertices[i].z;
-		temp.bsnorX = BSmodelVertices[i].norX;
-		temp.bsnorY = BSmodelVertices[i].norY;
-		temp.bsnorZ = BSmodelVertices[i].norZ;
-		temp.bsu = BSmodelVertices[i].u;
-		temp.bsv = BSmodelVertices[i].v;
+		temp.x = modelLoader.modelVertexList[i].x;
+		temp.y = modelLoader.modelVertexList[i].y;
+		temp.z = modelLoader.modelVertexList[i].z;
+		temp.norX = modelLoader.modelVertexList[i].norX;
+		temp.norY = modelLoader.modelVertexList[i].norY;
+		temp.norZ = modelLoader.modelVertexList[i].norZ;
+		temp.u = modelLoader.modelVertexList[i].u;
+		temp.v = modelLoader.modelVertexList[i].v;
+		temp.bsx = modelLoader.blendShapes[i].x;
+		temp.bsy = modelLoader.blendShapes[i].y;
+		temp.bsz = modelLoader.blendShapes[i].z;
+		//temp.bsnorX = BSmodelVertices[i].norX;
+		//temp.bsnorY = BSmodelVertices[i].norY;
+		//temp.bsnorZ = BSmodelVertices[i].norZ;
+		//temp.bsu = BSmodelVertices[i].u;
+		//temp.bsv = BSmodelVertices[i].v;
 
 		modelWithBSstruct.push_back(temp);
 

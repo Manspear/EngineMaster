@@ -25,7 +25,7 @@ VS_OUT VS_main(VS_IN input)
 
 	VS_OUT output = (VS_OUT)0; //Hmm... What is this? Am I zeroing-out my output?
 
-	float weight = 1.0;
+	float weight = 0.5;
 	float3 positionDiff = input.bsPos - input.Pos;
 
 	float3 position = input.Pos + weight * positionDiff;

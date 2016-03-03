@@ -283,24 +283,26 @@ void FbxDawg::loadModels(const char* filePath)
 				this->modelVertexList.push_back(tempVertex);
 			}
 
-			for (int i = 0; i < bsVert.size(); i++)
-			{
+			for (int j = 0; j < bsVert.size(); j++)
+				Vertices = bsVert[j];
+				for (int i = 0; i < IndexVector.size(); i++)
+				{
 
-				//normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
-				//tempVertex.norX = normals[0];
-				//tempVertex.norY = normals[1];
-				//tempVertex.norZ = (-1)*(normals[2]);
+					//normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
+					//tempVertex.norX = normals[0];
+					//tempVertex.norY = normals[1];
+					//tempVertex.norZ = (-1)*(normals[2]);
 
-				tempBlendShape.x = (float)bsVert[i][IndexVector[i].posIndex].mData[0];
-				tempBlendShape.y = (float)bsVert[i][IndexVector[i].posIndex].mData[1];
-				tempBlendShape.z = -1 * ((float)bsVert[i][IndexVector[i].posIndex].mData[2]);
+					tempBlendShape.x = (float)Vertices[IndexVector[i].posIndex].mData[0];
+					tempBlendShape.y = (float)Vertices[IndexVector[i].posIndex].mData[1];
+					tempBlendShape.z = -1 * ((float)Vertices[IndexVector[i].posIndex].mData[2]);
 
-				//FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
-				//tempVertex.u = UVValue.mData[0];
-				//tempVertex.v = 1 - UVValue.mData[1];
+					//FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
+					//tempVertex.u = UVValue.mData[0];
+					//tempVertex.v = 1 - UVValue.mData[1];
 
-				this->blendShapes.push_back(tempBlendShape);
-			}
+					this->blendShapes.push_back(tempBlendShape);
+				}
 				
 			this->makeIndexList();
 

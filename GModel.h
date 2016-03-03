@@ -21,6 +21,10 @@ public:
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
 	};
+	struct bsWorldStruct {
+		XMMATRIX worldMatrix;
+		float weight;
+	};
 	GModel();
 	~GModel();
 	ID3D11Buffer* modelVertexBuffer = nullptr;
