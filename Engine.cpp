@@ -185,6 +185,7 @@ void Engine::Render()
 	GModel* listOfModels = modelListObject->getModelList();
 
 	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
+<<<<<<< HEAD
 
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
@@ -192,6 +193,17 @@ void Engine::Render()
 			printf("Culling works!"); 
 			continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
 		}
+=======
+
+	
+
+	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
+	{
+		//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
+		//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
+		if (!cullingFrustum->hasCollided(listOfModels[bufferCounter].bBox))
+			continue;
+>>>>>>> origin/Albin's-Lair-3
 		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
 
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.

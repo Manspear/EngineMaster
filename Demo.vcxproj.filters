@@ -60,6 +60,9 @@
     <ClCompile Include="GFrustum.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
+    <ClCompile Include="GBoundingBox.cpp">
+      <Filter>Source Files\Model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -102,6 +105,9 @@
     </ClInclude>
     <ClInclude Include="GModel.h">
       <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="GBoundingBox.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
