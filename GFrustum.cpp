@@ -23,7 +23,7 @@ void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, cons
 	frustum.Transform(frustum, XMMatrixInverse(nullptr, cameraView));
 
 	//Manual frustum inc. 
-	XMMATRIX fMatrix = cameraProjection * XMMatrixInverse(nullptr, cameraView);
+	XMMATRIX fMatrix = cameraProjection * XMMatrixInverse(nullptr, cameraView);//gets the frustum into world-space. 
 	//fMatrix = XMMatrixTranspose(fMatrix); //Seeing if this helps...
 	XMFLOAT4X4 TFM;
 	XMStoreFloat4x4(&TFM, fMatrix);
