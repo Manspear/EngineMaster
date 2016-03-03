@@ -159,7 +159,7 @@ void GModel::loadBlendShape(const char* fbxFilePath, const char* fbxBS, ID3D11De
 		temp.bsv = BSmodelVertices[i].v;
 
 		
-
+		printf("%d \n", i);
 		modelWithBSstruct.push_back(temp);
 		printf("%f      %f \n", modelWithBSstruct[i].bsx, modelWithBSstruct[i].x);
 	}

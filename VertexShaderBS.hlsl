@@ -25,13 +25,13 @@ VS_OUT VS_main(VS_IN input)
 
 	VS_OUT output = (VS_OUT)0; //Hmm... What is this? Am I zeroing-out my output?
 
+	float weight = 1.0;
+	float3 positionDiff = input.bsPos - input.Pos;
 
-	float3 position = input.Pos;
-
-	position = 1.0 * input.bsPos; //typecasting float3 to float4. The 1 is the w-part of the 4x1 point
+	float3 position = input.Pos + weight * positionDiff; //typecasting float3 to float4. The 1 is the w-part of the 4x1 point
 	output.Pos = float4(position, 1);
 
-	output.normal = input.bsn;
+	output.normal = input.normal;
 	output.uv = input.uv;
 
 	return output;
