@@ -46,7 +46,7 @@ void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDevic
 
 	//my bbox-code
 	XMFLOAT4X4 poop;
-	XMStoreFloat4x4(&poop, XMMatrixTranspose(XMMatrixIdentity() * XMMatrixTranslation(position.x, position.y, position.z)));
+	XMStoreFloat4x4(&poop, XMMatrixTranslation(position.x, position.y, position.z));
 	bBox.setAtMeshPosition(&poop); //send XMMATRIX in a package.
 };
 XMMATRIX GModel::getPosition() {

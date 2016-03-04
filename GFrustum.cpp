@@ -66,11 +66,16 @@ void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, cons
 	fPlanes[3].normal.y = -(TFM._24 - TFM._22);
 	fPlanes[3].normal.z = -(TFM._34 - TFM._32);
 	fPlanes[3].distance = -(TFM._44 - TFM._42);
+	
+	//DirectX doesn't have a whole unit-cube in clip-space.
+	//So it didn't need the multiplication with near and far plane.
+	//Should've just looked at some matrix math from the start.
+
 	//near plane
-	fPlanes[4].normal.x = -(TFM._14 + TFM._13);
-	fPlanes[4].normal.y = -(TFM._24 + TFM._23);
-	fPlanes[4].normal.z = -(TFM._34 + TFM._33);
-	fPlanes[4].distance = -(TFM._44 + TFM._43);
+	fPlanes[4].normal.x = -(TFM._13);
+	fPlanes[4].normal.y = -(TFM._23);
+	fPlanes[4].normal.z = -(TFM._33);
+	fPlanes[4].distance = -(TFM._43); 
 	//far plane
 	fPlanes[5].normal.x = -(TFM._14 - TFM._13);
 	fPlanes[5].normal.y = -(TFM._24 - TFM._23);
@@ -85,6 +90,8 @@ void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, cons
 		fPlanes[i].normal.x = fPlanes[i].normal.x * denom;
 		fPlanes[i].normal.y = fPlanes[i].normal.y * denom;
 		fPlanes[i].normal.z = fPlanes[i].normal.z * denom;
+		//You also need to normalize the distance-variable... For DirectX!
+		fPlanes[i].distance = fPlanes[i].distance * denom;
 	}
 
 	//Question: If I've made a frustum, can I change it's matrix and plane positions

@@ -27,13 +27,10 @@ void GBoundingBox::CreateBBox(XMFLOAT3 minPoint, XMFLOAT3 maxPoint)
 
 void GBoundingBox::setAtMeshPosition(XMFLOAT4X4* modelMatrix)
 {
-	//This isn't the cause of the bbox-problem. Since even if we're NOT calling this function, the bboxes dissapear oddly.
-	//GBBoxMatrix = modelMatrix; //note: I may have to redo the boundingbox, if you cannot simply multiply it's vertices with the boundingbox's worldMatrix.
 	GBBoxMatrix[0] = XMLoadFloat4x4(modelMatrix);
 	for (int i = 0; i < 8; i++) {
-		XMVECTOR temp = XMVectorSet(vertices.BBoxPoint[i].x, vertices.BBoxPoint[i].y, vertices.BBoxPoint[i].z, 0); //converts the XMFLOAT3 to XMVECTOR
-		XMVector4Transform(temp, GBBoxMatrix[0]); //Transforms every box-corner
-		//temp = GBBoxMatrix * temp;
+		XMVECTOR temp = XMVectorSet(vertices.BBoxPoint[i].x, vertices.BBoxPoint[i].y, vertices.BBoxPoint[i].z, 1); //converts the XMFLOAT3 to XMVECTOR
+		temp = XMVector4Transform(temp, GBBoxMatrix[0]); //Transforms every box-corner. Supposedly.
 		XMStoreFloat3(&vertices.BBoxPoint[i], temp); //Stores the transformed XMVECTOR in a FLOAT3.
 	}
 }
