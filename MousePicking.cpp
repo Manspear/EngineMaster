@@ -2,8 +2,9 @@
 
 
 
-MousePicking::MousePicking(HWND wndHandle, int screenHeight, int screenWidth)
+MousePicking::MousePicking(HWND wndHandle, GCamera* camera, int screenHeight, int screenWidth)
 {
+	this->camera = camera;
 	this->wndHandle2 = wndHandle;
 	this->height = screenHeight;
 	this->width = screenWidth;
@@ -11,22 +12,24 @@ MousePicking::MousePicking(HWND wndHandle, int screenHeight, int screenWidth)
 
 MousePicking::~MousePicking()
 {
+	 //Pass
+}
+
+void MousePicking::updateVariables()
+{
 
 }
 
 void MousePicking::getCursorPosition()
 {
 	
-	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) //if left mouse button down
-	{
+	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) /*if left mouse button down*/{
 		POINT curMousePos; 
 		BOOL result = GetCursorPos(&curMousePos);
-		if (result)
-		{
-			
-			//The function call succeeded and curPos has valid data.
-			result=ScreenToClient(this->wndHandle2, &curMousePos);
 
+		if (result) /*The function call succeeded and curPos has valid data.*/{
+			
+			result=ScreenToClient(this->wndHandle2, &curMousePos);
 
 			if (curMousePos.x > width)
 				curMousePos.x = width;
@@ -41,10 +44,6 @@ void MousePicking::getCursorPosition()
 				curMousePos.y = 0;
 
 			printf("(x: %d) (y: %d)\n", curMousePos.x, curMousePos.y);
-
-		
-
-			
 		}
 		else
 		{
@@ -52,7 +51,12 @@ void MousePicking::getCursorPosition()
 
 		}
 
-	}
+	}//End of if(left mouse button down)
+}
+
+void MousePicking::calculateCurrentRay()
+{
+
 }
 
 

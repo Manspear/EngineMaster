@@ -393,7 +393,7 @@ void Engine::InitializeCamera()
 void Engine::initializeMousePicking(HWND wndHandle)
 {
 	printf("%d\n", this->wWIDTH);
-	MousePickingObject = new MousePicking(wndHandle, this->wHEIGHT,this->wWIDTH);
+	MousePickingObject = new MousePicking(wndHandle, this->camera, this->wHEIGHT,this->wWIDTH);
 
 
 }
