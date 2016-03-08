@@ -10,7 +10,7 @@ GQuadTree::~GQuadTree() {
 
 }
 
-void GQuadTree::makeTree(int numberOfDivisions)
+void GQuadTree::makeTree(int numberOfDivisions, GModelList& modelList)
 {
-	rootBox.splitBox(numberOfDivisions);
+	rootBox.splitBox(numberOfDivisions, modelList);
 }

@@ -104,7 +104,7 @@ void GQuadTreeBoundingBox::fillBox(GModelList & modelList)
 	for (int z = 0; z < modelList.numberOfModels; z++) {
 		//INSERT COLLISION DETECTION HERE!!!! Between all modelboxes 
 		//and this box. Add the 
-		//colliding model-boxes to this bbox's modelChildren-struct.
+		//colliding models to this bbox's modelChildren-vector.
 		modelChildren.push_back(&tempModelList[z]); //gives a reference of the GModel to this bbox-object.
 	}
 	modelChildrenCounter = modelChildren.size();
