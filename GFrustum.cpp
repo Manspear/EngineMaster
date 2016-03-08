@@ -19,8 +19,8 @@ float retLength(XMFLOAT3 input) {
 
 void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, const DirectX::XMMATRIX &cameraView)
 {
-	frustum.CreateFromMatrix(frustum, cameraProjection);
-	frustum.Transform(frustum, cameraView); 
+	//frustum.CreateFromMatrix(frustum, cameraProjection);
+	//frustum.Transform(frustum, cameraView); 
 
 	//Manual frustum inc. 
 	//these are transposed, since they're both left-handed
@@ -100,7 +100,7 @@ void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, cons
 	//Answer: You have to remake this every frame. 
 }
 
-bool GFrustum::isCollision(const DirectX::BoundingBox& modelBBox)
+/*bool GFrustum::isCollision(const DirectX::BoundingBox& modelBBox)
 {
 	//Now make the Frustum follow the camera. How? By creating it with the camera's Frustum!	
 	//Uhmm...What to do when a collision has actually happened? I cannot do it here, can I? No. I gotta send back a bool to main, and there handle the "model-ignoring"	
@@ -132,54 +132,25 @@ bool GFrustum::isCollision(const DirectX::BoundingBox& modelBBox)
 
 
 	return collision;
-}
+}*/
 
 bool GFrustum::hasCollided(GBoundingBox& modelBox)
 {
-	//if even one whole point is inside the frustum, we have an intersection.
-	//if all of the points are inside the frustum, we have a contain.
-	//if no point is inside the frustum, we have a nonCollision.
-
-	bool intersectionJudge[8] = { true, true, true, true, true, true, true, true }; //I never set this to true... Hmm...
-
-	bool containmentJudge[6];
-
-	bool contains = true;
-
-	for (int i = 0; i < 8; i++) //for every point in bBox
-	{
-		//herein do the collision-test... See if the points of the cube are contained inside the frustum.
-		//modelBox.vertices.BBoxPoint[i];
-		for (int k = 0; k < 6; k++) //check against the frustum planes
-		{
-			float indicator = (fPlanes[k].normal.x) * (modelBox.vertices.BBoxPoint[i].x) + (fPlanes[k].normal.y) * (modelBox.vertices.BBoxPoint[i].y) + (fPlanes[k].normal.z) * (modelBox.vertices.BBoxPoint[i].z) + fPlanes[k].distance;
-			if (indicator <= 0) //if the point is inside or behind this plane
-				containmentJudge[k] = true;
-			else
-				containmentJudge[k] = false;
-
-		}
-		for (int p = 0; p < 6; p++) {
-			//if any bool is false, no containment.
-			if (!containmentJudge[p]) {
-				contains = false;
-				intersectionJudge[i] = false;
+	for (int planeC = 0; planeC < 6; planeC++) {
+		//Check this every frustum-plane against all of the points of the cube. If any point is inside the current plane --> intersection for this plane is true.
+		//Then go through the rest of the planes. As long as there are boxpoint(s) inside all planes, we have an intersection!
+		bool intersection = false;
+		for (int i = 0; i < 8; i++) {
+			if (((fPlanes[planeC].normal.x) * (modelBox.vertices.BBoxPoint[i].x) + (fPlanes[planeC].normal.y) * (modelBox.vertices.BBoxPoint[i].y) + (fPlanes[planeC].normal.z) * (modelBox.vertices.BBoxPoint[i].z) + fPlanes[planeC].distance) <= 0) {
+				intersection = true;
+				break; //break finds the closest loop.
 			}
 		}
-	}
-	if (contains) {
-		printf("Contains!\n");
-		return true;
-	}
-	else
-	{
-		for (int c = 0; c < 8; c++) {
-			if (intersectionJudge[c]) { //if any point is inside the frustum, we have an intersection.
-				printf("Intersects!\n");
-				return true;
-			}
+		if (intersection == false) {
+			return false;
 		}
 	}
+	return true; //If we haven't already returned false, we have an intersection!
 	//if nothing intersected, no collision was made.
 	printf("Non-Collision!\n");
 	return false;

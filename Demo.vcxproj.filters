@@ -63,6 +63,9 @@
     <ClCompile Include="GBoundingBox.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
+    <ClCompile Include="GQuadTreeBoundingBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -107,6 +110,9 @@
       <Filter>Header Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="GBoundingBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GQuadTreeBoundingBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -94,6 +94,7 @@
     <ClCompile Include="GModel.cpp" />
     <ClCompile Include="GModelList.cpp" />
     <ClCompile Include="GQuadTree.cpp" />
+    <ClCompile Include="GQuadTreeBoundingBox.cpp" />
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -136,6 +137,7 @@
     <ClInclude Include="GModel.h" />
     <ClInclude Include="GModelList.h" />
     <ClInclude Include="GQuadTree.h" />
+    <ClInclude Include="GQuadTreeBoundingBox.h" />
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
