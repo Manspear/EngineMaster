@@ -6,6 +6,7 @@ GQuadTreeBoundingBox::GQuadTreeBoundingBox()
 
 GQuadTreeBoundingBox::~GQuadTreeBoundingBox()
 {
+	delete[] objectBBoxChildren; //this will call the ~GQuadTreeBoundingBox() of the children.
 }
 void GQuadTreeBoundingBox::CreateBBox(XMFLOAT3 minPoint, XMFLOAT3 maxPoint)
 {
@@ -21,7 +22,7 @@ void GQuadTreeBoundingBox::CreateBBox(XMFLOAT3 minPoint, XMFLOAT3 maxPoint)
 	QTBVertices.BBoxPoint[7] = minPoint; //true
 }
 
-void GQuadTreeBoundingBox::splitBox()
+void GQuadTreeBoundingBox::splitBox(int divisionCounter)
 {
 	//thanks to the way the vertices in
 	//GBoundingBox::CreateBBox(minPoint, maxPoint)
@@ -32,14 +33,46 @@ void GQuadTreeBoundingBox::splitBox()
 
 	//now make four child boxes out of the halfpoints of minValue and maxValue.
 	//the y-axis is never divided.
-	XMFLOAT3 tempMin;
-	XMFLOAT3 tempMax;
+	XMFLOAT3 tempMin = minValue; //to start off, they're the same.
+	XMFLOAT3 tempMax = maxValue;
+	
+	
+	//you never divide the y-value... But you need to apply either the min of max y-value,
+	//depending on if the point calculated is a min or max value. tempMax.y = maxValue.y. tempMin.y = minValue.y
+	
+	//Here's a chart of the "min-max-calculation-order"
+	//	x.........x...........
+	//	.1max     .4max	     .
+	//	.         .		     .
+	//	.    1min .     4min .
+	//	x.........x..........x     1min and 2max only have a differing y-value.  
+	//	.3max     . 2max     .
+	//	.         .          .
+	//	.   3min  .     2min .
+	//	..........x..........x
+
+	//objectBBoxChildren holds pointers to the child-boxes.
 	objectBBoxChildren = new(GQuadTreeBoundingBox[4]);
+
 	tempMax = maxValue;
-	tempMin.x = (maxValue.x / 2) + (minValue.x / 2);
-	tempMin.y = tempMin.y;
-	tempMin.z = (maxValue.z / 2) + (minValue.z / 2);
+	tempMin.x = (maxValue.x / 2.f) + (minValue.x / 2.f);
+	tempMin.z = (maxValue.z / 2.f) + (minValue.z / 2.f);
 	objectBBoxChildren[0].CreateBBox(tempMin, tempMax);
 
-	//continue here
+	tempMax = tempMin; //tempMin here holds the same values(except for the y) as tempMax will have.
+	tempMax.y = maxValue.y;
+	tempMin = minValue;
+	objectBBoxChildren[1].CreateBBox(tempMin, tempMax);
+
+	tempMax.x = maxValue.x;
+	tempMax.z = (maxValue.z / 2.f) + (minValue.z / 2.f);
+	tempMin.x = (maxValue.x / 2.f) + (minValue.x / 2.f);
+	tempMin.z = minValue.z;
+	objectBBoxChildren[2].CreateBBox(tempMin, tempMax);
+
+	tempMax.x = (maxValue.x / 2.f) + (minValue.x / 2.f);
+	tempMax.z = maxValue.z;
+	tempMin.x = minValue.x;
+	tempMin.z = (maxValue.z / 2.f) + (minValue.z / 2.f);
+	objectBBoxChildren[3].CreateBBox(tempMin, tempMax);
 }
