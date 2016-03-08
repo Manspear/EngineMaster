@@ -182,7 +182,7 @@ void Engine::Render()
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
-	GModel* listOfModels = modelListObject->getModelList();
+	GModel* listOfModels = modelListObject.getModelList();
 
 	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
 
@@ -192,7 +192,7 @@ void Engine::Render()
 //	frustumVert frustumVertices[6]; //...
 	
 
-	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
+	for (int bufferCounter = 0; bufferCounter < modelListObject.numberOfModels; bufferCounter++)
 	{
 		//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
 		//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
@@ -340,7 +340,6 @@ void Engine::Clean() {
 
 	delete camera;
 	delete input;
-	delete modelListObject;
 	delete cullingFrustum;
 	//delete[] loops through the new-objects in the array, and deletes them!
 }
@@ -354,12 +353,11 @@ void Engine::InitializeCamera()
 
 void Engine::InitializeModels() {
 	//Here create the dynamic GModel-Array:
-	modelListObject->initializeModels(gDevice, gDeviceContext);
+	modelListObject.initializeModels(gDevice, gDeviceContext);
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
-	modelListObject = new GModelList;
 
 	CreateDirect3DContext(wndHandle);
 

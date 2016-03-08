@@ -76,7 +76,7 @@ public:
 		XMFLOAT4 camDir;
 	};
 
-	GModelList * modelListObject = nullptr;
+	GModelList modelListObject; //This will be used in GQuadTreeBoundingBox::splitBox()
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
 	GFrustum * cullingFrustum = nullptr;

@@ -156,3 +156,41 @@ bool GFrustum::hasCollided(GBoundingBox& modelBox)
 	return false;
 }
 
+void GFrustum::QuadTreeCollision(GQuadTreeBoundingBox& rootBox) //The loops herein could be hairy... Also: alway have the "original root" as input.
+{
+	//Here check collision against all of the GQuadTreeBoundingBox-children.
+	for (int i = 0; i < 4; i++) 
+	{
+		if (hasCollided(rootBox.GQTBBoxChildren[i])) //if the frustum has collided with the QuadTreeBBox
+		{
+			if (rootBox.GQTBBoxChildren[i].hasSplit) //Check if this QuadTreeBBox has split
+			{
+				//loop again through it's children using this QuadTreeCollision-function.
+				QuadTreeCollision(rootBox.GQTBBoxChildren[i]);
+			}
+			else //check for object-collisions. 
+				 //Since only the lowest box-division has them, objects are found in the boxes that haven't split.
+			{
+				for (int c = 0; c < rootBox.modelChildrenCounter; c++) { //for each model in this bbox...
+					bool modelSeen = hasCollided(rootBox.modelChildren[c]->bBox); //Check for collision with this object's bbox.
+					if (modelSeen) {
+						rootBox.modelChildren[c]->isCulled = false;
+					}
+					else {
+						rootBox.modelChildren[c]->isCulled = true;
+					}
+					//Hmm... I am now looping through all bboxes, including model-boxes, 
+					//registering detection with a bool called isCulled.
+					//in Engine::Render() we'll loop through the complete modelList, 
+					//and ignore rendering the models with the "isCulled == true" tag.
+					//the bottleneck here could be the loop through all the models.
+					//Solution is to add all non-culled objects into a list that gets rendered 
+					//somehow. It must be done in this GFrustum-class. Otherwise we'll 
+					//still have to loop through all models to assemble the list(that'd be even slower).
+					
+				}
+			}
+		}
+	}
+}
+

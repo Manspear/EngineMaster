@@ -7,7 +7,7 @@ public:
 	GQuadTree();
 	GQuadTree(XMFLOAT3 minPoint, XMFLOAT3 maxPoint);
 	~GQuadTree();
-	GQuadTreeBoundingBox* rootBox;
+	GQuadTreeBoundingBox rootBox;
 	void makeTree(int numberOfDivisions);
 	//Hmm... How to invoke parentage?
 	//You do it by either:

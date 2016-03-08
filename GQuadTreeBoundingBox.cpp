@@ -6,30 +6,31 @@ GQuadTreeBoundingBox::GQuadTreeBoundingBox()
 
 GQuadTreeBoundingBox::~GQuadTreeBoundingBox()
 {
-	delete[] objectBBoxChildren; //this will call the ~GQuadTreeBoundingBox() of the children.
+	delete[] GQTBBoxChildren; //this will call the ~GQuadTreeBoundingBox() of the children.
 }
 void GQuadTreeBoundingBox::CreateBBox(XMFLOAT3 minPoint, XMFLOAT3 maxPoint)
 {
 	//THis is axis-aligned.
-	QTBVertices.BBoxPoint[0] = maxPoint; //false
-	QTBVertices.BBoxPoint[1] = XMFLOAT3(minPoint.x, maxPoint.y, maxPoint.z); //false
-	QTBVertices.BBoxPoint[2] = XMFLOAT3(maxPoint.x, maxPoint.y, minPoint.z); //true
-	QTBVertices.BBoxPoint[3] = XMFLOAT3(minPoint.x, maxPoint.y, minPoint.z); //true
+	vertices.BBoxPoint[0] = maxPoint; //false
+	vertices.BBoxPoint[1] = XMFLOAT3(minPoint.x, maxPoint.y, maxPoint.z); //false
+	vertices.BBoxPoint[2] = XMFLOAT3(maxPoint.x, maxPoint.y, minPoint.z); //true
+	vertices.BBoxPoint[3] = XMFLOAT3(minPoint.x, maxPoint.y, minPoint.z); //true
 
-	QTBVertices.BBoxPoint[4] = XMFLOAT3(maxPoint.x, minPoint.y, maxPoint.z); //false
-	QTBVertices.BBoxPoint[5] = XMFLOAT3(minPoint.x, minPoint.y, maxPoint.z);//false
-	QTBVertices.BBoxPoint[6] = XMFLOAT3(maxPoint.x, minPoint.y, minPoint.z); //true
-	QTBVertices.BBoxPoint[7] = minPoint; //true
+	vertices.BBoxPoint[4] = XMFLOAT3(maxPoint.x, minPoint.y, maxPoint.z); //false
+	vertices.BBoxPoint[5] = XMFLOAT3(minPoint.x, minPoint.y, maxPoint.z);//false
+	vertices.BBoxPoint[6] = XMFLOAT3(maxPoint.x, minPoint.y, minPoint.z); //true
+	vertices.BBoxPoint[7] = minPoint; //true
 }
 
-void GQuadTreeBoundingBox::splitBox(int divisionCounter)
+void GQuadTreeBoundingBox::splitBox(int divisionCounter, GModelList& modelList)
 {
+	hasSplit = true;
 	//thanks to the way the vertices in
 	//GBoundingBox::CreateBBox(minPoint, maxPoint)
 	//are saved, maxPoint is saved at position [0]
 	//and minPoint at position [7]
-	XMFLOAT3 minValue = QTBVertices.BBoxPoint[0]; 
-	XMFLOAT3 maxValue = QTBVertices.BBoxPoint[7];
+	XMFLOAT3 minValue = vertices.BBoxPoint[0]; 
+	XMFLOAT3 maxValue = vertices.BBoxPoint[7];
 
 	//now make four child boxes out of the halfpoints of minValue and maxValue.
 	//the y-axis is never divided.
@@ -51,28 +52,60 @@ void GQuadTreeBoundingBox::splitBox(int divisionCounter)
 	//	.   3min  .     2min .
 	//	..........x..........x
 
-	//objectBBoxChildren holds pointers to the child-boxes.
-	objectBBoxChildren = new(GQuadTreeBoundingBox[4]);
+	//GQTBBoxChildren holds pointers to the child-boxes.
+	GQTBBoxChildren = new(GQuadTreeBoundingBox[4]);
 
 	tempMax = maxValue;
 	tempMin.x = (maxValue.x / 2.f) + (minValue.x / 2.f);
 	tempMin.z = (maxValue.z / 2.f) + (minValue.z / 2.f);
-	objectBBoxChildren[0].CreateBBox(tempMin, tempMax);
+	GQTBBoxChildren[0].CreateBBox(tempMin, tempMax);
 
 	tempMax = tempMin; //tempMin here holds the same values(except for the y) as tempMax will have.
 	tempMax.y = maxValue.y;
 	tempMin = minValue;
-	objectBBoxChildren[1].CreateBBox(tempMin, tempMax);
+	GQTBBoxChildren[1].CreateBBox(tempMin, tempMax);
 
 	tempMax.x = maxValue.x;
 	tempMax.z = (maxValue.z / 2.f) + (minValue.z / 2.f);
 	tempMin.x = (maxValue.x / 2.f) + (minValue.x / 2.f);
 	tempMin.z = minValue.z;
-	objectBBoxChildren[2].CreateBBox(tempMin, tempMax);
+	GQTBBoxChildren[2].CreateBBox(tempMin, tempMax);
 
 	tempMax.x = (maxValue.x / 2.f) + (minValue.x / 2.f);
 	tempMax.z = maxValue.z;
 	tempMin.x = minValue.x;
 	tempMin.z = (maxValue.z / 2.f) + (minValue.z / 2.f);
-	objectBBoxChildren[3].CreateBBox(tempMin, tempMax);
+	GQTBBoxChildren[3].CreateBBox(tempMin, tempMax);
+
+	divisionCounter--;
+
+	if (divisionCounter > 0) {
+		//if divisions 
+		GQTBBoxChildren[0].splitBox(divisionCounter, modelList);
+		GQTBBoxChildren[1].splitBox(divisionCounter, modelList);
+		GQTBBoxChildren[2].splitBox(divisionCounter, modelList);
+		GQTBBoxChildren[3].splitBox(divisionCounter, modelList);
+	}
+	if(divisionCounter == 0)
+	{
+		fillBox(modelList);
+	}
+}
+
+void GQuadTreeBoundingBox::fillBox(GModelList & modelList)
+{
+	//do collision-detection with all the 
+	//object-bboxes in the scene.
+	//if collision: add that object to the 
+	//modelList-object-pointer.
+
+	//adding objects: 
+	GModel* tempModelList = modelList.getModelList();
+	for (int z = 0; z < modelList.numberOfModels; z++) {
+		//INSERT COLLISION DETECTION HERE!!!! Between all modelboxes 
+		//and this box. Add the 
+		//colliding model-boxes to this bbox's modelChildren-struct.
+		modelChildren.push_back(&tempModelList[z]); //gives a reference of the GModel to this bbox-object.
+	}
+	modelChildrenCounter = modelChildren.size();
 }

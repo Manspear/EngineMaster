@@ -20,6 +20,7 @@ public:
 	};
 	GModel();
 	~GModel();
+	bool isCulled = false; //This bool will serve as a tag, it is set by the GFrustum calling the QuadTreeCollision-function.
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
 	XMMATRIX* objectWorldMatrix;
