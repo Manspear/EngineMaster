@@ -249,7 +249,7 @@ void Engine::Render()
 
 
 void Engine::Update() {
-	MousePickingObject->getCursorPosition();
+	MousePickingObject->updateClass();
 	
 	frameCount++;
 	if (getTime() > 1.0f)

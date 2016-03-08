@@ -6,8 +6,8 @@ MousePicking::MousePicking(HWND wndHandle, GCamera* camera, int screenHeight, in
 {
 	this->camera = camera;
 	this->wndHandle2 = wndHandle;
-	this->height = screenHeight;
-	this->width = screenWidth;
+	this->screenHeight = screenHeight;
+	this->screenWidth = screenWidth;
 }
 
 MousePicking::~MousePicking()
@@ -15,48 +15,65 @@ MousePicking::~MousePicking()
 	 //Pass
 }
 
-void MousePicking::updateVariables()
+void MousePicking::updateClass() //updates variables & checks ray
 {
+	//here be variable uppgrades
+	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) /*if left mouse button down*/
+	{
+		result = calculateCurrentRay();
+		
+	}
+
 
 }
 
-void MousePicking::getCursorPosition()
+bool MousePicking::getCursorPosition(POINT& MousePosSavedHere)
 {
 	
-	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) /*if left mouse button down*/{
-		POINT curMousePos; 
-		BOOL result = GetCursorPos(&curMousePos);
+	
+	this->result = GetCursorPos(&MousePosSavedHere); 
 
-		if (result) /*The function call succeeded and curPos has valid data.*/{
-			
-			result=ScreenToClient(this->wndHandle2, &curMousePos);
+	if (this->result) /*The function call succeeded and curPos has valid data.*/
+	{
 
-			if (curMousePos.x > width)
-				curMousePos.x = width;
-
-			else if (curMousePos.x < 0)
-				curMousePos.x = 0;
-
-			if (curMousePos.y > height)
-				curMousePos.y = height;
-
-			else if (curMousePos.y < 0)
-				curMousePos.y = 0;
-
-			printf("(x: %d) (y: %d)\n", curMousePos.x, curMousePos.y);
-		}
-		else
+		this->result = ScreenToClient(this->wndHandle2, &MousePosSavedHere);
+		if (this->result = true)
 		{
-			printf("Failed to get mouse position data\n");
 
+			if (MousePosSavedHere.x > this->screenWidth)
+				MousePosSavedHere.x = this->screenWidth;
+
+			else if (MousePosSavedHere.x < 0)
+				MousePosSavedHere.x = 0;
+
+			if (MousePosSavedHere.y > this->screenHeight)
+				MousePosSavedHere.y = this->screenHeight;
+
+			else if (MousePosSavedHere.y < 0)
+				MousePosSavedHere.y = 0;
+
+			return true;
 		}
 
-	}//End of if(left mouse button down)
+
+	}
+	else
+	{
+		printf("Failed to get mouse position data\n");
+		return false;
+	}
+
 }
 
-void MousePicking::calculateCurrentRay()
+bool MousePicking::calculateCurrentRay()
 {
-
+	
+	result = getCursorPosition(this->MousePos); //1. get the mouse cordinates
+												//printf("(x: %d) (y: %d)\n", this->MousePos.x, this->MousePos.y);
+	
+	
+	printf("RayDirection; x: %d y: %d, z: %d \n", this->CurrentRay.x, this->CurrentRay.x, this->CurrentRay.z);
+	return true;
 }
 
 

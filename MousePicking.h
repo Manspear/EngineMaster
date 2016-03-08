@@ -15,8 +15,18 @@ class MousePicking
 {
 //http://www.braynzarsoft.net/viewtutorial/q16390-24-picking
 
+//Variables
+private:
+	POINT MousePos;
+	int screenHeight, screenWidth;
+	
+	bool result;
+	XMMATRIX projectionMatrix, viewMatrix;
+	GCamera* camera;
+	HWND wndHandle2;
+	
+
 public:
-#pragma region Variables
 
 	struct Ray
 	{
@@ -24,20 +34,16 @@ public:
 		int y=0;
 		int z=0;
 	} CurrentRay;
-	XMMATRIX projectionMatrix;
-	XMMATRIX viewMatrix;
-	GCamera* camera;
-	HWND wndHandle2;
-	int height, width;
 
-#pragma region Variables
+	
+//end of Variables
 
 	MousePicking(HWND wndHandle, GCamera* camera, int screenHeight, int screenWidth);
 	~MousePicking();
 
-	void updateVariables();
-	void getCursorPosition();
-	void calculateCurrentRay();
+	void updateClass(); 
+	bool getCursorPosition(POINT& MousePosSavedHere);
+	bool calculateCurrentRay();
 
 
 };
