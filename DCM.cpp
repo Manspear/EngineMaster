@@ -176,23 +176,7 @@ void DCM::BuildCubeFaceCamera(float x, float y, float z, float w)
 	{
 		DCM_CubeMapCamera[i].LookAt(center, targets[i], ups[i]);
 	}
-}
-
-void DCM::DrawScene()
-{
-
-
-	//Generate the cube map by rendering to each cube map face.
-
-
-	//Det jag skrev här använde gDeviceContext och funktioner som redan används i engine. Jag flyttade därför dessa rader till render() i eng och tog bort de som gjordes dubbelt
-}
-
-//vi använder const för att göra det extra tydligt att vi inte ska ändra på något hos kameraobjektet i drawscene2 funktionen
-//vi  använder & för att skicka in det faktiska objektet och inte en kopia utav det. För det vore onödigt med tanke på minnet
-//void DCM::DrawScene2(const GCamera& mCubeMapCamera, bool drawCenterSphere)
-//{
-//}
+}//end, moved drawscene to engine
 
 ID3D11ShaderResourceView* DCM::getSubResourceView()
 {

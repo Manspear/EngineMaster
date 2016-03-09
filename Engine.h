@@ -76,7 +76,7 @@ public:
 	byte * keys;
 
 
-
+	void CreateDynamicCubeMap();
 	void CreateShaders();
 	void CreateTriangleData();
 	void CreateTexture();

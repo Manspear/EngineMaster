@@ -22,6 +22,11 @@ Engine::~Engine()
 
 }
 
+void Engine::CreateDynamicCubeMap()
+{
+	dcm.Dynamic_Cube_Map(gDevice);
+}
+
 void Engine::CreateShaders()
 {
 	//create vertex shader
@@ -123,6 +128,7 @@ void Engine::CreateTexture() {
 }
 
 
+
 void Engine::CreateConstantBuffer() {
 
 	D3D11_BUFFER_DESC bufferDesc;
@@ -203,16 +209,18 @@ void Engine::Render()
 
 	//vvvvvvvvvv	< Dynamic cube map >	vvvvvvvvvvvvv
 
-	gDeviceContext->RSSetViewports(1, &dcm.getDCM_CubeMapViewport());
+	//override void DrawScene() Vad menas med override? Ärvs några functioner? Nej Den kunde lika gärna heta DrawScene2().
 
+	gDeviceContext->RSSetViewports(1, &dcm.getDCM_CubeMapViewport());
+	
 	for (int i = 0; i < 6; i++)
 	{
 		gDeviceContext->ClearRenderTargetView(dcm.getDCM_RenderTargetView(i), reinterpret_cast<const float*>(&Colors::Silver));//fortsätt läsa sid 486
 		gDeviceContext->ClearDepthStencilView(dcm.getDCM_DepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		ID3D11RenderTargetView* rtv = dcm.getDCM_RenderTargetView(i); // för den ville ha //&DCM_RenderTargetView[i]
+		ID3D11RenderTargetView* DCM_RenderTargetView = dcm.getDCM_RenderTargetView(i); // för den ville ha //&DCM_RenderTargetView[i]
 		//Bind cube map face as render target
-		gDeviceContext->OMSetRenderTargets(1, &rtv, dcm.getDCM_DepthStencilView());
+		gDeviceContext->OMSetRenderTargets(1, &DCM_RenderTargetView, dcm.getDCM_DepthStencilView());
 
 		//Draw the scene with exception of the center sphere, to this cube map face
 		// DrawScene2(DCM_CubeMapCamera[i], false); Engines draw funktion
@@ -394,6 +402,9 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	input->initialize(hinstance, wndHandle, wWIDTH, wHEIGHT);
 
+
+	CreateDynamicCubeMap();
+
 	CreateShaders();
 
 	CreateTriangleData();
@@ -403,5 +414,4 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	CreateConstantBuffer();
 
 	InitializeCamera();
-
 }
