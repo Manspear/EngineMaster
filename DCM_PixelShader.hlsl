@@ -8,14 +8,12 @@ SamplerState DCM_TriLinearSam
 	AddressV = Wrap;
 };
 
-
-
 Texture2D txDiffuse[2]; //: register(t0); //This receives the texture
 SamplerState sampAni;
+TextureCube gCubeMap;
 
 struct PS_IN
 {
-
 	float4 Pos : SV_Position;//Homogeneous clip space  /w för att få Normalised device space   utifrån kameran
 	float3 normal : normal;
 	float2 UV : TEXCOORD;
@@ -23,31 +21,24 @@ struct PS_IN
 
 	float3 tangent : TANGENT;
 	float3 biTangent : BITANGENT;
-
-	
 };
 
 float4 PS_main(PS_IN input) : SV_Target
 {
-	float3 reflectivityVector = float3(x, y, z);//reflektionsvinkeln. Spec map vectorn. 
-	float4 color = gCubeMap.Sample(gTriLinearSample, v);
+	//float3 reflectivityVector = float3(x, y, z);//reflektionsvinkeln. Spec map vectorn. 
+	//float4 color = gCubeMap.Sample(gTriLinearSample, v);
 
-
-	float3 lightPos = float3 (4, 3, -3) - input.worldPosition; //Vector from worldPosition to camera. This is correct.
+	float3 toEye = float3 (4, 3, -3) - input.worldPosition; //Vector from worldPosition to camera. This is correct.
 	float4 ambientLightColor = { 0.2, 0.2, 0.2, 0 };
 	float4 diffuseColor = float4(1,1,1,1);
 
 	float3 color, textureColor, bumpMap;
-	color = textureColor = float3 (txDiffuse[0].Sample(sampAni, input.UV).xyz);
 
-	bumpMap = float3 (txDiffuse[1].Sample(sampAni, input.UV).xyz);
+	reflectionColor = float3 (txDiffuse[1].Sample(sampAni, input.UV).xyz);
 	bumpMap = (bumpMap * 2.0f) - 1.0f;
 	input.normal = (bumpMap.x * input.tangent) + (bumpMap.y * input.biTangent) + (bumpMap.z * input.normal);
 	input.normal = normalize(input.normal);
 	float lightIntensity;
-
-
-
 
 	//specular
 	float shinypower = 3.0f;
@@ -66,6 +57,18 @@ float4 PS_main(PS_IN input) : SV_Target
 	color = color + (ambientLightColor * textureColor);
 	color = color + sl;
 
-	return float4(color,1);
-};
+	//DMC vvvvvvvvvvvvvvvvvvvvvv
 
+	if(gReflectionEnable)
+	{
+		float3 incident = -toEye;//
+		float3 reflectionVector = reflect(incident, pin.NormalW);//reflect ska finnas i material structen
+		float4 reflectionColor = float3 (gCubeMap.Sample(sampAni, input.UV).xyz);// här annorlunda
+
+		color += gMaterial.Reflect * reflectionColor;
+	}
+
+	//^^^^^^^^^^^^^^^^^^^^^^^^
+
+	return gCubeMap.Sample(DCM_TriLinearSam, lightPos)
+};
