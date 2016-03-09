@@ -17,7 +17,7 @@ private:
 	ID3D11RenderTargetView* DCM_RenderTargetView[6];
 	ID3D11DepthStencilView* DCM_DepthStencilView;
 
-public:
+public://bitch
 	DCM();
 	~DCM();
 	void Dynamic_Cube_Map(ID3D11Device *gDevice);
