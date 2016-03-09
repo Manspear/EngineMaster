@@ -105,7 +105,35 @@ void GQuadTreeBoundingBox::fillBox(GModelList & modelList)
 		//INSERT COLLISION DETECTION HERE!!!! Between all modelboxes 
 		//and this box. Add the 
 		//colliding models to this bbox's modelChildren-vector.
-		modelChildren.push_back(&tempModelList[z]); //gives a reference of the GModel to this bbox-object.
+		//Hmm... How to define the "inside" of a box?
+		//By making "planes" for every box by doing cross-product?
+		//In that case how to I make the "d-value" appear?
+		//By inserting a point that I know will be in the plane. Of course.
+		//That point simply being one of the vectors used to calculate the
+		//cross product.
+
+		//Will do a AABB vs AABB intersection-test. It is simple, and cheap, and works for this engine.
+		//It is done by comparing the two bboxes' max and min values. If ANY min > max, then they don't intersect.
+		XMFLOAT3 modelMax = tempModelList[z].bBox.vertices.BBoxPoint[0]; //the model bbox's MAX-point.
+		XMFLOAT3 modelMin = tempModelList[z].bBox.vertices.BBoxPoint[7];
+		//vertices.BBoxPoint[0]; //QuadTreeBBox maxpoint
+		//vertices.BBoxPoint[7]; //QuadTreeBBox minpoint
+		if (modelMin.x > vertices.BBoxPoint[7].x) {
+			//non-intersect
+			continue;
+		}
+		if (modelMin.y > vertices.BBoxPoint[7].y) {
+			//non intersect
+			continue;
+		}
+		if (modelMin.z > vertices.BBoxPoint[7].z) {
+			//non-intersect
+			continue;
+		}
+		//Enough tests? Hmm... Should be.
+
+		//if the AABs' have passed the intersection test, it intersects the QuadTreeBBox!
+		modelChildren.push_back(&tempModelList[z]); //gives a reference of the GModel to this bbox-object. (a pointer)
 	}
 	modelChildrenCounter = modelChildren.size();
 }
