@@ -1,8 +1,6 @@
 #include "Engine.h"
-#include "bth_image.h" //This header wouldn't work in Engine.h VS complained
-#include "FbxDawg.h"					   //of one or more multiply defined symbols found
-
-
+//#include "bth_image.h" //This header wouldn't work in Engine.h VS complained
+//of one or more multiply defined symbols found
 
 #pragma region Texture includes
 #include "WICTextureLoader.h"
@@ -12,14 +10,16 @@
 
 Engine::Engine()
 {
-	//EMPTY
+	countsPerSecond = 0;
+	counterStart = 0;
+	frameCount = 0;
+	fps = 0;
+	frameTimeOld = 0;
 }
-
 
 Engine::~Engine()
 {
-
-
+	
 }
 
 void Engine::CreateDynamicCubeMap()
@@ -51,12 +51,44 @@ void Engine::CreateShaders()
 	//create input layout (verified using vertex shader)
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0},
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
+	//create vertex shader
+	ID3DBlob* pVSbs = nullptr;
+	D3DCompileFromFile(
+		L"VertexShaderBS.hlsl", // filename
+		nullptr,		// optional macros
+		nullptr,		// optional include files
+		"VS_main",		// entry point
+		"vs_4_0",		// shader model (target)
+		0,				// shader compile options
+		0,				// effect compile options
+		&pVSbs,			// double pointer to ID3DBlob		
+		nullptr			// pointer for Error Blob messages.
+						// how to use the Error blob, see here
+						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+		);
+
+
+	gDevice->CreateVertexShader(pVSbs->GetBufferPointer(), pVSbs->GetBufferSize(), nullptr, &gVertexShaderBS);
+
+	//create input layout (verified using vertex shader)
+	D3D11_INPUT_ELEMENT_DESC inputDescBS[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA , 0 },
+		{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 56, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	HRESULT hr = gDevice->CreateInputLayout(inputDescBS, ARRAYSIZE(inputDescBS), pVSbs->GetBufferPointer(), pVSbs->GetBufferSize(), &gVertexLayoutBS);
+	// we do not need anymore this COM object, so we release it.
+
+	pVSbs->Release();
 
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;
@@ -94,39 +126,6 @@ void Engine::CreateShaders()
 	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShader);
 	pGS->Release();
 }
-
-void Engine::CreateTriangleData()
-{
-	int shit = fbxobj->modelVertexList.size();
-	D3D11_BUFFER_DESC bufferDesc;
-	memset(&bufferDesc, 0, sizeof(bufferDesc));
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
-
-	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = fbxobj->modelVertexList.data();
-	gDevice->CreateBuffer(&bufferDesc, &data, &gVertexBuffer);
-}
-
-void Engine::CreateTexture() {
-	#pragma region // Import texture from memory
-	HRESULT hr;
-	
-	#pragma endregion
-
-	#pragma region //Import from File
-	ID3D11ShaderResourceView * Texture;
-	CoInitialize(NULL);
-
-	hr = CreateWICTextureFromFile(gDevice, fbxobj->textureFilepath.c_str(), NULL, &gTextureView[0]);//wstring äger functionen c_str som är en getFucntion till wchar_t* som finns redan
-	hr = CreateWICTextureFromFile(gDevice, L"./Images/normal_map.jpg", NULL, &gTextureView[1]);
-	//(d3d11DeviceInterface, d3d11DeviceContextInterface, L"test.bmp", 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0, &pTex2D, NULL);
-	#pragma endregion 
-	
-
-}
-
 
 
 void Engine::CreateConstantBuffer() {
@@ -174,12 +173,7 @@ void Engine::SetViewport()
 // SWAG
 void Engine::Render()
 {
-	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
-	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
-	float clearColor[] = { 0, 0, 0, 1 };
-	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
-	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
+#pragma region //EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM
 	//>>>EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM<<<
 	//The depth buffer clears itself with a value between 0 and 1. If it clears to 1
 	//it has a depth-value corresponding to the Far Plane of the view-frustum. 
@@ -205,6 +199,13 @@ void Engine::Render()
 	//The values it holds are both positive and negative, where negative values represent 
 	//the shadow volume that is behind the last object that it hits, and positive values 
 	//represent the shadow-volume before it hits it's "object-that-will-get-shadow-on-it".
+#pragma endregion
+	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
+	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
+	float clearColor[] = { 1, 0.537, 0.812, 1 };
+	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
 	
 
 	//vvvvvvvvvv	< Dynamic cube map >	vvvvvvvvvvvvv
@@ -235,57 +236,112 @@ void Engine::Render()
 
 	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-	gDeviceContext->PSSetShaderResources(0, 2, gTextureView);
-	UINT32 vertexSize = sizeof(float) * 8;
-	UINT32 offset = 0;
-	gDeviceContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
-
+	UINT32 vertexSize;
+	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
+	
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->IASetInputLayout(gVertexLayout);
-
+	
+	
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
-	gDeviceContext->Draw(fbxobj->modelVertexList.size(), 0);
+
+	listOfModels = modelListObject->getModelList();
+
+	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
+	{
+		if (listOfModels[bufferCounter].hasBlendShape())
+		{
+			gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
+			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
+			vertexSize = sizeof(float) * 16;
+
+
+		}else{
+			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayout);
+			vertexSize = sizeof(float) * 8;
+		}
+
+		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
+
+		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
+		gDeviceContext->PSSetShaderResources(0, listOfModels[bufferCounter].getNumberOfTextures(), listOfModels[bufferCounter].modelTextureView);
+
+		gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
+		gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
+		//gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0); //Uses indexbuffer
+		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
+	}
 }
 
 
 
 void Engine::Update() {
+	frameCount++;
+	if (getTime() > 1.0f)
+	{
+		fps = frameCount;
+		frameCount = 0;
+		startTimer();
+	}
+	dt = getFrameTime();
+	//printf("%i \n", fps); uncomment for fps in console
 
-	XMFLOAT4X4 worldMatrix;
+	//printf("%d \n", dt); uncomment for dt
+
+	//printf("%d \n", dt);
+
+
 	XMFLOAT4X4 viewMatrix;
 	XMFLOAT4X4 projectionMatrix;
 
 	//world matrix
 	static float radianRotation = 0.00;
-	radianRotation += 0.0002;
-	XMMATRIX worMat = XMMatrixRotationY(radianRotation);
+	//radianRotation += 4500*dt;
+	XMMATRIX worMat = DirectX::XMMatrixRotationY(radianRotation);
 
 	//Transpose the matrices. This is a must for DirectX 11
-	worMat = XMMatrixTranspose(worMat);
+	worMat = DirectX::XMMatrixTranspose(worMat);
 
 	input->getKeyboardState();
 	input->GetMouseLoc();
 
-	if (input->keyState[DIK_LALT])
+	if (input->keyState[DIK_LCONTROL])
 	{
-		camera->rotate(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), input->mouseY);
-		camera->rotate(XMFLOAT4(0.0f, -1.0f, 0.0f, 1.0f), -input->mouseX);
+		camera->rotate(XAXIS, input->mouseX*MOUSE_SENSITIVITY*dt);
+		camera->rotate(YAXIS, -input->mouseY*MOUSE_SENSITIVITY*dt);
+	}
+	static float weight;
+	if (input->keyState[DIK_UPARROW])
+	{
+		weight += 0.2*dt;
+		if (weight > 1.0)
+			weight = 1.0;
+		listOfModels[2].setBlendWeight(weight, gDeviceContext);
+	}
+	if (input->keyState[DIK_DOWNARROW])
+	{
+		weight -= 0.2*dt;
+		if (weight < 0.0)
+			weight = 0.0;
+		listOfModels[2].setBlendWeight(weight, gDeviceContext);
 	}
 
 	// kryssprodukten mellan upp vektor och riktings vektorn ger sidleds vektorn.
 	if (input->keyState[DIK_S])
-		camera->moveForward(-0.001);
+		camera->moveForward(-MOVESPEED*dt);
 	if (input->keyState[DIK_A])
-		camera->moveStrafe(0.001);
+		camera->moveStrafe(MOVESPEED*dt);
 	if (input->keyState[DIK_D])
-		camera->moveStrafe(-0.001);
+		camera->moveStrafe(-MOVESPEED*dt);
 	if (input->keyState[DIK_W])
-		camera->moveForward(0.001);
+		camera->moveForward(MOVESPEED*dt);
 	if (input->keyState[DIK_R])
 		camera->reset();
 
@@ -296,10 +352,11 @@ void Engine::Update() {
 	gDeviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (matrixBuffer*)gMappedResource.pData;
 
-	dataPtr->worldMatrix = worMat;
-	dataPtr->viewMatrix = XMMatrixTranspose(camera->getViewMatrix());
-	dataPtr->projectionMatrix = XMMatrixTranspose(camera->getProjMatrix());
-
+	//dataPtr->worldMatrix = worMat;
+	dataPtr->viewMatrix = DirectX::XMMatrixTranspose(camera->getViewMatrix());
+	dataPtr->projectionMatrix = DirectX::XMMatrixTranspose(camera->getProjMatrix());
+	dataPtr->camPos = camera->getPosition();
+	dataPtr->camDir = camera->getCameraDirection();
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
 
@@ -322,7 +379,7 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		NULL,
+		D3D11_CREATE_DEVICE_DEBUG,
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,
@@ -355,7 +412,6 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 }
 
 void Engine::Clean() {
-	gVertexBuffer->Release();
 
 	gVertexLayout->Release();
 	gVertexShader->Release();
@@ -371,16 +427,10 @@ void Engine::Clean() {
 	depthStencilView->Release();
 	gDepthStencilBuffer->Release();
 
-	if (fbxobj != nullptr)
-	{
-		delete fbxobj;
-		//for every new, have a delete.
-		//the destructor of FbxDawg is called before this destructor is called.
-		//Destructors are called every time a variable runs out of scope.
-		//Delete removes the memory allocated.
-	}
 	delete camera;
 	delete input;
+	delete modelListObject;
+	//delete[] loops through the new-objects in the array, and deletes them!
 }
 void Engine::InitializeCamera()
 {
@@ -389,14 +439,26 @@ void Engine::InitializeCamera()
 	//													  ^^ near plane  förut var det 0.5 här
 }
 
+void Engine::InitializeModels() {
+	//Here create the dynamic GModel-Array:
+	modelListObject->initializeModels(gDevice, gDeviceContext);
+	//this->modelList[0].load(".\\ItsBoxxyTextured.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
+	//this->modelList[1].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
+	//this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
+	////this->modelList[3].load(".\\erect.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", NULL);
+	////this->modelList[4].load(".\\slak.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", NULL);
+	//
+	//modelList[3].setPosition(XMFLOAT4(-14, 0, 1, 1), gDeviceContext);
+	//modelList[4].setPosition(XMFLOAT4(-7, 0, 1, 1), gDeviceContext);
+}
+
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
-
-	const char* filePath = ".\\box3.fbx";
-	fbxobj = new FbxDawg();
-	fbxobj->loadModels(filePath);
+	modelListObject = new GModelList;
 
 	CreateDirect3DContext(wndHandle);
+
+	InitializeModels();
 
 	SetViewport();
 
@@ -407,11 +469,44 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	CreateShaders();
 
-	CreateTriangleData();
-
-	CreateTexture();
-
 	CreateConstantBuffer();
 
 	InitializeCamera();
+}
+
+void Engine::renderText(std::wstring text)
+{
+
+}
+
+void Engine::startTimer()
+{
+	LARGE_INTEGER frequencyCount;
+	QueryPerformanceFrequency(&frequencyCount);
+
+	countsPerSecond = double(frequencyCount.QuadPart);
+
+	QueryPerformanceCounter(&frequencyCount);
+	counterStart = frequencyCount.QuadPart;
+}
+
+double Engine::getTime()
+{
+	LARGE_INTEGER currentTime;
+	QueryPerformanceCounter(&currentTime);
+	return double(currentTime.QuadPart - counterStart) / countsPerSecond;
+}
+double Engine::getFrameTime()
+{
+	LARGE_INTEGER currentTime;
+	__int64 tickCount;
+	QueryPerformanceCounter(&currentTime);
+
+	tickCount = currentTime.QuadPart - frameTimeOld;
+	frameTimeOld = currentTime.QuadPart;
+
+	if (tickCount < 0.0f)
+		tickCount = 0.0f;
+
+	return float(tickCount) / countsPerSecond;
 }

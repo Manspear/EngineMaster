@@ -27,17 +27,19 @@ float4 PS_main(PS_IN input) : SV_Target
 {
 	//float3 reflectivityVector = float3(x, y, z);//reflektionsvinkeln. Spec map vectorn. 
 	//float4 color = gCubeMap.Sample(gTriLinearSample, v);
-
+	
+	float3 lightPos = normalize(float3 (4, 3, -3) - input.worldPosition);
 	float3 toEye = float3 (4, 3, -3) - input.worldPosition; //Vector from worldPosition to camera. This is correct.
 	float4 ambientLightColor = { 0.2, 0.2, 0.2, 0 };
 	float4 diffuseColor = float4(1,1,1,1);
 
 	float3 color, textureColor, bumpMap;
 
-	reflectionColor = float3 (txDiffuse[1].Sample(sampAni, input.UV).xyz);
+	
 	bumpMap = (bumpMap * 2.0f) - 1.0f;
 	input.normal = (bumpMap.x * input.tangent) + (bumpMap.y * input.biTangent) + (bumpMap.z * input.normal);
 	input.normal = normalize(input.normal);
+
 	float lightIntensity;
 
 	//specular
@@ -59,16 +61,16 @@ float4 PS_main(PS_IN input) : SV_Target
 
 	//DMC vvvvvvvvvvvvvvvvvvvvvv
 
-	if(gReflectionEnable)
+	/*if(gReflectionEnable)
 	{
 		float3 incident = -toEye;//
 		float3 reflectionVector = reflect(incident, pin.NormalW);//reflect ska finnas i material structen
 		float4 reflectionColor = float3 (gCubeMap.Sample(sampAni, input.UV).xyz);// här annorlunda
 
 		color += gMaterial.Reflect * reflectionColor;
-	}
+	}*/
 
 	//^^^^^^^^^^^^^^^^^^^^^^^^
 
-	return gCubeMap.Sample(DCM_TriLinearSam, lightPos)
+	return gCubeMap.Sample(DCM_TriLinearSam, lightPos);
 };

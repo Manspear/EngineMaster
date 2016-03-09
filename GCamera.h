@@ -25,23 +25,26 @@ public:
 
 	//FUNCTIONS
 
+
+
 	//VEIW
 	void reset();
 	void moveForward(float speed);
 	void moveStrafe(float speed);
 	void move(XMFLOAT4 direction);
-	void rotate(XMFLOAT4 axis, float degrees);
+	void rotate(int rotAx, float degrees);
 	void setPosition(XMFLOAT4& newPosition);
-	const XMVECTOR& getPosition() const { return cPosition; }
-	void setTarget(XMFLOAT4 nTarget);
+	const XMFLOAT4 getPosition();
 	//jespers Dynamic cube map camera
 	void LookAt(XMFLOAT4 pos, XMFLOAT4 target, XMFLOAT4 worldUp);
 	void setUp(XMFLOAT4 cUp);
-
+	void setTarget(XMFLOAT4 nTarget);
 	const XMVECTOR& getTarget() const { return cTarget; }
 	const XMFLOAT4 getUp(); //returns camera up vector
 	const XMFLOAT4 getLookAtTarget(); //returns camera look at target vector
 	const XMMATRIX getViewMatrix();
+	XMFLOAT4 getCameraDirection();
+
 
 	//PROJECTION
 	void setFrustAngle(float Angle);
