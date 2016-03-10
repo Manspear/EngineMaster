@@ -28,13 +28,10 @@ private:
 
 public:
 
-	struct Ray
-	{
-		int x=0;
-		int y=0;
-		int z=0;
-	} CurrentRay;
-
+	
+	XMFLOAT4 currentRay;
+	
+	
 	
 //end of Variables
 

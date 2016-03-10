@@ -1,11 +1,13 @@
 #include "MousePicking.h"
-
+#include <iostream>
 
 
 MousePicking::MousePicking(HWND wndHandle, GCamera* camera, int screenHeight, int screenWidth)
 {
 	this->camera = camera;
 	this->wndHandle2 = wndHandle;
+	this->projectionMatrix = camera->getProjMatrix();
+	this->viewMatrix = camera->getViewMatrix();
 	this->screenHeight = screenHeight;
 	this->screenWidth = screenWidth;
 }
@@ -18,8 +20,12 @@ MousePicking::~MousePicking()
 void MousePicking::updateClass() //updates variables & checks ray
 {
 	//here be variable uppgrades
+	this->projectionMatrix = this->camera->getProjMatrix();
+	this->viewMatrix = this->camera->getViewMatrix();
+
 	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) /*if left mouse button down*/
 	{
+		//std::cout << projectionMatrix->;
 		result = calculateCurrentRay();
 		
 	}
@@ -67,12 +73,42 @@ bool MousePicking::getCursorPosition(POINT& MousePosSavedHere)
 
 bool MousePicking::calculateCurrentRay()
 {
+	XMMATRIX projectionMatrix, viewMatrix, inverseViewMatrix, worldMatrix, translateMatrix, inverseWorldMatrix;
+	XMFLOAT3 direction, origin, rayOrigin, rayDirection;
+	bool intersect, result;
 	
-	result = getCursorPosition(this->MousePos); //1. get the mouse cordinates
-												//printf("(x: %d) (y: %d)\n", this->MousePos.x, this->MousePos.y);
 	
 	
-	printf("RayDirection; x: %d y: %d, z: %d \n", this->CurrentRay.x, this->CurrentRay.x, this->CurrentRay.z);
+	//1.viewport Space
+	result = getCursorPosition(this->MousePos); //printf("(x: %d) (y: %d)\n", this->MousePos.x, this->MousePos.y);
+	
+	
+	XMFLOAT4X4 camProjection;
+	XMStoreFloat4x4(&camProjection, this->projectionMatrix);
+
+	float ViewSpaceX = ((2 * MousePos.x) / screenWidth) / camProjection._11;
+	float ViewSpaceY = ((2 * MousePos.y) / screenHeight) / camProjection._22;
+	float ViewSpaceZ = 1;
+
+	XMVECTOR vector = { ViewSpaceX ,ViewSpaceY ,ViewSpaceZ };
+
+	XMVECTOR* pDeterminant= nullptr;
+	inverseViewMatrix = XMMatrixInverse(pDeterminant, this->viewMatrix);
+
+	XMVECTOR pickRayInWorldSpacePos = XMVector3TransformCoord(XMVectorSet(0, 0, 0, 0), inverseViewMatrix);
+	XMVECTOR pickRayInWorldSpaceDir = XMVector3TransformNormal(vector, inverseViewMatrix);
+
+	pickRayInWorldSpaceDir = XMVector3Normalize(pickRayInWorldSpaceDir);
+
+	//Microsoft.DirectX.Vector3 ray = 
+	
+	//3.homogeneous clip space
+	//4.eye space
+	//5.world space
+	
+	printf("RayDirection; x: %d y: %d, z: %d \n", XMVectorGetX(pickRayInWorldSpacePos), XMVectorGetY(pickRayInWorldSpaceDir), XMVectorGetZ(pickRayInWorldSpacePos));
+
+
 	return true;
 }
 
