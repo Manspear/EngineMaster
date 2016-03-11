@@ -73,42 +73,40 @@ bool MousePicking::getCursorPosition(POINT& MousePosSavedHere)
 
 bool MousePicking::calculateCurrentRay()
 {
-	XMMATRIX projectionMatrix, viewMatrix, inverseViewMatrix, worldMatrix, translateMatrix, inverseWorldMatrix;
-	XMFLOAT3 direction, origin, rayOrigin, rayDirection;
-	bool intersect, result;
+	XMVECTOR pickRayInViewSpaceDir = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	XMVECTOR pickRayInViewSpacePos = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	float PRVecX, PRVecY, PRVecZ;
 	
-	
-	
-	//1.viewport Space
-	result = getCursorPosition(this->MousePos); //printf("(x: %d) (y: %d)\n", this->MousePos.x, this->MousePos.y);
-	
+	MousePicking::getCursorPosition(this->MousePos); printf("MouseX: %d , MouseY: %d ::::: ", MousePos.x, MousePos.y);
 	
 	XMFLOAT4X4 camProjection;
 	XMStoreFloat4x4(&camProjection, this->projectionMatrix);
-
-	float ViewSpaceX = ((2 * MousePos.x) / screenWidth) / camProjection._11;
-	float ViewSpaceY = ((2 * MousePos.y) / screenHeight) / camProjection._22;
-	float ViewSpaceZ = 1;
-
-	XMVECTOR vector = { ViewSpaceX ,ViewSpaceY ,ViewSpaceZ };
-
-	XMVECTOR* pDeterminant= nullptr;
-	inverseViewMatrix = XMMatrixInverse(pDeterminant, this->viewMatrix);
-
-	XMVECTOR pickRayInWorldSpacePos = XMVector3TransformCoord(XMVectorSet(0, 0, 0, 0), inverseViewMatrix);
-	XMVECTOR pickRayInWorldSpaceDir = XMVector3TransformNormal(vector, inverseViewMatrix);
-
-	pickRayInWorldSpaceDir = XMVector3Normalize(pickRayInWorldSpaceDir);
-
-	//Microsoft.DirectX.Vector3 ray = 
 	
-	//3.homogeneous clip space
-	//4.eye space
-	//5.world space
+
+
+
+	//Transform 2D pick position on screen space to 3D ray in View space
+	PRVecX = (((2.0f * MousePos.x) / screenWidth) - 1) / camProjection(0, 0);
+	PRVecY = -(((2.0f * MousePos.x) / screenHeight) - 1) / camProjection(1, 1);
+	PRVecZ = 1.0f;    //View space's Z direction ranges from 0 to 1, so we set 1 since the ray goes "into" the screen
+
+	pickRayInViewSpaceDir = XMVectorSet(PRVecX, PRVecY, PRVecZ, 0.0f);
+
+	//Uncomment this line if you want to use the center of the screen (client area)
+	//to be the point that creates the picking ray (eg. first person shooter)
+	//pickRayInViewSpaceDir = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+
+	// Transform 3D Ray from View space to 3D ray in World space
+	XMMATRIX pickRayToWorldSpaceMatrix;
+	XMVECTOR matInvDeter;    //We don't use this, but the xna matrix inverse function requires the first parameter to not be null
+
+	pickRayToWorldSpaceMatrix = XMMatrixInverse(&matInvDeter, this->viewMatrix);    //Inverse of View Space matrix is World space matrix
+
+	//pickRayInViewSpacePos = XMVector3TransformCoord(pickRayInViewSpacePos, pickRayToWorldSpaceMatrix);
+	//pickRayInViewSpaceDir = XMVector3TransformNormal(pickRayInViewSpaceDir, pickRayToWorldSpaceMatrix);
+	pickRayInViewSpaceDir = XMVector3Normalize(pickRayInViewSpaceDir);
 	
-	printf("RayDirection; x: %d y: %d, z: %d \n", XMVectorGetX(pickRayInWorldSpacePos), XMVectorGetY(pickRayInWorldSpaceDir), XMVectorGetZ(pickRayInWorldSpacePos));
-
-
+	printf("X: %d Y: %d Z: %d \n", XMVectorGetX(pickRayInViewSpaceDir), XMVectorGetY(pickRayInViewSpaceDir), XMVectorGetZ(pickRayInViewSpaceDir));
 	return true;
 }
 

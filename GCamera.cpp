@@ -128,7 +128,7 @@ const XMMATRIX GCamera::getProjMatrix()
 
 void GCamera::InitProjMatrix(const float angle, const float height, const float width,
 	const float nearest, const float farthest)
-{
+ {
 	frustAngle = angle;
 	cWidth = width;
 	cHeight = height;
