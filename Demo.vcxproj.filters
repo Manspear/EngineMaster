@@ -57,6 +57,9 @@
     <ClCompile Include="GModelList.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -69,6 +72,9 @@
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="VertexShaderBS.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ComputeShader.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
@@ -102,6 +108,9 @@
     </ClInclude>
     <ClInclude Include="GModel.h">
       <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
