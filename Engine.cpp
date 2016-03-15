@@ -249,7 +249,7 @@ void Engine::Render()
 
 
 void Engine::Update() {
-	MousePickingObject->updateClass();
+	
 	
 	frameCount++;
 	if (getTime() > 1.0f)
@@ -261,8 +261,8 @@ void Engine::Update() {
 	dt = getFrameTime();
 
 
-	XMFLOAT4X4 viewMatrix;
-	XMFLOAT4X4 projectionMatrix;
+	//XMFLOAT4X4 viewMatrix;
+	//XMFLOAT4X4 projectionMatrix;
 
 	//world matrix
 	static float radianRotation = 0.00;
@@ -305,6 +305,9 @@ void Engine::Update() {
 	dataPtr->projectionMatrix = DirectX::XMMatrixTranspose(camera->getProjMatrix());
 	dataPtr->camPos = camera->getPosition();
 	dataPtr->camDir = camera->getCameraDirection();
+
+	MousePickingObject->updateClass();
+
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
 }
 

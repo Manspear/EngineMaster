@@ -3,10 +3,17 @@
 #define MOUSEPICKING
 
 #include <d3d11.h>
-#include <directXMath.h>
 #include <d3dcompiler.h> 
+#include <directXMath.h>
+#include "SimpleMath.h"
+#include "DirectXCollision.h"
+
 #include <stdio.h>
+#include <iostream>
+
 #include "GCamera.h"
+
+
 
 using namespace DirectX;
 
@@ -21,7 +28,7 @@ private:
 	int screenHeight, screenWidth;
 	
 	bool result;
-	XMMATRIX projectionMatrix, viewMatrix;
+	SimpleMath::Matrix projectionMatrix, viewMatrix;
 	GCamera* camera;
 	HWND wndHandle2;
 	
@@ -29,7 +36,7 @@ private:
 public:
 
 	
-	XMFLOAT4 currentRay;
+	SimpleMath::Vector3 currentRay;
 	
 	
 	
@@ -41,6 +48,7 @@ public:
 	void updateClass(); 
 	bool getCursorPosition(POINT& MousePosSavedHere);
 	bool calculateCurrentRay();
+	bool CheckBoundingBoxIntersection();
 
 
 };
