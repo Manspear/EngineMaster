@@ -99,7 +99,11 @@ bool MousePicking::CheckBoundingBoxIntersection()
 {
 	SimpleMath::Matrix;
 	BoundingBox Box;
-
+	XMFLOAT3 point1, point2, point3, point4;
+	point1 = { 0,0,0 };
+	
+	
+	
 	return false;
 }
 

@@ -48,7 +48,7 @@ public:
 	void updateClass(); 
 	bool getCursorPosition(POINT& MousePosSavedHere);
 	bool calculateCurrentRay();
-	bool CheckBoundingBoxIntersection();
+	bool CheckBoundingBoxIntersection(); //std::vector<MyVertexStruct> modelVertices,
 
 
 };
