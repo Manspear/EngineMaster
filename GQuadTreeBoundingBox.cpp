@@ -55,9 +55,12 @@ void GQuadTreeBoundingBox::splitBox(int divisionCounter, GModelList& modelList)
 	//GQTBBoxChildren holds pointers to the child-boxes.
 	GQTBBoxChildren = new(GQuadTreeBoundingBox[4]);
 
+	float diffX = maxValue.x - minValue.x;
+	float diffZ = maxValue.z - minValue.z;
+
 	tempMax = maxValue;
-	tempMin.x = (maxValue.x / 2.f) + (minValue.x / 2.f);
-	tempMin.z = (maxValue.z / 2.f) + (minValue.z / 2.f);
+	tempMin.x = maxValue.x - (0.5 * diffX);
+	tempMin.z = maxValue.z - (0.5 * diffZ);
 	GQTBBoxChildren[0].CreateBBox(tempMin, tempMax);
 
 	tempMax = tempMin; //tempMin here holds the same values(except for the y) as tempMax will have.
@@ -66,15 +69,15 @@ void GQuadTreeBoundingBox::splitBox(int divisionCounter, GModelList& modelList)
 	GQTBBoxChildren[1].CreateBBox(tempMin, tempMax);
 
 	tempMax.x = maxValue.x;
-	tempMax.z = (maxValue.z / 2.f) + (minValue.z / 2.f);
-	tempMin.x = (maxValue.x / 2.f) + (minValue.x / 2.f);
+	tempMax.z = maxValue.z - (0.5 * diffZ);
+	tempMin.x = maxValue.x - (0.5 * diffX);
 	tempMin.z = minValue.z;
 	GQTBBoxChildren[2].CreateBBox(tempMin, tempMax);
 
-	tempMax.x = (maxValue.x / 2.f) + (minValue.x / 2.f);
+	tempMax.x = maxValue.x - (0.5 * diffX);
 	tempMax.z = maxValue.z;
 	tempMin.x = minValue.x;
-	tempMin.z = (maxValue.z / 2.f) + (minValue.z / 2.f);
+	tempMin.z = maxValue.z - (0.5 * diffZ);
 	GQTBBoxChildren[3].CreateBBox(tempMin, tempMax);
 
 	divisionCounter--;

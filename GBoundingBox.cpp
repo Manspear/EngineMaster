@@ -31,7 +31,8 @@ void GBoundingBox::setAtMeshPosition(XMFLOAT4X4* modelMatrix)
 	for (int i = 0; i < 8; i++) {
 		XMVECTOR temp = XMVectorSet(vertices.BBoxPoint[i].x, vertices.BBoxPoint[i].y, vertices.BBoxPoint[i].z, 1); //converts the XMFLOAT3 to XMVECTOR
 		temp = XMVector4Transform(temp, GBBoxMatrix[0]); //Transforms every box-corner. Supposedly.
-		XMStoreFloat3(&vertices.BBoxPoint[i], temp); //Stores the transformed XMVECTOR in a FLOAT3.
+		DirectX::XMStoreFloat3(&vertices.BBoxPoint[i], temp);
+		//XMStoreFloat3(&vertices.BBoxPoint[i], temp); //Stores the transformed XMVECTOR in a FLOAT3.
 	}
 }
 

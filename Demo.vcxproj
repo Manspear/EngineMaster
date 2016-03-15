@@ -93,8 +93,12 @@
     <ClCompile Include="GInput.cpp" />
     <ClCompile Include="GModel.cpp" />
     <ClCompile Include="GModelList.cpp" />
-    <ClCompile Include="GQuadTree.cpp" />
-    <ClCompile Include="GQuadTreeBoundingBox.cpp" />
+    <ClCompile Include="GQuadTree.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GQuadTreeBoundingBox.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -136,8 +140,12 @@
     <ClInclude Include="GInput.h" />
     <ClInclude Include="GModel.h" />
     <ClInclude Include="GModelList.h" />
-    <ClInclude Include="GQuadTree.h" />
-    <ClInclude Include="GQuadTreeBoundingBox.h" />
+    <ClInclude Include="GQuadTree.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GQuadTreeBoundingBox.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

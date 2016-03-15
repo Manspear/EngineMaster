@@ -136,6 +136,7 @@ void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, cons
 
 bool GFrustum::hasCollided(GBoundingBox& modelBox)
 {
+	//FIX THIS THING!
 	for (int planeC = 0; planeC < 6; planeC++) {
 		//Check this every frustum-plane against all of the points of the cube. If any point is inside the current plane --> intersection for this plane is true.
 		//Then go through the rest of the planes. As long as there are boxpoint(s) inside all planes, we have an intersection!
@@ -150,12 +151,64 @@ bool GFrustum::hasCollided(GBoundingBox& modelBox)
 			return false;
 		}
 	}
+	printf("Collision\n");
 	return true; //If we haven't already returned false, we have an intersection!
 	//if nothing intersected, no collision was made.
 	printf("Non-Collision!\n");
 	return false;
-}
 
+//if even one whole point is inside the frustum, we have an intersection.
+//if all of the points are inside the frustum, we have a contain.
+//if no point is inside the frustum, we have a nonCollision.
+//if even one whole point is inside the frustum, we have an intersection.
+//if all of the points are inside the frustum, we have a contain.
+//if no point is inside the frustum, we have a nonCollision.
+
+
+	//bool intersectionJudge[8] = { true, true, true, true, true, true, true, true }; //I never set this to true... Hmm...
+
+	//bool containmentJudge[6];
+
+	//bool contains = true;
+
+	//for (int i = 0; i < 8; i++) //for every point in bBox
+	//{
+	//	//herein do the collision-test... See if the points of the cube are contained inside the frustum.
+	//	//modelBox.vertices.BBoxPoint[i];
+	//	for (int k = 0; k < 6; k++) //check against the frustum planes
+	//	{
+	//		float indicator = (fPlanes[k].normal.x) * (modelBox.vertices.BBoxPoint[i].x) + (fPlanes[k].normal.y) * (modelBox.vertices.BBoxPoint[i].y) + (fPlanes[k].normal.z) * (modelBox.vertices.BBoxPoint[i].z) + fPlanes[k].distance;
+	//		if (indicator <= 0) //if the point is inside or behind this plane
+	//			containmentJudge[k] = true;
+	//		else
+	//			containmentJudge[k] = false;
+
+	//	}
+	//	for (int p = 0; p < 6; p++) {
+	//		//if any bool is false, no containment.
+	//		if (!containmentJudge[p]) {
+	//			contains = false;
+	//			intersectionJudge[i] = false;
+	//		}
+	//	}
+	//}
+	//if (contains) {
+	//	printf("Contains!\n");
+	//	return true;
+	//}
+	//else
+	//{
+	//	for (int c = 0; c < 8; c++) {
+	//		if (intersectionJudge[c]) { //if any point is inside the frustum, we have an intersection.
+	//			printf("Intersects!\n");
+	//			return true;
+	//		}
+	//	}
+	//}
+	////if nothing intersected, no collision was made.
+	//printf("Non-Collision!\n");
+	//return false;
+}
 void GFrustum::QuadTreeCollision(GQuadTreeBoundingBox& rootBox) //The loops herein could be hairy... Also: alway have the "original root" as input.
 {
 	//Here check collision against all of the GQuadTreeBoundingBox-children.

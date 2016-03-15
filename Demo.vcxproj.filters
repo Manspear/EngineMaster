@@ -28,6 +28,12 @@
     <Filter Include="Source Files\Model">
       <UniqueIdentifier>{80b0ff61-1592-4337-9867-a819ce78c4a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Quad Tree and BBoxes">
+      <UniqueIdentifier>{7b5b0a48-523b-4057-8cab-0f12cad30879}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Quad Tree and BBoxes">
+      <UniqueIdentifier>{66900ecb-808e-4e80-97de-2179e827acf3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -48,23 +54,23 @@
     <ClCompile Include="FbxDawg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GQuadTree.cpp">
-      <Filter>Source Files\Model</Filter>
-    </ClCompile>
     <ClCompile Include="GModel.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="GModelList.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
+    <ClCompile Include="GQuadTree.cpp">
+      <Filter>Source Files\Quad Tree and BBoxes</Filter>
+    </ClCompile>
     <ClCompile Include="GFrustum.cpp">
-      <Filter>Source Files\Model</Filter>
+      <Filter>Source Files\Quad Tree and BBoxes</Filter>
     </ClCompile>
     <ClCompile Include="GBoundingBox.cpp">
-      <Filter>Source Files\Model</Filter>
+      <Filter>Source Files\Quad Tree and BBoxes</Filter>
     </ClCompile>
     <ClCompile Include="GQuadTreeBoundingBox.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Quad Tree and BBoxes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -97,23 +103,23 @@
     <ClInclude Include="FbxDawg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GFrustum.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GQuadTree.h">
-      <Filter>Header Files\Model</Filter>
-    </ClInclude>
     <ClInclude Include="GModelList.h">
       <Filter>Header Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="GModel.h">
       <Filter>Header Files\Model</Filter>
     </ClInclude>
-    <ClInclude Include="GBoundingBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GQuadTreeBoundingBox.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Quad Tree and BBoxes</Filter>
+    </ClInclude>
+    <ClInclude Include="GFrustum.h">
+      <Filter>Header Files\Quad Tree and BBoxes</Filter>
+    </ClInclude>
+    <ClInclude Include="GBoundingBox.h">
+      <Filter>Header Files\Quad Tree and BBoxes</Filter>
+    </ClInclude>
+    <ClInclude Include="GQuadTree.h">
+      <Filter>Header Files\Quad Tree and BBoxes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
