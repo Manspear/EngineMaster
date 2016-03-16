@@ -148,14 +148,13 @@ bool GFrustum::hasCollided(GBoundingBox& modelBox)
 			}
 		}
 		if (intersection == false) {
+			printf("Non-Collision!\n");
 			return false;
 		}
 	}
 	printf("Collision\n");
 	return true; //If we haven't already returned false, we have an intersection!
 	//if nothing intersected, no collision was made.
-	printf("Non-Collision!\n");
-	return false;
 
 //if even one whole point is inside the frustum, we have an intersection.
 //if all of the points are inside the frustum, we have a contain.
@@ -209,8 +208,13 @@ bool GFrustum::hasCollided(GBoundingBox& modelBox)
 	//printf("Non-Collision!\n");
 	//return false;
 }
-void GFrustum::QuadTreeCollision(GQuadTreeBoundingBox& rootBox) //The loops herein could be hairy... Also: alway have the "original root" as input.
+void GFrustum::QuadTreeCollision(GQuadTreeBoundingBox& rootBox, bool startCollision) //The loops herein could be hairy... Also: alway have the "original root" as input.
 {
+	if (startCollision) {
+		//every time you start over this collision-detection, the previous list needs to be cleared.
+		seenObjects.clear();
+	}
+	startCollision = false;
 	//Here check collision against all of the GQuadTreeBoundingBox-children.
 	for (int i = 0; i < 4; i++) 
 	{
@@ -219,19 +223,20 @@ void GFrustum::QuadTreeCollision(GQuadTreeBoundingBox& rootBox) //The loops here
 			if (rootBox.GQTBBoxChildren[i].hasSplit) //Check if this QuadTreeBBox has split
 			{
 				//loop again through it's children using this QuadTreeCollision-function.
-				QuadTreeCollision(rootBox.GQTBBoxChildren[i]);
+				QuadTreeCollision(rootBox.GQTBBoxChildren[i], startCollision);
 			}
 			else //check for object-collisions. 
 				 //Since only the lowest box-division has them, objects are found in the boxes that haven't split.
 			{
-				for (int c = 0; c < rootBox.modelChildrenCounter; c++) { //for each model in this bbox...
-					bool modelSeen = hasCollided(rootBox.modelChildren[c]->bBox); //Check for collision with this object's bbox.
+				for (int c = 0; c < rootBox.GQTBBoxChildren[i].modelChildrenCounter; c++) { //for each model in this bbox...
+					bool modelSeen = hasCollided(rootBox.GQTBBoxChildren[i].modelChildren[c]->bBox); //Check for collision with this object's bbox.
 					if (modelSeen) {
-						rootBox.modelChildren[c]->isCulled = false;
+						seenObjects.push_back(rootBox.GQTBBoxChildren[i].modelChildren[c]);
+						rootBox.GQTBBoxChildren[i].modelChildren[c]->isCulled = false;
 					}
-					else {
-						rootBox.modelChildren[c]->isCulled = true;
-					}
+					//else {
+						//rootBox.GQTBBoxChildren[i].modelChildren[c]->isCulled = true;
+					//}
 					//Hmm... I am now looping through all bboxes, including model-boxes, 
 					//registering detection with a bool called isCulled.
 					//in Engine::Render() we'll loop through the complete modelList, 

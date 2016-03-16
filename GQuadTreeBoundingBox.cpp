@@ -118,19 +118,31 @@ void GQuadTreeBoundingBox::fillBox(GModelList & modelList)
 		//Will do a AABB vs AABB intersection-test. It is simple, and cheap, and works for this engine.
 		//It is done by comparing the two bboxes' max and min values. If ANY min > max, then they don't intersect.
 		XMFLOAT3 modelMax = tempModelList[z].bBox.vertices.BBoxPoint[0]; //the model bbox's MAX-point.
-		XMFLOAT3 modelMin = tempModelList[z].bBox.vertices.BBoxPoint[7];
+		XMFLOAT3 modelMin = tempModelList[z].bBox.vertices.BBoxPoint[7]; //the model bbox MIN point.
+
+		XMFLOAT3 bboxMax = vertices.BBoxPoint[0];
+		XMFLOAT3 bboxMin = vertices.BBoxPoint[7];
 		//vertices.BBoxPoint[0]; //QuadTreeBBox maxpoint
 		//vertices.BBoxPoint[7]; //QuadTreeBBox minpoint
-		if (modelMin.x > vertices.BBoxPoint[7].x) {
+		if (modelMin.x > bboxMax.x) {
 			//non-intersect
 			continue;
 		}
-		if (modelMin.y > vertices.BBoxPoint[7].y) {
+		if (modelMax.x < bboxMin.x) {
+			continue;
+		}
+		if (modelMin.y > bboxMax.y) {//dumb check? Hmm... No, since models bboxes vary in height.
 			//non intersect
 			continue;
 		}
-		if (modelMin.z > vertices.BBoxPoint[7].z) {
+		if (modelMax.y < bboxMin.y) {
+			continue;
+		}
+		if (modelMin.z > bboxMax.z) {
 			//non-intersect
+			continue;
+		}
+		if (modelMax.z < bboxMin.z) {
 			continue;
 		}
 		//Enough tests? Hmm... Should be.

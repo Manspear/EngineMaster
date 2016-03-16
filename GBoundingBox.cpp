@@ -28,9 +28,10 @@ void GBoundingBox::CreateBBox(XMFLOAT3 minPoint, XMFLOAT3 maxPoint)
 void GBoundingBox::setAtMeshPosition(XMFLOAT4X4* modelMatrix)
 {
 	GBBoxMatrix[0] = XMLoadFloat4x4(modelMatrix);
+	XMMATRIX localModelMatrix = GBBoxMatrix[0];
 	for (int i = 0; i < 8; i++) {
 		XMVECTOR temp = XMVectorSet(vertices.BBoxPoint[i].x, vertices.BBoxPoint[i].y, vertices.BBoxPoint[i].z, 1); //converts the XMFLOAT3 to XMVECTOR
-		temp = XMVector4Transform(temp, GBBoxMatrix[0]); //Transforms every box-corner. Supposedly.
+		temp = XMVector4Transform(temp, localModelMatrix); //Transforms every box-corner. Supposedly.
 		DirectX::XMStoreFloat3(&vertices.BBoxPoint[i], temp);
 		//XMStoreFloat3(&vertices.BBoxPoint[i], temp); //Stores the transformed XMVECTOR in a FLOAT3.
 	}
