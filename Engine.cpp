@@ -341,6 +341,7 @@ void Engine::Clean() {
 	delete camera;
 	delete input;
 	delete cullingFrustum;
+	delete quadTreeRoot;
 	//delete[] loops through the new-objects in the array, and deletes them!
 }
 void Engine::InitializeCamera()
@@ -354,6 +355,12 @@ void Engine::InitializeCamera()
 void Engine::InitializeModels() {
 	//Here create the dynamic GModel-Array:
 	modelListObject.initializeModels(gDevice, gDeviceContext);
+}
+
+void Engine::InitializeQuadTree()
+{
+	quadTreeRoot = new GQuadTree;
+	quadTreeRoot->makeTree(4, modelListObject);
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
@@ -374,6 +381,8 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	InitializeCamera();
 
 	InitializeFrustum();
+
+	InitializeQuadTree();
 
 }
 

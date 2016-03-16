@@ -6,7 +6,8 @@ GQuadTreeBoundingBox::GQuadTreeBoundingBox()
 
 GQuadTreeBoundingBox::~GQuadTreeBoundingBox()
 {
-	delete[] GQTBBoxChildren; //this will call the ~GQuadTreeBoundingBox() of the children.
+	if(GQTBBoxChildren != nullptr)
+		delete[] GQTBBoxChildren; //this will call the ~GQuadTreeBoundingBox() of the children.
 }
 void GQuadTreeBoundingBox::CreateBBox(XMFLOAT3 minPoint, XMFLOAT3 maxPoint)
 {

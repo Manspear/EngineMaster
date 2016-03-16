@@ -20,6 +20,8 @@
 
 #include "GFrustum.h"
 
+#include "GQuadTree.h"
+
 #include <vector>
 
 #ifndef ENGINE_H
@@ -80,7 +82,7 @@ public:
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
 	GFrustum * cullingFrustum = nullptr;
-
+	GQuadTree * quadTreeRoot = nullptr;
 
 	FbxDawg * fbxobj = nullptr;
 
@@ -113,6 +115,7 @@ public:
 	void InitializeFrustum();
 	void InitializeCamera();
 	void InitializeModels();
+	void InitializeQuadTree();
 	HRESULT CreateDirect3DContext(HWND wndHandle);
 
 	/*LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
