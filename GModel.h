@@ -12,12 +12,13 @@ using namespace DirectX;
 class GModel
 {
 private:
-	DirectX::XMMATRIX objectWorldMatrix;
+	
 	int noOfTextures;
 	FbxDawg modelLoader;
 	FbxDawg BSLoader;
 	bool blendShape;
 public:
+	XMMATRIX objectWorldMatrix; 
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
 	};
@@ -26,7 +27,9 @@ public:
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11Buffer* modelIndexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
+	
 	int* IndexArray = nullptr;
+	int sizeOfIndexArray = 0;
 
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture then normal map
 	//share projection and view, but have different world-view.

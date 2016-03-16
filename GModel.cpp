@@ -60,13 +60,14 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 #pragma region IndexBuffer
 	
 	this->IndexArray= modelLoader.FBXIndexArray; //Making it 123... for now. change will be made.
+	this->sizeOfIndexArray = modelLoader.sizeOfFBXIndexArray;
 
 
 	D3D11_BUFFER_DESC indexBufferDesc;
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = modelVertices.size()*sizeof(int); //This is the size of the Index Array. 23 feb
+	indexBufferDesc.ByteWidth = this->sizeOfIndexArray*sizeof(int);
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;

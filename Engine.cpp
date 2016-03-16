@@ -242,7 +242,7 @@ void Engine::Render()
 
 		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
 		//gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0); //Uses indexbuffer
-		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
+		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].sizeOfIndexArray, 0, 0);
 	}
 }
 
@@ -306,9 +306,23 @@ void Engine::Update() {
 	dataPtr->camPos = camera->getPosition();
 	dataPtr->camDir = camera->getCameraDirection();
 
-	MousePickingObject->updateClass();
-
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
+
+
+	MousePickingObject->updateClass();
+	
+	
+	
+	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) /*if left mouse button down*/
+	{
+		GModel* listOfModels = modelListObject->getModelList();
+		MousePickingObject->updateClass();
+		float temp = MousePickingObject->checkRayIntersectionAgainstObject(listOfModels[0].modelVertices, listOfModels[0].IndexArray, listOfModels[0].sizeOfIndexArray, listOfModels[0].objectWorldMatrix);
+		//printf("%f \n", temp);
+
+	}
+
+	
 }
 
 HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
@@ -390,10 +404,7 @@ void Engine::InitializeCamera()
 
 void Engine::initializeMousePicking(HWND wndHandle)
 {
-	printf("%d\n", this->wWIDTH);
 	MousePickingObject = new MousePicking(wndHandle, this->camera, this->wHEIGHT,this->wWIDTH);
-
-
 }
 
 
