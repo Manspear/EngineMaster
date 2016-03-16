@@ -184,29 +184,44 @@ void Engine::Render()
 
 	GModel* listOfModels = modelListObject.getModelList();
 
+	bool isRoot = true;
 	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
+	cullingFrustum->QuadTreeCollision(quadTreeRoot->rootBox, isRoot);
 
 	//struct frustumVert {
 //		float x, y, z, xn, yn, zn, u, v;
 //	};
 //	frustumVert frustumVertices[6]; //...
 	
-
-	for (int bufferCounter = 0; bufferCounter < modelListObject.numberOfModels; bufferCounter++)
+	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
-		//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
-		//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
-		if (!cullingFrustum->hasCollided(listOfModels[bufferCounter].bBox))
-			continue;
-		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
 
+		//gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
+		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer);
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
-		gDeviceContext->PSSetShaderResources(0, 2, listOfModels[bufferCounter].modelTextureView);
+		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
 
-		gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
+		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
 
-		gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
+		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
+		gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0);
 	}
+
+	//for (int bufferCounter = 0; bufferCounter < modelListObject.numberOfModels; bufferCounter++)
+	//{
+	//	//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
+	//	//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
+	//	if (!cullingFrustum->hasCollided(listOfModels[bufferCounter].bBox))
+	//		continue;
+	//	gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
+
+	//	//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
+	//	gDeviceContext->PSSetShaderResources(0, 2, listOfModels[bufferCounter].modelTextureView);
+
+	//	gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
+
+	//	gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
+	//}
 }
 
 

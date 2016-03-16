@@ -213,6 +213,7 @@ void GFrustum::QuadTreeCollision(GQuadTreeBoundingBox& rootBox, bool startCollis
 	if (startCollision) {
 		//every time you start over this collision-detection, the previous list needs to be cleared.
 		seenObjects.clear();
+
 	}
 	startCollision = false;
 	//Here check collision against all of the GQuadTreeBoundingBox-children.
