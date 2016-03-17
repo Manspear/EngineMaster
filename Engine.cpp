@@ -121,6 +121,21 @@ void Engine::CreateShaders()
 		);
 	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShader);
 	pGS->Release();
+
+	ID3DBlob* pGSps = nullptr; //This may be used for error handling!
+	D3DCompileFromFile(
+		L"GeometryShaderParticle.hlsl", //The L here specifies unicode vs. ansii... Dunno exactly.
+		nullptr,
+		nullptr,
+		"main",
+		"gs_4_0",
+		0,
+		0,
+		&pGSps,
+		nullptr
+		);
+	gDevice->CreateGeometryShader(pGSps->GetBufferPointer(), pGSps->GetBufferSize(), nullptr, &gGeometryShaderParticle);
+	pGSps->Release();
 }
 
 void Engine::CreateConstantBuffer() {
@@ -224,8 +239,6 @@ void Engine::Render()
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
 			vertexSize = sizeof(float) * 16;
-
-
 		}else{
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
@@ -382,6 +395,7 @@ void Engine::Clean() {
 	gVertexShader->Release();
 	gPixelShader->Release();
 	gGeometryShader->Release();
+	gGeometryShaderParticle->Release();
 
 	gBackbufferRTV->Release();
 	gSwapChain->Release();

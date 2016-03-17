@@ -67,6 +67,7 @@ public:
 	ID3D11VertexShader* gVertexShaderBS = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;
+	ID3D11GeometryShader* gGeometryShaderParticle = nullptr;
 
 	struct matrixBuffer {
 		XMMATRIX viewMatrix;
@@ -79,8 +80,6 @@ public:
 	GModelList * modelListObject = nullptr;
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
-	
-
 	FbxDawg * fbxobj = nullptr;
 
 	int wHEIGHT = 480;

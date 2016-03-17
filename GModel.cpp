@@ -46,7 +46,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	this->modelVertices = modelLoader.modelVertexList; 
 	this->modelTextureFilepath = modelLoader.textureFilepath;
 #pragma region VertexBuffer
-	D3D11_BUFFER_DESC bufferDesc; 
+	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;

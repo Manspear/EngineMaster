@@ -9,22 +9,35 @@ using namespace DirectX;
 
 class ParticleSystem
 {
-public:
-	XMVECTOR eyePosW;
-	XMVECTOR emitPosW;
-	XMVECTOR emitDirW;
-
-	XMFLOAT4X4 eyePosW;
-	XMFLOAT4X4 emitPosW;
-	XMFLOAT4X4 emitDirW;
-
 private:
+	struct modelWorldStruct {
+		XMMATRIX worldMatrix;
+	};
+	struct particle
+	{
+		float x, y, z, 
+			  nx, ny, nz, 
+			  u, v;
+	};
+
+	ID3D11Buffer* particleConstantBuffer = nullptr;
+	ID3D11Buffer* particleVertexBuffer = nullptr;
+	XMMATRIX particleWorldMatrix;
 	int maxParticles;
 	float gTime;
 	float timeStep;
 	float age;
 
+public:
 
+	XMFLOAT4X4 eyePosW;
+	XMFLOAT4X4 emitPosW;
+	XMFLOAT4X4 emitDirW;
+
+	particle party;
+
+	ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext);
+	~ParticleSystem();
 
 };
 
