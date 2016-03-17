@@ -111,8 +111,8 @@ float MousePicking::checkRayIntersectionAgainstObject(std::vector<MyVertexStruct
 
 		//Get triangle Vertexes
 		SimpleMath::Vector4 tri1V1 = { modelVertices[IndexArray[(i * 3) + 0]].x, modelVertices[IndexArray[(i * 3) + 0]].y, modelVertices[IndexArray[(i * 3) + 0]].z, 0 };
-		SimpleMath::Vector4 tri1V2 = { modelVertices[IndexArray[(i * 3) + 1]].x, modelVertices[IndexArray[(i * 3) + 0]].y, modelVertices[IndexArray[(i * 3) + 0]].z, 0 };
-		SimpleMath::Vector4 tri1V3 = { modelVertices[IndexArray[(i * 3) + 2]].x, modelVertices[IndexArray[(i * 3) + 0]].y, modelVertices[IndexArray[(i * 3) + 0]].z, 0 };
+		SimpleMath::Vector4 tri1V2 = { modelVertices[IndexArray[(i * 3) + 1]].x, modelVertices[IndexArray[(i * 3) + 1]].y, modelVertices[IndexArray[(i * 3) + 1]].z, 0 };
+		SimpleMath::Vector4 tri1V3 = { modelVertices[IndexArray[(i * 3) + 2]].x, modelVertices[IndexArray[(i * 3) + 2]].y, modelVertices[IndexArray[(i * 3) + 2]].z, 0 };
 
 		//printf("tri1A: %f tri1B: %f tri1C: %f \n", tri1V1.x, tri1V2.x, tri1V3.x);
 
@@ -120,16 +120,17 @@ float MousePicking::checkRayIntersectionAgainstObject(std::vector<MyVertexStruct
 		tri1V1 = XMVector3TransformCoord(tri1V1, worldMatrix);
 		tri1V2 = XMVector3TransformCoord(tri1V2, worldMatrix);
 		tri1V3 = XMVector3TransformCoord(tri1V3, worldMatrix);
+		//printf("tri1V3: %.4f tri1V1: %.4f \n", tri1V3.x, tri1V1.x );
 
-		//printf("tri1V1: %.4f tri1V2: %.4f \n", tri1V1.x, tri1V2.x );
-		//Find the normal using U, V coordinates (two edges)
-		SimpleMath::Vector4 U = {0.0f, 0.0f, 0.0f, 0.0f};
+		
+		SimpleMath::Vector4 U = {0.0f, 0.0f, 0.0f, 0.0f}; //Find the normal using U, V coordinates (two edges)
 		SimpleMath::Vector4 V = { 0.0f, 0.0f, 0.0f, 0.0f };
 		SimpleMath::Vector4 faceNormal = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 
 		U = tri1V2 - tri1V1;
 		V = tri1V3 - tri1V1;
-		printf("U: %.4f V: %.4f \n", U, V);
+		//printf("ANS: %f \n", (tri1V3 - tri1V1));
+		//printf("U: %.4f V: %.4f \n", U, V);
 		
 		//printf("TriVertex: %f TriVertex2: %f \n", tri1V2, tri1V2);
 		
@@ -138,6 +139,7 @@ float MousePicking::checkRayIntersectionAgainstObject(std::vector<MyVertexStruct
 		faceNormal = XMVector3Cross(U, V);
 		//printf("faceNormalX: %f, FaceNormalY: %f, FaceNormalZ: %f \n", faceNormal.x, faceNormal.y, faceNormal.z);
 		faceNormal = XMVector3Normalize(faceNormal);
+		faceNormal = (faceNormal*-1);
 		
 
 		//Calculate a point on the triangle for the plane equation
@@ -182,7 +184,7 @@ float MousePicking::checkRayIntersectionAgainstObject(std::vector<MyVertexStruct
 		}
 	}
 	//return the max float value (near infinity) if an object was not picked
-	return 8.0085;
+	return 1000000;
 }
 
 bool  MousePicking::PointInTriangle(SimpleMath::Vector4& triV1, SimpleMath::Vector4& triV2, SimpleMath::Vector4& triV3, SimpleMath::Vector4& point)
@@ -190,8 +192,8 @@ bool  MousePicking::PointInTriangle(SimpleMath::Vector4& triV1, SimpleMath::Vect
 	//To find out if the point is inside the triangle, we will check to see if the point
 	//is on the correct side of each of the triangles edges.
 
-	SimpleMath::Vector3 cp1 = XMVector3Cross((triV3 - triV2), (point - triV2));
-	SimpleMath::Vector3 cp2 = XMVector3Cross((triV3 - triV2), (triV1 - triV2));
+	XMVECTOR cp1 = XMVector3Cross((triV3 - triV2), (point - triV2));
+	XMVECTOR cp2 = XMVector3Cross((triV3 - triV2), (triV1 - triV2));
 	if (XMVectorGetX(XMVector3Dot(cp1, cp2)) >= 0)
 	{
 		cp1 = XMVector3Cross((triV3 - triV1), (point - triV1));
