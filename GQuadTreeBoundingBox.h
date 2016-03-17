@@ -10,7 +10,7 @@ private:
 public:
 	GQuadTreeBoundingBox();
 	~GQuadTreeBoundingBox();
-	GQuadTreeBoundingBox* GQTBBoxChildren = nullptr; //This holds pointers to other GQuadTreeBBoxes.
+	GQuadTreeBoundingBox* GQTBBoxChildren[4]; //This holds pointers to other GQuadTreeBBoxes.
 	bool hasSplit = false; //when hasSplit == true, we know that it's got four child-quadtree-bboxes. It is set to true in GQuadTreeBoundingBox::splitBox(int divisionCounter).
 	std::vector<GModel*> modelChildren; //With this I have references to the models.
 	int modelChildrenCounter = 0;

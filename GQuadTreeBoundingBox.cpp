@@ -30,8 +30,8 @@ void GQuadTreeBoundingBox::splitBox(int divisionCounter, GModelList& modelList)
 	//GBoundingBox::CreateBBox(minPoint, maxPoint)
 	//are saved, maxPoint is saved at position [0]
 	//and minPoint at position [7]
-	XMFLOAT3 minValue = vertices.BBoxPoint[0]; 
-	XMFLOAT3 maxValue = vertices.BBoxPoint[7];
+	XMFLOAT3 minValue = vertices.BBoxPoint[7]; 
+	XMFLOAT3 maxValue = vertices.BBoxPoint[0];
 
 	//now make four child boxes out of the halfpoints of minValue and maxValue.
 	//the y-axis is never divided.
@@ -54,7 +54,10 @@ void GQuadTreeBoundingBox::splitBox(int divisionCounter, GModelList& modelList)
 	//	..........x..........x
 
 	//GQTBBoxChildren holds pointers to the child-boxes.
-	GQTBBoxChildren = new(GQuadTreeBoundingBox[4]);
+	GQTBBoxChildren[0] = new(GQuadTreeBoundingBox);
+	GQTBBoxChildren[1] = new(GQuadTreeBoundingBox);
+	GQTBBoxChildren[2] = new(GQuadTreeBoundingBox);
+	GQTBBoxChildren[3] = new(GQuadTreeBoundingBox);
 
 	float diffX = maxValue.x - minValue.x;
 	float diffZ = maxValue.z - minValue.z;
@@ -62,33 +65,33 @@ void GQuadTreeBoundingBox::splitBox(int divisionCounter, GModelList& modelList)
 	tempMax = maxValue;
 	tempMin.x = maxValue.x - (0.5 * diffX);
 	tempMin.z = maxValue.z - (0.5 * diffZ);
-	GQTBBoxChildren[0].CreateBBox(tempMin, tempMax);
+	GQTBBoxChildren[0]->CreateBBox(tempMin, tempMax);
 
 	tempMax = tempMin; //tempMin here holds the same values(except for the y) as tempMax will have.
 	tempMax.y = maxValue.y;
 	tempMin = minValue;
-	GQTBBoxChildren[1].CreateBBox(tempMin, tempMax);
+	GQTBBoxChildren[1]->CreateBBox(tempMin, tempMax);
 
 	tempMax.x = maxValue.x;
 	tempMax.z = maxValue.z - (0.5 * diffZ);
 	tempMin.x = maxValue.x - (0.5 * diffX);
 	tempMin.z = minValue.z;
-	GQTBBoxChildren[2].CreateBBox(tempMin, tempMax);
+	GQTBBoxChildren[2]->CreateBBox(tempMin, tempMax);
 
 	tempMax.x = maxValue.x - (0.5 * diffX);
 	tempMax.z = maxValue.z;
 	tempMin.x = minValue.x;
 	tempMin.z = maxValue.z - (0.5 * diffZ);
-	GQTBBoxChildren[3].CreateBBox(tempMin, tempMax);
+	GQTBBoxChildren[3]->CreateBBox(tempMin, tempMax);
 
 	divisionCounter--;
 
 	if (divisionCounter > 0) {
 		//if divisions 
-		GQTBBoxChildren[0].splitBox(divisionCounter, modelList);
-		GQTBBoxChildren[1].splitBox(divisionCounter, modelList);
-		GQTBBoxChildren[2].splitBox(divisionCounter, modelList);
-		GQTBBoxChildren[3].splitBox(divisionCounter, modelList);
+		GQTBBoxChildren[0]->splitBox(divisionCounter, modelList);
+		GQTBBoxChildren[1]->splitBox(divisionCounter, modelList);
+		GQTBBoxChildren[2]->splitBox(divisionCounter, modelList);
+		GQTBBoxChildren[3]->splitBox(divisionCounter, modelList);
 	}
 	if(divisionCounter == 0)
 	{

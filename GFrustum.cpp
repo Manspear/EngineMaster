@@ -134,7 +134,7 @@ void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, cons
 	return collision;
 }*/
 
-bool GFrustum::hasCollided(GBoundingBox& modelBox)
+bool GFrustum::hasCollided(GBoundingBox* modelBox)
 {
 	//FIX THIS THING!
 	for (int planeC = 0; planeC < 6; planeC++) {
@@ -142,7 +142,7 @@ bool GFrustum::hasCollided(GBoundingBox& modelBox)
 		//Then go through the rest of the planes. As long as there are boxpoint(s) inside all planes, we have an intersection!
 		bool intersection = false;
 		for (int i = 0; i < 8; i++) {
-			if (((fPlanes[planeC].normal.x) * (modelBox.vertices.BBoxPoint[i].x) + (fPlanes[planeC].normal.y) * (modelBox.vertices.BBoxPoint[i].y) + (fPlanes[planeC].normal.z) * (modelBox.vertices.BBoxPoint[i].z) + fPlanes[planeC].distance) <= 0) {
+			if (((fPlanes[planeC].normal.x) * (modelBox->vertices.BBoxPoint[i].x) + (fPlanes[planeC].normal.y) * (modelBox->vertices.BBoxPoint[i].y) + (fPlanes[planeC].normal.z) * (modelBox->vertices.BBoxPoint[i].z) + fPlanes[planeC].distance) <= 0) {
 				intersection = true;
 				break; //break finds the closest loop.
 			}
@@ -208,7 +208,7 @@ bool GFrustum::hasCollided(GBoundingBox& modelBox)
 	//printf("Non-Collision!\n");
 	//return false;
 }
-void GFrustum::QuadTreeCollision(GQuadTreeBoundingBox& rootBox, bool startCollision) //The loops herein could be hairy... Also: alway have the "original root" as input.
+void GFrustum::QuadTreeCollision(GQuadTreeBoundingBox* rootBox, bool startCollision) //The loops herein could be hairy... Also: alway have the "original root" as input.
 {
 	if (startCollision) {
 		//every time you start over this collision-detection, the previous list needs to be cleared.
@@ -219,21 +219,21 @@ void GFrustum::QuadTreeCollision(GQuadTreeBoundingBox& rootBox, bool startCollis
 	//Here check collision against all of the GQuadTreeBoundingBox-children.
 	for (int i = 0; i < 4; i++) 
 	{
-		if (hasCollided(rootBox.GQTBBoxChildren[i])) //if the frustum has collided with the QuadTreeBBox
+		if (hasCollided(rootBox->GQTBBoxChildren[i])) //if the frustum has collided with the QuadTreeBBox
 		{
-			if (rootBox.GQTBBoxChildren[i].hasSplit) //Check if this QuadTreeBBox has split
+			if (rootBox->GQTBBoxChildren[i]->hasSplit) //Check if this QuadTreeBBox has split
 			{
 				//loop again through it's children using this QuadTreeCollision-function.
-				QuadTreeCollision(rootBox.GQTBBoxChildren[i], startCollision);
+				QuadTreeCollision(rootBox->GQTBBoxChildren[i], startCollision);
 			}
 			else //check for object-collisions. 
 				 //Since only the lowest box-division has them, objects are found in the boxes that haven't split.
 			{
-				for (int c = 0; c < rootBox.GQTBBoxChildren[i].modelChildrenCounter; c++) { //for each model in this bbox...
-					bool modelSeen = hasCollided(rootBox.GQTBBoxChildren[i].modelChildren[c]->bBox); //Check for collision with this object's bbox.
+				for (int c = 0; c < rootBox->GQTBBoxChildren[i]->modelChildrenCounter; c++) { //for each model in this bbox...
+					bool modelSeen = hasCollided(&rootBox->GQTBBoxChildren[i]->modelChildren[c]->bBox); //Check for collision with this object's bbox.
 					if (modelSeen) {
-						seenObjects.push_back(rootBox.GQTBBoxChildren[i].modelChildren[c]);
-						rootBox.GQTBBoxChildren[i].modelChildren[c]->isCulled = false;
+						seenObjects.push_back(rootBox->GQTBBoxChildren[i]->modelChildren[c]);
+						rootBox->GQTBBoxChildren[i]->modelChildren[c]->isCulled = false;
 					}
 					//else {
 						//rootBox.GQTBBoxChildren[i].modelChildren[c]->isCulled = true;

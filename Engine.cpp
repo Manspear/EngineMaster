@@ -186,7 +186,7 @@ void Engine::Render()
 
 	bool isRoot = true;
 	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
-	cullingFrustum->QuadTreeCollision(quadTreeRoot->rootBox, isRoot);
+	cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
 
 	//struct frustumVert {
 //		float x, y, z, xn, yn, zn, u, v;
