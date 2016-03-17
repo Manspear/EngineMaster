@@ -122,20 +122,6 @@ void Engine::CreateShaders()
 	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShader);
 	pGS->Release();
 
-	ID3DBlob* pGSps = nullptr; //This may be used for error handling!
-	D3DCompileFromFile(
-		L"GeometryShaderParticle.hlsl", //The L here specifies unicode vs. ansii... Dunno exactly.
-		nullptr,
-		nullptr,
-		"main",
-		"gs_4_0",
-		0,
-		0,
-		&pGSps,
-		nullptr
-		);
-	gDevice->CreateGeometryShader(pGSps->GetBufferPointer(), pGSps->GetBufferSize(), nullptr, &gGeometryShaderParticle);
-	pGSps->Release();
 }
 
 void Engine::CreateConstantBuffer() {
@@ -231,6 +217,8 @@ void Engine::Render()
 
 	listOfModels = modelListObject->getModelList();
 
+	
+
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
 		if (listOfModels[bufferCounter].hasBlendShape())
@@ -244,8 +232,8 @@ void Engine::Render()
 			gDeviceContext->IASetInputLayout(gVertexLayout);
 			vertexSize = sizeof(float) * 8;
 		}
-
-
+		
+		
 		
 		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
 
@@ -259,6 +247,8 @@ void Engine::Render()
 		//gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0); //Uses indexbuffer
 		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
 	}
+
+	particleSys->renderParticles();
 }
 
 
@@ -395,7 +385,7 @@ void Engine::Clean() {
 	gVertexShader->Release();
 	gPixelShader->Release();
 	gGeometryShader->Release();
-	gGeometryShaderParticle->Release();
+	delete particleSys;
 
 	gBackbufferRTV->Release();
 	gSwapChain->Release();
@@ -409,6 +399,7 @@ void Engine::Clean() {
 	delete camera;
 	delete input;
 	delete modelListObject;
+	
 	//delete[] loops through the new-objects in the array, and deletes them!
 }
 void Engine::InitializeCamera()
@@ -432,6 +423,12 @@ void Engine::InitializeModels() {
 	//modelList[4].setPosition(XMFLOAT4(-7, 0, 1, 1), gDeviceContext);
 }
 
+void Engine::initializeParticles()
+{
+	particleSys = new ParticleSystem(gDevice, gDeviceContext);
+	particleSys->setShaders(gVertexShader);
+}
+
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
 	modelListObject = new GModelList;
@@ -449,6 +446,8 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	CreateConstantBuffer();
 
 	InitializeCamera();
+
+	initializeParticles();
 }
 
 void Engine::renderText(std::wstring text)

@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include "ParticleSystem.h"
+
 #ifndef ENGINE_H
 #define ENGINE_H
 #define XAXIS 0
@@ -67,7 +69,7 @@ public:
 	ID3D11VertexShader* gVertexShaderBS = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;
-	ID3D11GeometryShader* gGeometryShaderParticle = nullptr;
+	
 
 	struct matrixBuffer {
 		XMMATRIX viewMatrix;
@@ -81,6 +83,7 @@ public:
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
 	FbxDawg * fbxobj = nullptr;
+	ParticleSystem * particleSys;
 
 	int wHEIGHT = 480;
 	int wWIDTH = 640;
@@ -110,6 +113,7 @@ public:
 	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once
 	void InitializeCamera();
 	void InitializeModels();
+	void initializeParticles();
 	HRESULT CreateDirect3DContext(HWND wndHandle);
 
 	/*LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

@@ -3,6 +3,7 @@
 #define PARTICLE_SYSTEMS_H
 
 #include <d3d11.h>
+#include <d3dcompiler.h> 
 #include <DirectXMath.h>
 
 using namespace DirectX;
@@ -20,6 +21,9 @@ private:
 			  u, v;
 	};
 
+	ID3D11VertexShader* gVertexShader = nullptr;
+	ID3D11GeometryShader* gGeometryShaderParticle = nullptr;
+	ID3D11DeviceContext* gDeviceContext;
 	ID3D11Buffer* particleConstantBuffer = nullptr;
 	ID3D11Buffer* particleVertexBuffer = nullptr;
 	XMMATRIX particleWorldMatrix;
@@ -39,6 +43,8 @@ public:
 	ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext);
 	~ParticleSystem();
 
+	void renderParticles();
+	void setShaders(ID3D11VertexShader* gVertexShader);
 };
 
 

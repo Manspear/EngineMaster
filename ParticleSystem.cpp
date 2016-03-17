@@ -1,10 +1,30 @@
 #include "ParticleSystem.h"
 
+
+
 ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext)
 {
-	party.x = 1.0f;
-	party.y = 1.0f;
-	party.z = 1.0f;
+	this->gDeviceContext = gDeviceContext;
+
+	ID3DBlob* pGSps = nullptr;
+	D3DCompileFromFile(
+		L"GeometryShaderParticle.hlsl",
+		nullptr,
+		nullptr,
+		"main",
+		"gs_4_0",
+		0,
+		0,
+		&pGSps,
+		nullptr
+		);
+	gDevice->CreateGeometryShader(pGSps->GetBufferPointer(), pGSps->GetBufferSize(), nullptr, &gGeometryShaderParticle);
+	pGSps->Release();
+
+
+	party.x = 0.0f;
+	party.y = 0.0f;
+	party.z = -4.0f;
 
 	party.nx = party.x;
 	party.ny = party.y;
@@ -14,18 +34,20 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 	party.v = 0.0f;
 
 	//vertexbuffer
-	D3D11_BUFFER_DESC bufferDesc;
-	memset(&bufferDesc, 0, sizeof(bufferDesc));
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(particle);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
+	D3D11_BUFFER_DESC bufferDescV;
+	memset(&bufferDescV, 0, sizeof(bufferDescV));
+	bufferDescV.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDescV.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDescV.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDescV.ByteWidth = sizeof(particle);
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = &party;
 
-	gDevice->CreateBuffer(&bufferDesc, &data, &particleVertexBuffer);
+	gDevice->CreateBuffer(&bufferDescV, &data, &particleVertexBuffer);
 
-
+	
 	//constantbuffer
+	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -48,6 +70,24 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 
 ParticleSystem::~ParticleSystem()
 {
+	gGeometryShaderParticle->Release();
+}
 
+void ParticleSystem::renderParticles()
+{
+	UINT vertSize = sizeof(float) * 8;
+	UINT offset = 0;
 
+	gDeviceContext->GSSetShader(gGeometryShaderParticle, nullptr, 0);
+	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+
+	gDeviceContext->GSSetConstantBuffers(1, 1, &particleConstantBuffer);
+	gDeviceContext->IASetVertexBuffers(0, 1, &particleVertexBuffer, &vertSize, &offset);
+	gDeviceContext->Draw(vertSize, offset);
+
+}
+
+void ParticleSystem::setShaders(ID3D11VertexShader * gVertexShader)
+{
+	this->gVertexShader = gVertexShader;
 }
