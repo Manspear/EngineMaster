@@ -133,7 +133,27 @@ void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, cons
 
 	return collision;
 }*/
-
+bool GFrustum:: quadTreeCollided(GQuadTreeBoundingBox* modelBox)
+{
+	//FIX THIS THING!
+	for (int planeC = 0; planeC < 6; planeC++) {
+		//Check this every frustum-plane against all of the points of the cube. If any point is inside the current plane --> intersection for this plane is true.
+		//Then go through the rest of the planes. As long as there are boxpoint(s) inside all planes, we have an intersection!
+		bool intersection = false;
+		for (int i = 0; i < 8; i++) {
+			if (((fPlanes[planeC].normal.x) * (modelBox->vertices.BBoxPoint[i].x) + (fPlanes[planeC].normal.y) * (modelBox->vertices.BBoxPoint[i].y) + (fPlanes[planeC].normal.z) * (modelBox->vertices.BBoxPoint[i].z) + fPlanes[planeC].distance) <= 0) {
+				intersection = true;
+				break; //break finds the closest loop.
+			}
+		}
+		if (intersection == false) {
+			printf("Non-Collision QUADTREE!\n");
+			return false;
+		}
+	}
+	printf("Collision QUADTREE\n");
+	return true;
+}
 bool GFrustum::hasCollided(GBoundingBox* modelBox)
 {
 	//FIX THIS THING!
@@ -219,7 +239,7 @@ void GFrustum::QuadTreeCollision(GQuadTreeBoundingBox* rootBox, bool startCollis
 	//Here check collision against all of the GQuadTreeBoundingBox-children.
 	for (int i = 0; i < 4; i++) 
 	{
-		if (hasCollided(rootBox->GQTBBoxChildren[i])) //if the frustum has collided with the QuadTreeBBox
+		if (quadTreeCollided(rootBox->GQTBBoxChildren[i])) //if the frustum has collided with the QuadTreeBBox
 		{
 			if (rootBox->GQTBBoxChildren[i]->hasSplit) //Check if this QuadTreeBBox has split
 			{

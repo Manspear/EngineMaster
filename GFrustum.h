@@ -24,6 +24,8 @@ public:
 	//static DirectX::XMVECTOR HomogenousPoints[6];
 	//bool GFrustum::isCollision(const DirectX::BoundingBox& modelBBox);//<- updates frustum position, and checks for intersection
 	
+	bool quadTreeCollided(GQuadTreeBoundingBox * modelBox);
+
 	bool hasCollided(GBoundingBox* modelBox);
 	void QuadTreeCollision(GQuadTreeBoundingBox* rootBox, bool startCollision); //input from GQuadTree is: rootBox-object.
 	void updateFrustumPos(const DirectX::XMMATRIX &cameraProjection, const DirectX::XMMATRIX &cameraView);//will add a "boundingbox-list" as paremeter to updateFrustum. Or make a collision-function that updateFrustum calls.

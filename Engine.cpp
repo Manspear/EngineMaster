@@ -187,6 +187,7 @@ void Engine::Render()
 	bool isRoot = true;
 	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
 	cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
+	//rootBox has 2 modelChildren, but the bbox-children of rootBox have no modelchildren. Odd that.
 
 	//struct frustumVert {
 //		float x, y, z, xn, yn, zn, u, v;
@@ -375,7 +376,7 @@ void Engine::InitializeModels() {
 void Engine::InitializeQuadTree()
 {
 	quadTreeRoot = new GQuadTree;
-	quadTreeRoot->makeTree(4, modelListObject);
+	quadTreeRoot->makeTree(5, modelListObject);
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {

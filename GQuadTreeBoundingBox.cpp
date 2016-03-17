@@ -2,12 +2,20 @@
 
 GQuadTreeBoundingBox::GQuadTreeBoundingBox()
 {
+	GQTBBoxChildren[0] = nullptr;
+	GQTBBoxChildren[1] = nullptr;
+	GQTBBoxChildren[2] = nullptr;
+	GQTBBoxChildren[3] = nullptr;
 }
 
 GQuadTreeBoundingBox::~GQuadTreeBoundingBox()
 {
-	if(GQTBBoxChildren != nullptr)
-		delete[] GQTBBoxChildren; //this will call the ~GQuadTreeBoundingBox() of the children.
+	if (GQTBBoxChildren[0] != 0) {
+		delete GQTBBoxChildren[0];
+		delete GQTBBoxChildren[1];
+		delete GQTBBoxChildren[2];
+		delete GQTBBoxChildren[3];//this will call the ~GQuadTreeBoundingBox() of the children.
+	}
 }
 void GQuadTreeBoundingBox::CreateBBox(XMFLOAT3 minPoint, XMFLOAT3 maxPoint)
 {
@@ -95,7 +103,13 @@ void GQuadTreeBoundingBox::splitBox(int divisionCounter, GModelList& modelList)
 	}
 	if(divisionCounter == 0)
 	{
-		fillBox(modelList);
+		//If divisioncounter == 0, I fill THIS box. That is... Wrong. 
+		//So if I fill the children I created with models, I'm good 2 go.
+		//fillBox(modelList);
+		GQTBBoxChildren[0]->fillBox(modelList);
+		GQTBBoxChildren[1]->fillBox(modelList);
+		GQTBBoxChildren[2]->fillBox(modelList);
+		GQTBBoxChildren[3]->fillBox(modelList);
 	}
 }
 
@@ -154,5 +168,5 @@ void GQuadTreeBoundingBox::fillBox(GModelList & modelList)
 		//if the AABs' have passed the intersection test, it intersects the QuadTreeBBox!
 		modelChildren.push_back(&tempModelList[z]); //gives a reference of the GModel to this bbox-object. (a pointer)
 	}
-	modelChildrenCounter = modelChildren.size();
+	this->modelChildrenCounter = modelChildren.size();
 }
