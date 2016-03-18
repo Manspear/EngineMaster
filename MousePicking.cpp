@@ -118,6 +118,10 @@ bool MousePicking::calculateCurrentRay()
 
 float MousePicking::checkRayIntersectionAgainstObject(std::vector<MyVertexStruct> modelVertices, int* IndexArray,int IndexArraySize, SimpleMath::Matrix worldMatrix)
 {
+
+	currentRay=XMVector3TransformCoord(currentRay, worldMatrix.Invert());
+	rayOrigin=XMVector3TransformCoord(rayOrigin, worldMatrix.Invert());
+
 	for (int i = 0; i < IndexArraySize / 3; i++)
 	{
 		
@@ -132,9 +136,9 @@ float MousePicking::checkRayIntersectionAgainstObject(std::vector<MyVertexStruct
 		
 
 		//Transform the vertices to world space
-		tri1V1 = XMVector3TransformCoord(tri1V1, worldMatrix);
-		tri1V2 = XMVector3TransformCoord(tri1V2, worldMatrix);
-		tri1V3 = XMVector3TransformCoord(tri1V3, worldMatrix);
+		//tri1V1 = XMVector3TransformCoord(tri1V1, worldMatrix);
+		//tri1V2 = XMVector3TransformCoord(tri1V2, worldMatrix);
+		//tri1V3 = XMVector3TransformCoord(tri1V3, worldMatrix);
 		
 		
 		

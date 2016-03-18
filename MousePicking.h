@@ -37,8 +37,8 @@ private:
 public:
 
 	
-	SimpleMath::Vector3 currentRay;
-	SimpleMath::Vector3 rayOrigin;
+	SimpleMath::Vector4 currentRay;
+	SimpleMath::Vector4 rayOrigin;
 	
 	
 	
