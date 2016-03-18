@@ -13,6 +13,7 @@
 
 #include "GCamera.h"
 #include "FbxDawg.h"
+#include "GModel.h"
 
 
 using namespace DirectX;
@@ -24,15 +25,15 @@ class MousePicking
 
 //Variables
 private:
-	
+	bool previousLeftMouseButtonDown;
 	int screenHeight, screenWidth;
 	bool result;
 	SimpleMath::Matrix projectionMatrix, viewMatrix;
 	GCamera* camera;
 	HWND wndHandle2;
 	POINT MousePos;
-
 	bool CheckBoundingBoxIntersection();
+	GModel* listOfModels;
 public:
 
 	
@@ -43,14 +44,16 @@ public:
 	
 //end of Variables
 	
-	MousePicking(HWND wndHandle, GCamera* camera, int screenHeight, int screenWidth);
+	
+	MousePicking(HWND wndHandle, GCamera* camera, GModel* listOfModels, int screenHeight, int screenWidth);
 	~MousePicking();
 
 	void updateClass(); 
+	bool isLeftMouseButtonClicked();
 	bool getCursorPosition(POINT& MousePosSavedHere);
 	bool calculateCurrentRay();
 	float checkRayIntersectionAgainstObject(std::vector<MyVertexStruct> modelVertices, int* IndexArray, int IndexArraySize, SimpleMath::Matrix worldMatrix); //std::vector<MyVertexStruct> modelVertices,
 	bool PointInTriangle(SimpleMath::Vector4& triV1, SimpleMath::Vector4& triV2, SimpleMath::Vector4& triV3, SimpleMath::Vector4& point);
-
+	
 };
 #endif

@@ -2,7 +2,7 @@
 
 
 
-MousePicking::MousePicking(HWND wndHandle, GCamera* camera, int screenHeight, int screenWidth)
+MousePicking::MousePicking(HWND wndHandle, GCamera* camera, GModel* listOfModels, int screenHeight, int screenWidth)
 {
 	this->camera = camera;
 	this->wndHandle2 = wndHandle;
@@ -10,6 +10,10 @@ MousePicking::MousePicking(HWND wndHandle, GCamera* camera, int screenHeight, in
 	this->viewMatrix = camera->getViewMatrix();
 	this->screenHeight = screenHeight;
 	this->screenWidth = screenWidth;
+
+	this->listOfModels = listOfModels;
+
+	this->previousLeftMouseButtonDown=false;
 }
 
 MousePicking::~MousePicking()
@@ -19,18 +23,35 @@ MousePicking::~MousePicking()
 
 void MousePicking::updateClass() //updates variables & checks ray
 {
-	
-	this->projectionMatrix = this->camera->getProjMatrix();
-	this->viewMatrix = this->camera->getViewMatrix();
-
-	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) /*if left mouse button down*/
+	if (isLeftMouseButtonClicked())
 	{
-		//std::cout << projectionMatrix->;
+		this->projectionMatrix = this->camera->getProjMatrix();
+		this->viewMatrix = this->camera->getViewMatrix();
+
 		this->result = this->calculateCurrentRay();
-		this->CheckBoundingBoxIntersection();
-		
+		printf("%f\n",checkRayIntersectionAgainstObject(listOfModels[0].modelVertices, listOfModels[0].IndexArray, listOfModels[0].sizeOfIndexArray, XMMatrixTranspose(listOfModels[0].objectWorldMatrix)));
+		//this->CheckBoundingBoxIntersection();
+	}
+	
+
+
+}
+
+bool MousePicking::isLeftMouseButtonClicked()
+{
+
+	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0 && previousLeftMouseButtonDown == false) /*if left mouse button down && was up*/
+	{
+		previousLeftMouseButtonDown = true;
+		return true;
 	}
 
+	else if ((GetKeyState(VK_LBUTTON) & 0x100) ==0) //if not down
+	{
+		previousLeftMouseButtonDown = false;
+	}
+
+	return false;
 
 }
 

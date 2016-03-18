@@ -248,7 +248,8 @@ void Engine::Render()
 
 
 
-void Engine::Update() {
+void Engine::Update() 
+{
 	
 	
 	frameCount++;
@@ -310,18 +311,6 @@ void Engine::Update() {
 
 
 	MousePickingObject->updateClass();
-	
-	
-	
-	if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) /*if left mouse button down*/
-	{
-		GModel* listOfModels = modelListObject->getModelList();
-		MousePickingObject->updateClass();
-		
-		float temp = MousePickingObject->checkRayIntersectionAgainstObject(listOfModels[0].modelVertices, listOfModels[0].IndexArray, listOfModels[0].sizeOfIndexArray,XMMatrixTranspose(listOfModels[0].objectWorldMatrix));
-		printf("%f \n", temp);
-
-	}
 
 	
 }
@@ -405,7 +394,8 @@ void Engine::InitializeCamera()
 
 void Engine::initializeMousePicking(HWND wndHandle)
 {
-	MousePickingObject = new MousePicking(wndHandle, this->camera, this->wHEIGHT,this->wWIDTH);
+	GModel* listOfModels = modelListObject->getModelList();
+	MousePickingObject = new MousePicking(wndHandle, this->camera, listOfModels,  this->wHEIGHT,this->wWIDTH);
 }
 
 
