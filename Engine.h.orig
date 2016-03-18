@@ -67,8 +67,6 @@ public:
 	ID3D11DepthStencilView* depthStencilView = nullptr;
 	//ID3D11ShaderResourceView* gTextureView[2];
 
-	ID3D11SamplerState* gPSTextureSampler = nullptr;
-
 	ID3D11InputLayout* gVertexLayout = nullptr;
 	ID3D11InputLayout* gVertexLayoutBS = nullptr;
 	ID3D11VertexShader* gVertexShader = nullptr;
@@ -118,7 +116,6 @@ public:
 	void Render();
 	void Update();
 	void Clean(); //releases all resources
-	//void Initialize(HWND wndHandle, HINSTANCE hinstance); 
 	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once
 	void InitializeFrustum();
 	void InitializeCamera();

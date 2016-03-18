@@ -6,10 +6,14 @@ using namespace DirectX;
 
 GModel::GModel()
 {
+<<<<<<< HEAD
 	this->objectWorldMatrix = new XMMATRIX;
 	this->objectWorldMatrix[0] = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
+=======
 	this->blendShape = false;
 	noOfTextures = 1;
+	this->objectWorldMatrix = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
+>>>>>>> superbranch_DEV
 }
 
 GModel::~GModel()
@@ -17,21 +21,32 @@ GModel::~GModel()
 	//modelVertexBuffer->Release(); //This gets released...Somewhere.
 	//modelTextureView[0]->Release();
 	//modelTextureView[1]->Release();
+<<<<<<< HEAD
 	delete objectWorldMatrix;
+=======
 
+
+>>>>>>> superbranch_DEV
 }
 void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext)
 {
 	//For this to work, we'll need our own world matrix, which we've got created in the GModel constructor.
+<<<<<<< HEAD
 	//XMMATRIX translation = XMMatrixTranslation(position.x, position.y, position.z);
 	//translation = XMMatrixTranspose(translation); 
-	//translation = XMMatrixTranspose(translation);
 	//XMMATRIX identity = XMMatrixIdentity();
 	//identity = XMMatrixTranspose(identity);
 
 	this->objectWorldMatrix[0] = XMMatrixTranspose(XMMatrixIdentity() * XMMatrixTranslation(position.x, position.y, position.z)); //multiply transposed matrix with transposed matrix --> result is transposed 
 																																  //this->objectWorldMatrix = XMMatrixTranspose(objectWorldMatrix);
 
+=======
+	XMMATRIX translation = XMMatrixTranslation(position.x, position.y, position.z);
+	translation = XMMatrixTranspose(translation);
+	XMMATRIX identity = XMMatrixIdentity();
+	identity = XMMatrixTranspose(identity);
+	objectWorldMatrix = identity * translation; //multiply transposed matrix with transposed matrix --> result is transposed (I think)
+>>>>>>> superbranch_DEV
 
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
 	modelWorldStruct* dataPtr;
@@ -73,6 +88,9 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	data.pSysMem = modelVertices.data();
 
 	gDevice->CreateBuffer(&bufferDesc, &data, &modelVertexBuffer);
+<<<<<<< HEAD
+
+=======
 #pragma endregion VertexBuffer
 
 #pragma region IndexBuffer
@@ -95,6 +113,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	gDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &this->modelIndexBuffer);
 #pragma endregion IndexBuffer
 #pragma region ConstantBuffer
+>>>>>>> superbranch_DEV
 	//Creating constant buffer holding only worldmatrix
 	//D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
@@ -122,22 +141,14 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 
 	CoInitialize(NULL);
 	//Need to have this be part of the Render-looping-through-objects-loop. That is: not having modelList[0]
-	if (diffusePath == NULL)
-		hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);
-	else
-		hr = DirectX::CreateWICTextureFromFile(gDevice, diffusePath, NULL, &modelTextureView[0]);
+<<<<<<< HEAD
+	hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);//wstring äger functionen c_str som är en getFucntion till wchar_t* som finns redan
+	hr = DirectX::CreateWICTextureFromFile(gDevice, L"./Images/normal_map.jpg", NULL, &modelTextureView[1]);
+	//(d3d11DeviceInterface, d3d11DeviceContextInterface, L"test.bmp", 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0, &pTex2D, NULL);
+#pragma endregion 
 
-	if (normalPath == NULL)
-	{
-		noOfTextures = 1;
-		hr = DirectX::CreateWICTextureFromFile(gDevice, L"finland", NULL, &modelTextureView[1]);
-	}else{
-		noOfTextures = 2;
-		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]);
-	}
-#pragma endregion
-
-	//Making bbox
+	//Loop through the vertices to get the minimum and maximum xyz values to be used for BBox creation.
+	//This could be done in the FbxDawg-class, to spare the CPU when you're loading lots of models.
 	float maxX = FLT_MIN;
 	float minX = FLT_MAX;
 	float maxY = FLT_MIN;
@@ -162,12 +173,29 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	//make two XMVECTORs that we will create the bbox from
 	XMVECTOR maxPos = XMVectorSet(maxX, maxY, maxZ, 1);
 	XMVECTOR minPos = XMVectorSet(minX, minY, minZ, 1);
-	//modelBBox.CreateFromPoints(modelBBox, maxPos, minPos);
+	modelBBox.CreateFromPoints(modelBBox, maxPos, minPos);
 	//now when I've got a bbox, I can do collision-detection with the frustum in the Frustum-class.
 
 	//Create the bbox (my version)
 	bBox.CreateBBox(XMFLOAT3(minX, minY, minZ), XMFLOAT3(maxX, maxY, maxZ));
+};
+=======
+	if (diffusePath == NULL)
+		hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);
+	else
+		hr = DirectX::CreateWICTextureFromFile(gDevice, diffusePath, NULL, &modelTextureView[0]);
+
+	if (normalPath == NULL)
+	{
+		noOfTextures = 1;
+		hr = DirectX::CreateWICTextureFromFile(gDevice, L"finland", NULL, &modelTextureView[1]);
+	}else{
+		noOfTextures = 2;
+		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]);
+	}
+#pragma endregion 
 }; 
+>>>>>>> superbranch_DEV
 
 void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath)
 {
@@ -267,7 +295,7 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 	gDeviceContext->Map(modelConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (modelWorldStruct*)gMappedResource.pData;
 
-	dataPtr->worldMatrix = objectWorldMatrix[0];
+	dataPtr->worldMatrix = objectWorldMatrix;
 
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 #pragma endregion ConstantBuffer
@@ -291,38 +319,6 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 
 	}
 #pragma endregion 
-
-	//Loop through the vertices to get the minimum and maximum xyz values to be used for BBox creation.
-	//This could be done in the FbxDawg-class, to spare the CPU when you're loading lots of models.
-	float maxX = FLT_MIN;
-	float minX = FLT_MAX;
-	float maxY = FLT_MIN;
-	float minY = FLT_MAX;
-	float maxZ = FLT_MIN;
-	float minZ = FLT_MAX;
-	for (int i = 0; i < modelVertices.size(); i++) {
-		//get the min and max values of the model
-		if (maxX < modelVertices[i].x)
-			maxX = modelVertices[i].x;
-		if (minX > modelVertices[i].x)
-			minX = modelVertices[i].x;
-		if (maxY < modelVertices[i].y)
-			maxY = modelVertices[i].y;
-		if (minY > modelVertices[i].y)
-			minY = modelVertices[i].y;
-		if (maxZ < modelVertices[i].z)
-			maxZ = modelVertices[i].z;
-		if (minZ > modelVertices[i].z)
-			minZ = modelVertices[i].z;
-	}
-	//make two XMVECTORs that we will create the bbox from
-	XMVECTOR maxPos = XMVectorSet(maxX, maxY, maxZ, 1);
-	XMVECTOR minPos = XMVectorSet(minX, minY, minZ, 1);
-	//modelBBox.CreateFromPoints(modelBBox, maxPos, minPos);
-	//now when I've got a bbox, I can do collision-detection with the frustum in the Frustum-class.
-
-	//Create the bbox (my version)
-	bBox.CreateBBox(XMFLOAT3(minX, minY, minZ), XMFLOAT3(maxX, maxY, maxZ));
 };
 
 
@@ -348,7 +344,7 @@ void GModel::setBlendWeight(float weight, ID3D11DeviceContext* gDeviceContext)
 
 void GModel::renderModel()
 {
-	//This here needs... The model's texture. Among other things.
+	//This here needs... The model's texture.
 	//
 
 };

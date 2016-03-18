@@ -1,3 +1,9 @@
+struct GSINPUT {
+	float4 Pos : SV_POSITION;
+	float3 normal : NORMAL;
+	float2 UV : TEXCOORD;
+};
+
 struct GSOutput
 {
 	float4 Pos : SV_Position;
@@ -30,7 +36,7 @@ cbuffer worldBuffer:register(b1) { //Gotten from the GModel class.
 [maxvertexcount(3)] //returns a maximum of x vertices
 
 
-void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSOutput > output)
+void GS_main(triangle GSINPUT input[3] : SV_POSITION, inout TriangleStream< GSOutput > output)
 {
 	GSOutput element = (GSOutput)0;
 
