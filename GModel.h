@@ -5,6 +5,7 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <string>
+#include "SimpleMath.h"
 
 using namespace DirectX;
 
@@ -18,7 +19,7 @@ private:
 	FbxDawg BSLoader;
 	bool blendShape;
 public:
-	XMMATRIX objectWorldMatrix; 
+	SimpleMath::Matrix objectWorldMatrix;
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
 	};

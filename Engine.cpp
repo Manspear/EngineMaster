@@ -317,7 +317,8 @@ void Engine::Update() {
 	{
 		GModel* listOfModels = modelListObject->getModelList();
 		MousePickingObject->updateClass();
-		float temp = MousePickingObject->checkRayIntersectionAgainstObject(listOfModels[0].modelVertices, listOfModels[0].IndexArray, listOfModels[0].sizeOfIndexArray, listOfModels[0].objectWorldMatrix);
+		
+		float temp = MousePickingObject->checkRayIntersectionAgainstObject(listOfModels[0].modelVertices, listOfModels[0].IndexArray, listOfModels[0].sizeOfIndexArray,XMMatrixTranspose(listOfModels[0].objectWorldMatrix));
 		printf("%f \n", temp);
 
 	}
