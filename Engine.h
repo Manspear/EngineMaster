@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include "ParticleSystem.h"
+
 #ifndef ENGINE_H
 #define ENGINE_H
 #define XAXIS 0
@@ -39,7 +41,7 @@ class Engine
 {
 
 private:
-
+	GModel* listOfModels;
 
 
 public:
@@ -66,9 +68,12 @@ public:
 	//ID3D11ShaderResourceView* gTextureView[2];
 
 	ID3D11InputLayout* gVertexLayout = nullptr;
+	ID3D11InputLayout* gVertexLayoutBS = nullptr;
 	ID3D11VertexShader* gVertexShader = nullptr;
+	ID3D11VertexShader* gVertexShaderBS = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;
+	
 
 	struct matrixBuffer {
 		XMMATRIX viewMatrix;
@@ -83,8 +88,8 @@ public:
 	GInput * input = nullptr;
 	GFrustum * cullingFrustum = nullptr;
 	GQuadTree * quadTreeRoot = nullptr;
-
 	FbxDawg * fbxobj = nullptr;
+	ParticleSystem * particleSys;
 
 	int wHEIGHT = 480;
 	int wWIDTH = 480;//was 640
@@ -116,6 +121,7 @@ public:
 	void InitializeCamera();
 	void InitializeModels();
 	void InitializeQuadTree();
+	void initializeParticles();
 	HRESULT CreateDirect3DContext(HWND wndHandle);
 
 	/*LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

@@ -62,6 +62,8 @@
     </ClCompile>
     <ClCompile Include="GQuadTree.cpp">
       <Filter>Source Files\Quad Tree and BBoxes</Filter>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GFrustum.cpp">
       <Filter>Source Files\Quad Tree and BBoxes</Filter>
@@ -81,6 +83,18 @@
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Vertex.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShaderBS.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ComputeShader.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShaderParticle.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="GeometryShaderParticle.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
@@ -111,6 +125,8 @@
     </ClInclude>
     <ClInclude Include="GQuadTreeBoundingBox.h">
       <Filter>Header Files\Quad Tree and BBoxes</Filter>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GFrustum.h">
       <Filter>Header Files\Quad Tree and BBoxes</Filter>

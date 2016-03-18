@@ -53,6 +53,38 @@ void Engine::CreateShaders()
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
+	//create vertex shader
+	ID3DBlob* pVSbs = nullptr;
+	D3DCompileFromFile(
+		L"VertexShaderBS.hlsl", // filename
+		nullptr,		// optional macros
+		nullptr,		// optional include files
+		"VS_main",		// entry point
+		"vs_4_0",		// shader model (target)
+		0,				// shader compile options
+		0,				// effect compile options
+		&pVSbs,			// double pointer to ID3DBlob		
+		nullptr			// pointer for Error Blob messages.
+						// how to use the Error blob, see here
+						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+		);
+
+
+	gDevice->CreateVertexShader(pVSbs->GetBufferPointer(), pVSbs->GetBufferSize(), nullptr, &gVertexShaderBS);
+
+	//create input layout (verified using vertex shader)
+	D3D11_INPUT_ELEMENT_DESC inputDescBS[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA , 0 },
+		{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 56, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	HRESULT hr = gDevice->CreateInputLayout(inputDescBS, ARRAYSIZE(inputDescBS), pVSbs->GetBufferPointer(), pVSbs->GetBufferSize(), &gVertexLayoutBS);
+	// we do not need anymore this COM object, so we release it.
+
+	pVSbs->Release();
 
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;
@@ -89,6 +121,7 @@ void Engine::CreateShaders()
 		);
 	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShader);
 	pGS->Release();
+
 }
 
 void Engine::CreateConstantBuffer() {
@@ -165,29 +198,41 @@ void Engine::Render()
 #pragma endregion
 	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
 	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
-	float clearColor[] = { 0, 0, 0, 1 };
+	float clearColor[] = { 1, 0.537, 0.812, 1 };
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+	
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-	UINT32 vertexSize = sizeof(float) * 8;
+	UINT32 vertexSize;
 	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gDeviceContext->IASetInputLayout(gVertexLayout);
+	
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
-	GModel* listOfModels = modelListObject.getModelList();
+	listOfModels = modelListObject->getModelList();
+
+	
 
 	bool isRoot = true;
 	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
 	cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
 	//rootBox has 2 modelChildren, but the bbox-children of rootBox have no modelchildren. Odd that.
+			gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
+			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
+			vertexSize = sizeof(float) * 16;
+		}else{
+			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayout);
+			vertexSize = sizeof(float) * 8;
+		}
+		
 
 	//struct frustumVert {
 //		float x, y, z, xn, yn, zn, u, v;
@@ -203,12 +248,14 @@ void Engine::Render()
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
 
 		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
+		gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
 		gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0);
+		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
 	}
 
-	//for (int bufferCounter = 0; bufferCounter < modelListObject.numberOfModels; bufferCounter++)
+	particleSys->renderParticles();
 	//{
 	//	//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
 	//	//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
@@ -257,10 +304,25 @@ void Engine::Update() {
 	input->getKeyboardState();
 	input->GetMouseLoc();
 
-	if (input->keyState[DIK_LALT])
+	if (input->keyState[DIK_LCONTROL])
 	{
 		camera->rotate(XAXIS, input->mouseX*MOUSE_SENSITIVITY*dt);
 		camera->rotate(YAXIS, -input->mouseY*MOUSE_SENSITIVITY*dt);
+	}
+	static float weight;
+	if (input->keyState[DIK_UPARROW])
+	{
+		weight += 0.2*dt;
+		if (weight > 1.0)
+			weight = 1.0;
+		listOfModels[2].setBlendWeight(weight, gDeviceContext);
+	}
+	if (input->keyState[DIK_DOWNARROW])
+	{
+		weight -= 0.2*dt;
+		if (weight < 0.0)
+			weight = 0.0;
+		listOfModels[2].setBlendWeight(weight, gDeviceContext);
 	}
 
 	// kryssprodukten mellan upp vektor och riktings vektorn ger sidleds vektorn.
@@ -309,7 +371,7 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		NULL,
+		D3D11_CREATE_DEVICE_DEBUG,
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,
@@ -344,6 +406,7 @@ void Engine::Clean() {
 	gVertexShader->Release();
 	gPixelShader->Release();
 	gGeometryShader->Release();
+	delete particleSys;
 
 	gBackbufferRTV->Release();
 	gSwapChain->Release();
@@ -377,6 +440,14 @@ void Engine::InitializeQuadTree()
 {
 	quadTreeRoot = new GQuadTree;
 	quadTreeRoot->makeTree(5, modelListObject);
+	//modelList[3].setPosition(XMFLOAT4(-14, 0, 1, 1), gDeviceContext);
+	//modelList[4].setPosition(XMFLOAT4(-7, 0, 1, 1), gDeviceContext);
+}
+
+void Engine::initializeParticles()
+{
+	particleSys = new ParticleSystem(gDevice, gDeviceContext);
+	particleSys->setShaders(gVertexShader);
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
@@ -397,6 +468,7 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	InitializeCamera();
 
 	InitializeFrustum();
+	initializeParticles();
 
 	InitializeQuadTree();
 
