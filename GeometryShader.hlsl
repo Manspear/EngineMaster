@@ -22,7 +22,6 @@ cbuffer matrixBuffer:register(b0) {
 	float4 camPos;
 	float4 camDir;
 };
-
 cbuffer worldBuffer:register(b1) { //Gotten from the GModel class.
 	matrix worldMatrix;
 };
@@ -33,7 +32,6 @@ cbuffer worldBuffer:register(b1) { //Gotten from the GModel class.
 void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSOutput > output)
 {
 	GSOutput element = (GSOutput)0;
-
 	matrix allMatrix = mul(mul(worldMatrix, viewMatrix), projectionMatrix);
 
 	//Normal //still used in tangent bitangent
@@ -55,9 +53,11 @@ void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSO
 	tangent = mul(float4(tangent, 1), worldMatrix).xyz;
 	biTangent = mul(float4(biTangent, 1), worldMatrix).xyz;
 	//End of Normal
-	element.camPos = camPos;
+	
 		for (uint i = 0; i < 3; i++)
 		{ 
+			element.camPos = camPos;
+			element.camDir = camDir;
 			element.Pos = mul(input[i].Pos, allMatrix);
 			element.UV = input[i].UV;
 			element.normal = normalize(mul(float4(input[i].normal, 0), worldMatrix).xyz); //get the normal into worldspace

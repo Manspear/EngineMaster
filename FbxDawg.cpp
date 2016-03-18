@@ -1,5 +1,5 @@
 #include "FbxDawg.h"
-
+#include <DirectXMath.h>
 FbxDawg::FbxDawg()
 {
 
@@ -237,7 +237,13 @@ void FbxDawg::loadModels(const char* filePath)
 				FbxSurfaceMaterial* material = FbxChildNode->GetMaterial(m);
 				if (material)//.. if material
 				{
-					FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
+					FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);// This only gets the material of type sDiffuse, you probably need to traverse all Standard Material Property by its name to get all possible textures.
+
+					DCMmaterial = &material->FindProperty(FbxSurfaceMaterial::sReflection);
+					//DCMmaterial.get()  Gets the value of the property
+					//DCMmaterial.IsValid() Judges the property's validity
+					//DCMmaterial->Get<fbxsdk::FbxDouble4>();
+
 					int texture_Count = prop.GetSrcObjectCount<FbxTexture>();
 					for (int i = 0; i < texture_Count; i++)// how many texturefiles attached to the material
 					{

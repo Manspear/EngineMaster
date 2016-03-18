@@ -14,13 +14,15 @@
 
 #include "FbxDawg.h"
 
+#include <DirectXColors.h>
 #include "GModel.h"
+
+#include "DCM.h"
+
 
 #include "GModelList.h"
 
 #include <vector>
-
-#include "ParticleSystem.h"
 
 #ifndef ENGINE_H
 #define ENGINE_H
@@ -69,7 +71,6 @@ public:
 	ID3D11VertexShader* gVertexShaderBS = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;
-	
 
 	struct matrixBuffer {
 		XMMATRIX viewMatrix;
@@ -82,13 +83,16 @@ public:
 	GModelList * modelListObject = nullptr;
 	GCamera * camera = nullptr;
 	GInput * input = nullptr;
+	
+
 	FbxDawg * fbxobj = nullptr;
-	ParticleSystem * particleSys;
+	DCM dcm;
 
 	int wHEIGHT = 480;
 	int wWIDTH = 640;
 	byte * keys;
-
+	
+	void CreateDynamicCubeMap();
 	//Delta Time Stuff
 	double countsPerSecond;
 	__int64 counterStart;
@@ -101,7 +105,6 @@ public:
 	double getTime();
 	double getFrameTime();
 	//end delta dime stuff
-
 	void CreateShaders();
 	//void CreateTexture(int modelCounter);
 	void CreateConstantBuffer();
@@ -113,7 +116,6 @@ public:
 	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once
 	void InitializeCamera();
 	void InitializeModels();
-	void initializeParticles();
 	HRESULT CreateDirect3DContext(HWND wndHandle);
 
 	/*LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

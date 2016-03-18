@@ -17,6 +17,7 @@ private:
 	FbxDawg modelLoader;
 	FbxDawg BSLoader;
 	bool blendShape;
+	bool DCM;
 public:
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
@@ -40,6 +41,7 @@ public:
 	void setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext);
 	XMMATRIX getPosition();
 	void renderModel();
+
 	std::vector<MyVertexStruct> modelVertices;
 	std::vector<MyVertexStruct> BSmodelVertices;
 	std::vector<MyBSStruct> modelWithBSstruct;
@@ -47,6 +49,7 @@ public:
 	std::wstring modelTextureFilepath; //THis holds the texture's file-path
 	int getNumberOfTextures();
 	const bool& hasBlendShape() const { return blendShape; }
+	const bool& hasDCM() const { return DCM; }
 	void setBlendWeight(float weight, ID3D11DeviceContext* gDeviceContext);
 	//struct with vertex positions held by FbxDawg
 	void load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath); //<-- Loads the model. Means that modelLoader is called.

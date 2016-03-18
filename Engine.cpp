@@ -22,9 +22,13 @@ Engine::~Engine()
 	
 }
 
+void Engine::CreateDynamicCubeMap()
+{
+	dcm.Dynamic_Cube_Map(gDevice);
+}
+
 void Engine::CreateShaders()
 {
-
 	//create vertex shader
 	ID3DBlob* pVS = nullptr;
 	D3DCompileFromFile(
@@ -121,8 +125,8 @@ void Engine::CreateShaders()
 		);
 	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShader);
 	pGS->Release();
-
 }
+
 
 void Engine::CreateConstantBuffer() {
 
@@ -203,6 +207,35 @@ void Engine::Render()
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	
+
+	//vvvvvvvvvv	< Dynamic cube map >	vvvvvvvvvvvvv
+
+	//override void DrawScene() Vad menas med override? Ärvs några functioner? Nej Den kunde lika gärna heta DrawScene2().
+
+	gDeviceContext->RSSetViewports(1, &dcm.getDCM_CubeMapViewport());
+	
+	for (int i = 0; i < 6; i++)
+	{
+		gDeviceContext->ClearRenderTargetView(dcm.getDCM_RenderTargetView(i), reinterpret_cast<const float*>(&Colors::Silver));//fortsätt läsa sid 486
+		gDeviceContext->ClearDepthStencilView(dcm.getDCM_DepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+		ID3D11RenderTargetView* DCM_RenderTargetView = dcm.getDCM_RenderTargetView(i); // för den ville ha //&DCM_RenderTargetView[i]
+		//Bind cube map face as render target
+		gDeviceContext->OMSetRenderTargets(1, &DCM_RenderTargetView, dcm.getDCM_DepthStencilView());
+
+		//Draw the scene with exception of the center sphere, to this cube map face
+		// DrawScene2(DCM_CubeMapCamera[i], false); Engines draw funktion
+	}
+
+	SetViewport();
+
+	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);// jag gör ju detta där nere, måste jag göra det igen här?
+
+	//Have hardware generate lower mipmap levels of cube map.
+	gDeviceContext->GenerateMips(dcm.getSubResourceView());
+
+	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
@@ -217,24 +250,31 @@ void Engine::Render()
 
 	listOfModels = modelListObject->getModelList();
 
-	
-
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
 		if (listOfModels[bufferCounter].hasBlendShape())
-		{
+		{	// gör en check om dcm här också, blend shapes ska ju också kunna ha
 			gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
 			vertexSize = sizeof(float) * 16;
-		}else{
+
+
+		}
+		else if (listOfModels[bufferCounter].hasDCM()==true)//modelLoader->DCMmaterial->IsValid()
+		{
+			printf("hej");
+			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);//VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayout);
+			vertexSize = sizeof(float) * 8;
+		}
+
+		else{
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
 			vertexSize = sizeof(float) * 8;
 		}
-		
-		
-		
+
 		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
 
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
@@ -247,8 +287,6 @@ void Engine::Render()
 		//gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0); //Uses indexbuffer
 		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
 	}
-
-	particleSys->renderParticles();
 }
 
 
@@ -362,19 +400,22 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 
 	if (SUCCEEDED(hr))
 	{
-
-		// get the address of the back buffer
+		//1. get the address of the back buffer
 		ID3D11Texture2D* pBackBuffer = nullptr;
 		gSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
-		// use the back buffer address to create the render target
+		//2. use the back buffer adress to create the render target
+		//A render target is a buffer where the video card draws pixels for a scene.
+		//The default render target is called the back buffer, this is the part of 
+		//video memory that contains the next frame to be drawn
 		gDevice->CreateRenderTargetView(pBackBuffer, NULL, &gBackbufferRTV);
 		pBackBuffer->Release();
-		//gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, NULL);
 
+		//Bind 1 or more render targets atomically and the depth-stencil buffer to the output-merger stage.
+		//The maximum number of active render targets a device can have active at any given time is set by a 
+		//#define in D3D11.h called D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT
 		CreateDepthStencilBuffer();
-		gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);
-
+		gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);	
 	}
 	return hr;
 }
@@ -385,7 +426,6 @@ void Engine::Clean() {
 	gVertexShader->Release();
 	gPixelShader->Release();
 	gGeometryShader->Release();
-	delete particleSys;
 
 	gBackbufferRTV->Release();
 	gSwapChain->Release();
@@ -399,7 +439,6 @@ void Engine::Clean() {
 	delete camera;
 	delete input;
 	delete modelListObject;
-	
 	//delete[] loops through the new-objects in the array, and deletes them!
 }
 void Engine::InitializeCamera()
@@ -407,7 +446,6 @@ void Engine::InitializeCamera()
 	camera = new GCamera;//										vv far plane	dessa är 400 gånger ifrån varandra. Det är okej att ha runt 10 000 - 20 000
 	camera->InitProjMatrix(XM_PI * 0.45, wHEIGHT, wWIDTH, 0.05, 20);
 	//													  ^^ near plane  förut var det 0.5 här
-
 }
 
 void Engine::InitializeModels() {
@@ -423,12 +461,6 @@ void Engine::InitializeModels() {
 	//modelList[4].setPosition(XMFLOAT4(-7, 0, 1, 1), gDeviceContext);
 }
 
-void Engine::initializeParticles()
-{
-	particleSys = new ParticleSystem(gDevice, gDeviceContext);
-	particleSys->setShaders(gVertexShader);
-}
-
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
 	modelListObject = new GModelList;
@@ -441,13 +473,14 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	input->initialize(hinstance, wndHandle, wWIDTH, wHEIGHT);
 
+
+	CreateDynamicCubeMap();
+
 	CreateShaders();
 
 	CreateConstantBuffer();
 
 	InitializeCamera();
-
-	initializeParticles();
 }
 
 void Engine::renderText(std::wstring text)

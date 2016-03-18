@@ -10,6 +10,9 @@ struct VS_OUT //Output. Must match input of pixel shader.
 	float4 Pos : SV_POSITION;
 	float3 normal : NORMAL;
 	float2 uv : TEXCOORD;
+
+	float4 camPos : WORLDSPACE1;
+	float4 camDir :WORLDSPACE2;
 };
 //-----------------------------------------------------------------------------------------
 // VertexShader: VSScene

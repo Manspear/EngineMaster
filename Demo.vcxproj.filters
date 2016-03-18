@@ -48,6 +48,9 @@
     <ClCompile Include="FbxDawg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DCM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="GQuadTree.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
@@ -56,9 +59,6 @@
     </ClCompile>
     <ClCompile Include="GModelList.cpp">
       <Filter>Source Files\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="ParticleSystem.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -71,16 +71,13 @@
     <FxCompile Include="GeometryShader.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="DCM_PixelShader.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
     <FxCompile Include="VertexShaderBS.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="ComputeShader.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="VertexShaderParticle.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="GeometryShaderParticle.hlsl">
+    <FxCompile Include="DCM_VertexShader.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
@@ -103,6 +100,9 @@
     <ClInclude Include="FbxDawg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DCM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="GFrustum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -114,9 +114,6 @@
     </ClInclude>
     <ClInclude Include="GModel.h">
       <Filter>Header Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="ParticleSystem.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

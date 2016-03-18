@@ -63,7 +63,7 @@ void GCamera::rotate(int rotAx, float degrees) //rotax is 0 for x and 1 for y
 
 	static float degreecheck;
 	degreecheck += degrees;
-	if (degreecheck < 80 && axis.y != -1.0f);
+	if (degreecheck < 80 && axis.y != -1.0f)
 	{
 		if (XMVector4Equal(FtoV(axis), XMVectorZero()) || degrees == 0.0f)
 			return;
@@ -91,14 +91,32 @@ void GCamera::setPosition(XMFLOAT4& newPosition)
 	this->move(move);
 	//this->setTarget(target);
 }
-
-const XMVECTOR GCamera::getUp() //returns camera up vector
+//jespers
+void GCamera::LookAt(XMFLOAT4 pos, XMFLOAT4 target, XMFLOAT4 worldUp)
 {
-	return cUp;
+	GCamera::setPosition(pos);
+	GCamera::setTarget(target);
+	GCamera::setUp(worldUp);
 }
-const XMVECTOR GCamera::getLookAtTarget() //returns camera look at target vector
+
+void GCamera::setUp(XMFLOAT4 cUp)
 {
-	return cTarget;
+	this->cUp = FtoV(cUp);
+}
+
+void GCamera::setTarget(XMFLOAT4 nTarget)
+{
+	cTarget = FtoV(nTarget);
+}
+
+const XMFLOAT4 GCamera::getUp() //returns camera up vector
+{
+	return VtoF(cUp);
+}
+
+const XMFLOAT4 GCamera::getLookAtTarget() //returns camera look at target vector
+{
+	return VtoF(cTarget);
 }
 const XMMATRIX GCamera::getViewMatrix()
 {
@@ -119,6 +137,8 @@ void GCamera::setFarPlane(float farthest)
 {
 	frustFar = farthest;
 }
+
+
 
 const XMMATRIX GCamera::getProjMatrix()
 {
@@ -143,6 +163,22 @@ GCamera::GCamera()
 	cPosition = XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f);
 	cTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	cUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+
+	this->initViewMatrix();
+
+	frustAngle = 0.0f;
+	frustFar = 0.0f;
+	frustNear = 0.0f;
+
+	cHeight = 0.0f;
+	cWidth = 0.0f;
+}
+
+GCamera::GCamera(XMFLOAT4 pos, XMFLOAT4 up, XMFLOAT4 target)
+{
+	cPosition = FtoV(pos);
+	cTarget = FtoV(target);
+	cUp = FtoV(up);
 
 	this->initViewMatrix();
 
