@@ -5,3 +5,7 @@ GQuadTree::GQuadTree() {
 GQuadTree::~GQuadTree() {
 
 }
+
+void GQuadTree::splitTree()
+{
+}

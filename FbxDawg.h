@@ -60,6 +60,8 @@ public:
 	int* FBXIndexArray = nullptr;
 	void bsLoader(FbxMesh * mesh);
 
+
+	FbxProperty *DCMmaterial;//Material per object skickar vi. Så jobbigt annars. Eller sök upp bra exempel syntax
 	std::vector<MyBSposStruct> blendShapes;
 	std::vector<MyVertexStruct> modelVertexList;
 	std::vector<FbxVector4 *> bsVert;

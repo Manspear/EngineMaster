@@ -253,14 +253,23 @@ void Engine::Render()
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
 		if (listOfModels[bufferCounter].hasBlendShape())
-		{
+		{	// gör en check om dcm här också, blend shapes ska ju också kunna ha
 			gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
 			vertexSize = sizeof(float) * 16;
 
 
-		}else{
+		}
+		else if (listOfModels[bufferCounter].hasDCM()==true)//modelLoader->DCMmaterial->IsValid()
+		{
+			printf("hej");
+			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);//VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayout);
+			vertexSize = sizeof(float) * 8;
+		}
+
+		else{
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
 			vertexSize = sizeof(float) * 8;
