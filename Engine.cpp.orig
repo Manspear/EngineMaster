@@ -106,24 +106,6 @@ void Engine::CreateShaders()
 	// we do not need anymore this COM object, so we release it.
 	pPS->Release();
 
-	//Creating a Sampler for the Pixel Shader
-	D3D11_SAMPLER_DESC sampDesc;
-	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-	sampDesc.MipLODBias = 0;
-	sampDesc.MaxAnisotropy = 1;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS; //Maybe this does something bad? Hmm... Keep an eye out.
-	sampDesc.BorderColor[0] = 1.f;
-	sampDesc.BorderColor[1] = 1.f;
-	sampDesc.BorderColor[2] = 0.f;
-	sampDesc.BorderColor[3] = 1.f; //Not sure why this RGB value's w value must be 1... Alpha maybe?
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = 12;
-
-	hr = gDevice->CreateSamplerState(&sampDesc, &gPSTextureSampler);
-
 	//Creating Geometry Shader...
 	ID3DBlob* pGS = nullptr; //This may be used for error handling!
 	D3DCompileFromFile(
@@ -184,7 +166,7 @@ void Engine::SetViewport()
 	vp.TopLeftY = 0;
 	gDeviceContext->RSSetViewports(1, &vp);
 }
-
+// SWAG
 void Engine::Render()
 {
 #pragma region //EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM
@@ -220,69 +202,75 @@ void Engine::Render()
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-
+	
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-	gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
-	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-	gDeviceContext->IASetInputLayout(gVertexLayout);
-	UINT32 vertexSize = sizeof(float) * 8;
+	UINT32 vertexSize;
 	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	
+<<<<<<< HEAD
+	gDeviceContext->IASetInputLayout(gVertexLayout);
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
-	listOfModels = modelListObject.getModelList();
+	GModel* listOfModels = modelListObject.getModelList();
 
-	
-
-	//bool isRoot = true;
-	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
-	//cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
-	////rootBox has 2 modelChildren, but the bbox-children of rootBox have no modelchildren. Odd that.
-	//		gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
-	//		gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
-	//		gDeviceContext->IASetInputLayout(gVertexLayoutBS);
-	//		vertexSize = sizeof(float) * 16;
-	//	}else{
-	//		gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-	//		gDeviceContext->IASetInputLayout(gVertexLayout);
-	//		vertexSize = sizeof(float) * 8;
-	//	}
-		
+	bool isRoot = true;
+	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
+	cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
+	//rootBox has 2 modelChildren, but the bbox-children of rootBox have no modelchildren. Odd that.
 
 	//struct frustumVert {
 //		float x, y, z, xn, yn, zn, u, v;
 //	};
 //	frustumVert frustumVertices[6]; //...
 	
-	bool startCollision = true;
-
-	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
-	cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, startCollision);
-
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
+=======
+	
+	
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
+
+	listOfModels = modelListObject->getModelList();
+
+	
+
+	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
+	{
+		if (listOfModels[bufferCounter].hasBlendShape())
+		{
+			gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
+			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
+			vertexSize = sizeof(float) * 16;
+		}else{
+			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayout);
+			vertexSize = sizeof(float) * 8;
+		}
+		
+		
+		
+		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
+>>>>>>> superbranch_DEV
 
 		//gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
 		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer);
 		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
+<<<<<<< HEAD
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
 
 		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
-		gDeviceContext->IASetIndexBuffer(cullingFrustum->seenObjects[bufferCounter]->modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
-		//gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0);
-		gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0, 0);
+		gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0);
 	}
 
-	//particleSys->renderParticles();
-
+	//for (int bufferCounter = 0; bufferCounter < modelListObject.numberOfModels; bufferCounter++)
 	//{
 	//	//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
 	//	//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
@@ -297,14 +285,24 @@ void Engine::Render()
 
 	//	gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
 	//}
+=======
+		gDeviceContext->PSSetShaderResources(0, listOfModels[bufferCounter].getNumberOfTextures(), listOfModels[bufferCounter].modelTextureView);
+
+		gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
+		gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
+		//gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0); //Uses indexbuffer
+		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
+	}
+
+	particleSys->renderParticles();
+>>>>>>> superbranch_DEV
 }
 
 
 
-void Engine::Update() 
-{
-	
-	
+void Engine::Update() {
 	frameCount++;
 	if (getTime() > 1.0f)
 	{
@@ -313,10 +311,15 @@ void Engine::Update()
 		startTimer();
 	}
 	dt = getFrameTime();
+	//printf("%i \n", fps); uncomment for fps in console
+
+	//printf("%d \n", dt); uncomment for dt
+
+	//printf("%d \n", dt);
 
 
-	//XMFLOAT4X4 viewMatrix;
-	//XMFLOAT4X4 projectionMatrix;
+	XMFLOAT4X4 viewMatrix;
+	XMFLOAT4X4 projectionMatrix;
 
 	//world matrix
 	static float radianRotation = 0.00;
@@ -374,13 +377,7 @@ void Engine::Update()
 	dataPtr->projectionMatrix = DirectX::XMMatrixTranspose(camera->getProjMatrix());
 	dataPtr->camPos = camera->getPosition();
 	dataPtr->camDir = camera->getCameraDirection();
-
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
-
-
-	MousePickingObject->updateClass();
-
-	
 }
 
 HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
@@ -444,15 +441,19 @@ void Engine::Clean() {
 	gDevice->Release();
 	gDeviceContext->Release();
 
-	gPSTextureSampler->Release();
 
 	depthStencilView->Release();
 	gDepthStencilBuffer->Release();
 
 	delete camera;
 	delete input;
+<<<<<<< HEAD
 	delete cullingFrustum;
 	delete quadTreeRoot;
+=======
+	delete modelListObject;
+	
+>>>>>>> superbranch_DEV
 	//delete[] loops through the new-objects in the array, and deletes them!
 }
 void Engine::InitializeCamera()
@@ -463,16 +464,9 @@ void Engine::InitializeCamera()
 	//pi * 0.45, wHEIGHT, wWiDTH, 0.05, 20
 }
 
-void Engine::initializeMousePicking(HWND wndHandle)
-{
-	GModel* listOfModels = modelListObject->getModelList();
-	MousePickingObject = new MousePicking(wndHandle, this->camera, listOfModels,  this->wHEIGHT,this->wWIDTH);
-}
-
-
-
 void Engine::InitializeModels() {
 	//Here create the dynamic GModel-Array:
+<<<<<<< HEAD
 	modelListObject.initializeModels(gDevice, gDeviceContext);
 }
 
@@ -480,6 +474,14 @@ void Engine::InitializeQuadTree()
 {
 	quadTreeRoot = new GQuadTree;
 	quadTreeRoot->makeTree(5, modelListObject);
+=======
+	modelListObject->initializeModels(gDevice, gDeviceContext);
+	//this->modelList[0].load(".\\ItsBoxxyTextured.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
+	//this->modelList[1].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
+	//this->modelList[2].load(".\\itsBoxxyTextured.fbx", gDevice, gDeviceContext, NULL, L"./Images/normal_map.jpg");
+	////this->modelList[3].load(".\\erect.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", NULL);
+	////this->modelList[4].load(".\\slak.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", NULL);
+	//
 	//modelList[3].setPosition(XMFLOAT4(-14, 0, 1, 1), gDeviceContext);
 	//modelList[4].setPosition(XMFLOAT4(-7, 0, 1, 1), gDeviceContext);
 }
@@ -488,6 +490,7 @@ void Engine::initializeParticles()
 {
 	particleSys = new ParticleSystem(gDevice, gDeviceContext);
 	particleSys->setShaders(gVertexShader);
+>>>>>>> superbranch_DEV
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
@@ -507,17 +510,19 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	InitializeCamera();
 
-	initializeMousePicking(wndHandle);
-	initializeParticles();
+<<<<<<< HEAD
+	InitializeFrustum();
 
 	InitializeQuadTree();
 
-	InitializeFrustum();
 }
 
 void Engine::InitializeFrustum()
 {
 	cullingFrustum = new(GFrustum);
+=======
+	initializeParticles();
+>>>>>>> superbranch_DEV
 }
 
 void Engine::renderText(std::wstring text)

@@ -60,8 +60,11 @@
     <ClCompile Include="GModelList.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="MousePicking.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+=======
     <ClCompile Include="GQuadTree.cpp">
       <Filter>Source Files\Quad Tree and BBoxes</Filter>
     </ClCompile>
@@ -77,6 +80,7 @@
     <ClCompile Include="GQuadTreeBoundingBox.cpp">
       <Filter>Source Files\Quad Tree and BBoxes</Filter>
     </ClCompile>
+>>>>>>> origin/superbranch_DEV
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -126,8 +130,11 @@
     <ClInclude Include="GModel.h">
       <Filter>Header Files\Model</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="MousePicking.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+=======
     <ClInclude Include="GQuadTreeBoundingBox.h">
       <Filter>Header Files\Quad Tree and BBoxes</Filter>
     </ClInclude>
@@ -143,5 +150,6 @@
     <ClInclude Include="GQuadTree.h">
       <Filter>Header Files\Quad Tree and BBoxes</Filter>
     </ClInclude>
+>>>>>>> origin/superbranch_DEV
   </ItemGroup>
 </Project>

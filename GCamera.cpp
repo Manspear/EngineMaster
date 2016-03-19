@@ -12,7 +12,6 @@ XMFLOAT4 GCamera::getCameraDirection()
 	return temp;
 }
 
-
 //VEIW
 void GCamera::initViewMatrix()
 {
@@ -59,7 +58,7 @@ void GCamera::rotate(int rotAx, float degrees) //rotax is 0 for x and 1 for y
 		axis = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	else if (rotAx == 1)
 	{
-		 axis = XMFLOAT4(VtoF(XMVector3Cross((cTarget - cPosition), cUp)));
+		axis = XMFLOAT4(VtoF(XMVector3Cross((cTarget - cPosition), cUp)));
 	}
 
 	static float degreecheck;
@@ -77,7 +76,7 @@ void GCamera::rotate(int rotAx, float degrees) //rotax is 0 for x and 1 for y
 		lookAtUp = VtoF(XMVector4Transform(FtoV(lookAtUp), XMMatrixRotationAxis(FtoV(axis), XMConvertToRadians(degrees))));
 
 		cTarget = (cPosition + FtoV(lookAtTarget));
-		
+
 		this->initViewMatrix();
 
 	}
@@ -141,8 +140,8 @@ void GCamera::InitProjMatrix(const float angle, const float height, const float 
 //CON/DESTRUCTOR
 GCamera::GCamera()
 {
-	cPosition = XMVectorSet(0.0f, 0.0f, -2.0f, 1.0f);
-	cTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	cPosition = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	cTarget = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f);
 	cUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 
 	this->initViewMatrix();
