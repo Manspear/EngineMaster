@@ -274,11 +274,11 @@ void Engine::Render()
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
 
 		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
-		//gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		gDeviceContext->IASetIndexBuffer(cullingFrustum->seenObjects[bufferCounter]->modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
-		gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0);
-		//gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
+		//gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0);
+		gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0, 0);
 	}
 
 	//particleSys->renderParticles();

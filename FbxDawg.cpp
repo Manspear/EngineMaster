@@ -323,32 +323,32 @@ void FbxDawg::makeIndexList()
 	for (int i = 0; i < this->modelVertexList.size(); i++)
 		FBXIndexArray[i] = i;
 	
-	//for (int vertex = 0; vertex< this->modelVertexList.size(); vertex++)
-	//{
-	//	for (int other = vertex + 1; other < modelVertexList.size(); other++)
-	//	{
-	//		if (modelVertexList[vertex].norX == modelVertexList[other].norX &&
-	//			modelVertexList[vertex].norY == modelVertexList[other].norY &&
-	//			modelVertexList[vertex].norZ == modelVertexList[other].norZ
-	//			&&
+	for (int vertex = 0; vertex< this->modelVertexList.size(); vertex++)
+	{
+		for (int other = vertex + 1; other < modelVertexList.size(); other++)
+		{
+			if (modelVertexList[vertex].norX == modelVertexList[other].norX &&
+				modelVertexList[vertex].norY == modelVertexList[other].norY &&
+				modelVertexList[vertex].norZ == modelVertexList[other].norZ
+				&&
 
-	//			modelVertexList[vertex].u == modelVertexList[other].u &&
-	//			modelVertexList[vertex].v == modelVertexList[other].v
-	//			&&
+				modelVertexList[vertex].u == modelVertexList[other].u &&
+				modelVertexList[vertex].v == modelVertexList[other].v
+				&&
 
-	//			modelVertexList[vertex].x == modelVertexList[other].x &&
-	//			modelVertexList[vertex].y == modelVertexList[other].y &&
-	//			modelVertexList[vertex].z == modelVertexList[other].z)
-	//		{
-	//			FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
-	//		}
+				modelVertexList[vertex].x == modelVertexList[other].x &&
+				modelVertexList[vertex].y == modelVertexList[other].y &&
+				modelVertexList[vertex].z == modelVertexList[other].z)
+			{
+				FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
+			}
 
 
-	//	}printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
-	//	
-	//	
-	//
-	//}//All vertexes have been compared
+		}printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
+		
+		
+	
+	}//All vertexes have been compared
 	
 	
 }

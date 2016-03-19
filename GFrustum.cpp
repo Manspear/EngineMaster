@@ -147,11 +147,11 @@ bool GFrustum:: quadTreeCollided(GQuadTreeBoundingBox* modelBox)
 			}
 		}
 		if (intersection == false) {
-			printf("Non-Collision QUADTREE!\n");
+			//printf("Non-Collision QUADTREE!\n");
 			return false;
 		}
 	}
-	printf("Collision QUADTREE\n");
+	//printf("Collision QUADTREE\n");
 	return true;
 }
 bool GFrustum::hasCollided(GBoundingBox* modelBox)
@@ -168,11 +168,11 @@ bool GFrustum::hasCollided(GBoundingBox* modelBox)
 			}
 		}
 		if (intersection == false) {
-			printf("Non-Collision!\n");
+			//printf("Non-Collision!\n");
 			return false;
 		}
 	}
-	printf("Collision\n");
+	//printf("Collision\n");
 	return true; //If we haven't already returned false, we have an intersection!
 	//if nothing intersected, no collision was made.
 
