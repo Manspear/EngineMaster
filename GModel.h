@@ -7,6 +7,7 @@
 #include <DirectXMath.h>
 #include <DirectXCollision.h>
 #include <string>
+#include "SimpleMath.h"
 #include <stdlib.h>
 
 using namespace DirectX;
@@ -21,6 +22,7 @@ private:
 	FbxDawg BSLoader;
 	bool blendShape;
 public:
+	SimpleMath::Matrix* objectWorldMatrix;
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
 	};
@@ -36,11 +38,12 @@ public:
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11Buffer* modelIndexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
-	XMMATRIX* objectWorldMatrix;
+
 	BoundingBox modelBBox;
 	GBoundingBox bBox;
 	ID3D11Buffer* bsWBuffer = nullptr;
 	int* IndexArray = nullptr;
+	int sizeOfIndexArray = 0;
 
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture then normal map
 												   //share projection and view, but have different world-view.
@@ -55,10 +58,10 @@ public:
 	int getNumberOfTextures();
 	const bool& hasBlendShape() const { return blendShape; }
 	void setBlendWeight(float weight, ID3D11DeviceContext* gDeviceContext);
-									   //struct with vertex positions held by FbxDawg
+	//struct with vertex positions held by FbxDawg
 	void load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath); //<-- Loads the model. Means that modelLoader is called.
 	void loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath);
-	
+
 };
 
 //>>>>>>>USER MANUAL<<<<<<<<<<<

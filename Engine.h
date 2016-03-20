@@ -10,6 +10,8 @@
 
 #include "GCamera.h"
 
+#include "MousePicking.h"
+
 #include "GInput.h"
 
 #include "FbxDawg.h"
@@ -42,6 +44,7 @@ class Engine
 
 private:
 	GModel* listOfModels;
+	bool mousePickEffectOnClearColor = false;
 
 
 public:
@@ -75,7 +78,7 @@ public:
 	ID3D11VertexShader* gVertexShaderBS = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;
-	
+
 
 	struct matrixBuffer {
 		XMMATRIX viewMatrix;
@@ -87,6 +90,7 @@ public:
 
 	GModelList modelListObject; //This will be used in GQuadTreeBoundingBox::splitBox()
 	GCamera * camera = nullptr;
+	MousePicking* MousePickingObject = nullptr;
 	GInput * input = nullptr;
 	GFrustum * cullingFrustum = nullptr;
 	GQuadTree * quadTreeRoot = nullptr;
@@ -94,7 +98,7 @@ public:
 	ParticleSystem * particleSys;
 
 	int wHEIGHT = 480;
-	int wWIDTH = 480;//was 640
+	int wWIDTH = 640;//was 640
 	byte * keys;
 
 	//Delta Time Stuff
@@ -118,10 +122,11 @@ public:
 	void Render();
 	void Update();
 	void Clean(); //releases all resources
-	//void Initialize(HWND wndHandle, HINSTANCE hinstance); 
+				  //void Initialize(HWND wndHandle, HINSTANCE hinstance); 
 	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once
 	void InitializeFrustum();
 	void InitializeCamera();
+	void initializeMousePicking(HWND wndHandle);
 	void InitializeModels();
 	void InitializeQuadTree();
 	void initializeParticles();

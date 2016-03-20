@@ -102,6 +102,7 @@
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="MousePicking.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
   </ItemGroup>
@@ -167,7 +168,8 @@
     <ClInclude Include="GInput.h" />
     <ClInclude Include="GModel.h" />
     <ClInclude Include="GModelList.h" />
-    <ClInclude Include="GQuadTree.h" /> 
+    <ClInclude Include="GQuadTree.h" />
+    <ClInclude Include="MousePicking.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="GQuadTreeBoundingBox.h" />
     <ClInclude Include="WICTextureLoader.h" />

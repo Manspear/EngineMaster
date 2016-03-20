@@ -6,7 +6,7 @@ using namespace DirectX;
 
 GModel::GModel()
 {
-	this->objectWorldMatrix = new XMMATRIX;
+	this->objectWorldMatrix = new SimpleMath::Matrix;
 	this->objectWorldMatrix[0] = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
 	this->blendShape = false;
 	noOfTextures = 1;
@@ -76,15 +76,16 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 #pragma endregion VertexBuffer
 
 #pragma region IndexBuffer
-	
-	this->IndexArray= modelLoader.FBXIndexArray; //Making it 123... for now. change will be made.
+
+	this->IndexArray = modelLoader.FBXIndexArray; //Making it 123... for now. change will be made.
+	this->sizeOfIndexArray = modelLoader.sizeOfFBXIndexArray;
 
 
 	D3D11_BUFFER_DESC indexBufferDesc;
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = modelVertices.size()*sizeof(int); //This is the size of the Index Array. 23 feb
+	indexBufferDesc.ByteWidth = this->sizeOfIndexArray*sizeof(int);
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
@@ -131,7 +132,8 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	{
 		noOfTextures = 1;
 		hr = DirectX::CreateWICTextureFromFile(gDevice, L"finland", NULL, &modelTextureView[1]);
-	}else{
+	}
+	else {
 		noOfTextures = 2;
 		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]);
 	}
@@ -167,7 +169,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 
 	//Create the bbox (my version)
 	bBox.CreateBBox(XMFLOAT3(minX, minY, minZ), XMFLOAT3(maxX, maxY, maxZ));
-}; 
+};
 
 void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath)
 {
@@ -220,12 +222,6 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 #pragma region IndexBuffer
 
 
-
-	this->IndexArray = new int[modelVertices.size()]; //Making it 123... for now. change will be made.
-	for (int i = 0; i < modelVertices.size(); i++)
-		IndexArray[i] = i;
-
-
 	D3D11_BUFFER_DESC indexBufferDesc;
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 
@@ -241,14 +237,14 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 	gDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &this->modelIndexBuffer);
 #pragma endregion IndexBuffer
 #pragma region ConstantBuffer
-	
+
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.ByteWidth = sizeof(bsWeight);
 	gDevice->CreateBuffer(&bufferDesc, NULL, &bsWBuffer);
-	
+
 
 	//Creating constant buffer holding only worldmatrix
 	//D3D11_BUFFER_DESC bufferDesc;

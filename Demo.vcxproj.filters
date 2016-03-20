@@ -75,6 +75,9 @@
     <ClCompile Include="GQuadTreeBoundingBox.cpp">
       <Filter>Source Files\Quad Tree and BBoxes</Filter>
     </ClCompile>
+    <ClCompile Include="MousePicking.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -138,6 +141,9 @@
     </ClInclude>
     <ClInclude Include="GQuadTree.h">
       <Filter>Header Files\Quad Tree and BBoxes</Filter>
+    </ClInclude>
+    <ClInclude Include="MousePicking.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

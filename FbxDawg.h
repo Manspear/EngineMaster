@@ -6,21 +6,6 @@
 #include <fbxsdk.h>
 
 #pragma region structs
-struct MyPosition
-{
-	float pos[3];
-	int vertexIndex;
-};
-struct MyNormal
-{
-	float direction[3];
-	int normalIndex;
-};
-struct MyUV
-{
-	float uvCoord[2];
-	int uvIndex;
-};
 
 struct MyVertexStruct
 {
@@ -57,17 +42,15 @@ public:
 	std::wstring textureFilepath;//När denna blir tilldelad så får den en kopia istället. Så vi kan utan problem radera den variablen som var med i tilldelningen.
 	void loadModels(const char* filePath);
 	void makeIndexList();
+
 	int* FBXIndexArray = nullptr;
+	int sizeOfFBXIndexArray = 0;
 	void bsLoader(FbxMesh * mesh);
 
 	std::vector<MyBSposStruct> blendShapes;
 	std::vector<MyVertexStruct> modelVertexList;
 	std::vector<FbxVector4 *> bsVert;
 
-	//std::vector<MyPosition> indexedPosList;
-	//std::vector<MyNormal> indexedNormalList;
-	//std::vector<MyUV> indexedUVList;
-	//std::vector<MyIndexStruct> myIndexList;
 };
 #endif
 

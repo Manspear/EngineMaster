@@ -184,7 +184,7 @@ void Engine::SetViewport()
 	vp.TopLeftY = 0;
 	gDeviceContext->RSSetViewports(1, &vp);
 }
-// SWAG
+
 void Engine::Render()
 {
 #pragma region //EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM
@@ -216,10 +216,20 @@ void Engine::Render()
 #pragma endregion
 	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
 	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
-	float clearColor[] = { 1, 0.537, 0.812, 1 };
-	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
-	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+	float clearColor[] = { 1, 0, 0.5, 1 };
+	float clearColor2[] = { 1,0.5,0,1 };
+
+	if (this->mousePickEffectOnClearColor == true)
+		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+
+	else
+		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor2);
+
+
+
+
+	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
@@ -232,13 +242,13 @@ void Engine::Render()
 	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	
+
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
 	listOfModels = modelListObject.getModelList();
 
-	
+
 
 	//bool isRoot = true;
 	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
@@ -253,32 +263,27 @@ void Engine::Render()
 	//		gDeviceContext->IASetInputLayout(gVertexLayout);
 	//		vertexSize = sizeof(float) * 8;
 	//	}
-		
+
 
 	//struct frustumVert {
-//		float x, y, z, xn, yn, zn, u, v;
-//	};
-//	frustumVert frustumVertices[6]; //...
-	
-	bool startCollision = true;
+	//		float x, y, z, xn, yn, zn, u, v;
+	//	};
+	//	frustumVert frustumVertices[6]; //...
 
-	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
-	cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, startCollision);
+
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
 
-		//gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
-		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer);
-		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
+
+		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
+
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
 
 		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
 		gDeviceContext->IASetIndexBuffer(cullingFrustum->seenObjects[bufferCounter]->modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
-		//gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0);
-		gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0, 0);
+		gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray, 0, 0);
 	}
 
 	//particleSys->renderParticles();
@@ -301,7 +306,10 @@ void Engine::Render()
 
 
 
-void Engine::Update() {
+void Engine::Update()
+{
+
+
 	frameCount++;
 	if (getTime() > 1.0f)
 	{
@@ -310,24 +318,20 @@ void Engine::Update() {
 		startTimer();
 	}
 	dt = getFrameTime();
-	//printf("%i \n", fps); uncomment for fps in console
-
-	//printf("%d \n", dt); uncomment for dt
-
-	//printf("%d \n", dt);
 
 
-	XMFLOAT4X4 viewMatrix;
-	XMFLOAT4X4 projectionMatrix;
+	//XMFLOAT4X4 viewMatrix;
+	//XMFLOAT4X4 projectionMatrix;
 
 	//world matrix
-	static float radianRotation = 0.00;
+	//static float radianRotation = 0.00;
 	//radianRotation += 4500*dt;
-	XMMATRIX worMat = DirectX::XMMatrixRotationY(radianRotation);
+	//XMMATRIX worMat = DirectX::XMMatrixRotationY(radianRotation);
 
 	//Transpose the matrices. This is a must for DirectX 11
-	worMat = DirectX::XMMatrixTranspose(worMat);
-
+	//worMat = DirectX::XMMatrixTranspose(worMat);
+	//dataPtr->worldMatrix = worMat;
+#pragma region Camera
 	input->getKeyboardState();
 	input->GetMouseLoc();
 
@@ -371,12 +375,25 @@ void Engine::Update() {
 	gDeviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (matrixBuffer*)gMappedResource.pData;
 
-	//dataPtr->worldMatrix = worMat;
+
 	dataPtr->viewMatrix = DirectX::XMMatrixTranspose(camera->getViewMatrix());
 	dataPtr->projectionMatrix = DirectX::XMMatrixTranspose(camera->getProjMatrix());
 	dataPtr->camPos = camera->getPosition();
 	dataPtr->camDir = camera->getCameraDirection();
+
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
+#pragma endregion Camera
+
+#pragma region FrustumCulling
+	bool startCollision = true;
+
+	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
+	cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, startCollision);
+#pragma endregion FrustumCulling
+
+	MousePickingObject->updateClass(cullingFrustum->seenObjects, this->mousePickEffectOnClearColor);
+
+
 }
 
 HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
@@ -449,6 +466,7 @@ void Engine::Clean() {
 	delete input;
 	delete cullingFrustum;
 	delete quadTreeRoot;
+	delete MousePickingObject;
 	//delete[] loops through the new-objects in the array, and deletes them!
 }
 void Engine::InitializeCamera()
@@ -458,6 +476,14 @@ void Engine::InitializeCamera()
 	//													  ^^ near plane  förut var det 0.5 här
 	//pi * 0.45, wHEIGHT, wWiDTH, 0.05, 20
 }
+
+void Engine::initializeMousePicking(HWND wndHandle)
+{
+	GModel* listOfModels = modelListObject.getModelList();
+	MousePickingObject = new MousePicking(wndHandle, this->camera, this->wHEIGHT, this->wWIDTH);
+}
+
+
 
 void Engine::InitializeModels() {
 	//Here create the dynamic GModel-Array:
@@ -495,6 +521,7 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	InitializeCamera();
 
+	initializeMousePicking(wndHandle);
 	initializeParticles();
 
 	InitializeQuadTree();
