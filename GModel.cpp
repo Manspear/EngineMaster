@@ -177,7 +177,6 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 	modelLoader.loadModels(fbxFilePath);
 
 
-	//Note: Doing this may cause problems according to Martin, since it's vector = vector
 	this->modelVertices = modelLoader.modelVertexList;
 	this->modelTextureFilepath = modelLoader.textureFilepath;
 	for (int i = 0; i < this->modelVertices.size(); i++)
