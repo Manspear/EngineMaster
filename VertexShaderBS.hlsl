@@ -31,7 +31,7 @@ struct VS_OUT //Output. Must match input of pixel shader.
 VS_OUT VS_main(VS_IN input)
 {
 
-	VS_OUT output = (VS_OUT)0; //Hmm... What is this? Am I zeroing-out my output?
+	VS_OUT output = (VS_OUT)0;
 
 	float3 positionDiff = input.bsPos - input.Pos;
 

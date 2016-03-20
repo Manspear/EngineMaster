@@ -102,7 +102,6 @@
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="MousePicking.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
   </ItemGroup>
@@ -168,10 +167,17 @@
     <ClInclude Include="GInput.h" />
     <ClInclude Include="GModel.h" />
     <ClInclude Include="GModelList.h" />
+<<<<<<< HEAD
+    <ClInclude Include="GQuadTree.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="GQuadTreeBoundingBox.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
+=======
     <ClInclude Include="GQuadTree.h" />
-    <ClInclude Include="MousePicking.h" />
     <ClInclude Include="ParticleSystem.h" />
-    <ClInclude Include="GQuadTreeBoundingBox.h" />
+>>>>>>> superbranch_DEV
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
