@@ -44,7 +44,8 @@ class Engine
 
 private:
 	GModel* listOfModels;
-
+	bool mousePickEffectOnClearColor=false;
+	
 
 public:
 	struct MyVertexStruct
@@ -97,7 +98,7 @@ public:
 	ParticleSystem * particleSys;
 
 	int wHEIGHT = 480;
-	int wWIDTH = 480;//was 640
+	int wWIDTH = 640;//was 640
 	byte * keys;
 
 	//Delta Time Stuff

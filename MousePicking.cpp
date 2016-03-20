@@ -2,7 +2,7 @@
 
 
 
-MousePicking::MousePicking(HWND wndHandle, GCamera* camera, GModel* listOfModels, int screenHeight, int screenWidth)
+MousePicking::MousePicking(HWND wndHandle, GCamera* camera, int screenHeight, int screenWidth)
 {
 	this->camera = camera;
 	this->wndHandle2 = wndHandle;
@@ -10,9 +10,7 @@ MousePicking::MousePicking(HWND wndHandle, GCamera* camera, GModel* listOfModels
 	this->viewMatrix = camera->getViewMatrix();
 	this->screenHeight = screenHeight;
 	this->screenWidth = screenWidth;
-
-	this->listOfModels = listOfModels;
-
+	
 	this->previousLeftMouseButtonDown=false;
 }
 
@@ -21,19 +19,34 @@ MousePicking::~MousePicking()
 	 //Pass
 }
 
-void MousePicking::updateClass() //updates variables & checks ray
+void MousePicking::updateClass(std::vector<GModel*> ObjectsforIntersectionTest, bool& BoolAffectingClearColor) //updates variables & checks ray
 {
 	if (isLeftMouseButtonClicked())
 	{
-		this->projectionMatrix = this->camera->getProjMatrix();
-		this->viewMatrix = this->camera->getViewMatrix();
+		if (ObjectsforIntersectionTest.size() > 0)
+		{
+			this->projectionMatrix = this->camera->getProjMatrix();
+			this->viewMatrix = this->camera->getViewMatrix();
+			this->result = this->calculateCurrentRay();
 
-		this->result = this->calculateCurrentRay();
-		printf("%f\n",checkRayIntersectionAgainstObject(listOfModels[0].modelVertices, listOfModels[0].IndexArray, listOfModels[0].sizeOfIndexArray, XMMatrixTranspose(listOfModels[0].objectWorldMatrix)));
-		//this->CheckBoundingBoxIntersection();
+			//this->CheckBoundingBoxIntersection();
+			for (int i = 1; i < ObjectsforIntersectionTest.size(); i++)
+			{
+				if ("%f\n", this->checkRayIntersectionAgainstObject(ObjectsforIntersectionTest[i]->modelVertices, ObjectsforIntersectionTest[i]->IndexArray, ObjectsforIntersectionTest[i]->sizeOfIndexArray, XMMatrixTranspose(*ObjectsforIntersectionTest[i]->objectWorldMatrix))
+					< 10000)
+				{
+					//printf("hit\n");
+					BoolAffectingClearColor=true;
+					return;
+				}
+				BoolAffectingClearColor = false;
+			}
+		}
+		else
+		{
+			;//printf("No objects in scene\n");
+		}
 	}
-	
-
 
 }
 
@@ -96,17 +109,17 @@ bool MousePicking::getCursorPosition(POINT& MousePosSavedHere)
 bool MousePicking::calculateCurrentRay()
 {
 
-	//ViewportSpace
-	MousePicking::getCursorPosition(this->MousePos); 
 	
-	//ViewSpace
-	this->currentRay.x = (((2.0f * MousePos.x) / screenWidth) - 1) / this->projectionMatrix._11; 
+	MousePicking::getCursorPosition(this->MousePos); //ViewportSpace
+	
+	
+	this->currentRay.x = (((2.0f * MousePos.x) / screenWidth) - 1) / this->projectionMatrix._11; //ViewSpace
 	this->currentRay.y = -(((2.0f * MousePos.y) / screenHeight) - 1) / this->projectionMatrix._22;
 	this->currentRay.z = 1.0f;    //we set 1 since the ray goes "into" the screen
 	
 
-	//World space
-	this->rayOrigin = XMVector3TransformCoord(SimpleMath::Vector4(0,0,0,0), this->viewMatrix.Invert());
+	
+	this->rayOrigin = XMVector3TransformCoord(SimpleMath::Vector4(0,0,0,0), this->viewMatrix.Invert()); //World space
 	this->currentRay= XMVector3TransformNormal(this->currentRay, this->viewMatrix.Invert());
 	this->currentRay = XMVector3Normalize(this->currentRay);
 
@@ -119,26 +132,20 @@ bool MousePicking::calculateCurrentRay()
 float MousePicking::checkRayIntersectionAgainstObject(std::vector<MyVertexStruct> modelVertices, int* IndexArray,int IndexArraySize, SimpleMath::Matrix worldMatrix)
 {
 
-	currentRay=XMVector3TransformCoord(currentRay, worldMatrix.Invert());
-	rayOrigin=XMVector3TransformCoord(rayOrigin, worldMatrix.Invert());
+	//currentRay=XMVector3TransformCoord(currentRay, worldMatrix.Invert());
+	//rayOrigin=XMVector3TransformCoord(rayOrigin, worldMatrix.Invert());
 
 	for (int i = 0; i < IndexArraySize / 3; i++)
 	{
-		
-		//Temporary 3d floats for each vertex
-		
-
 		//Get triangle Vertexes
 		SimpleMath::Vector4 tri1V1 = { modelVertices[IndexArray[(i * 3) + 0]].x, modelVertices[IndexArray[(i * 3) + 0]].y, modelVertices[IndexArray[(i * 3) + 0]].z, 1};
 		SimpleMath::Vector4 tri1V2 = { modelVertices[IndexArray[(i * 3) + 1]].x, modelVertices[IndexArray[(i * 3) + 1]].y, modelVertices[IndexArray[(i * 3) + 1]].z, 1};
 		SimpleMath::Vector4 tri1V3 = { modelVertices[IndexArray[(i * 3) + 2]].x, modelVertices[IndexArray[(i * 3) + 2]].y, modelVertices[IndexArray[(i * 3) + 2]].z, 1};
 
-		
-
 		//Transform the vertices to world space
-		//tri1V1 = XMVector3TransformCoord(tri1V1, worldMatrix);
-		//tri1V2 = XMVector3TransformCoord(tri1V2, worldMatrix);
-		//tri1V3 = XMVector3TransformCoord(tri1V3, worldMatrix);
+		tri1V1 = XMVector3TransformCoord(tri1V1, worldMatrix);
+		tri1V2 = XMVector3TransformCoord(tri1V2, worldMatrix);
+		tri1V3 = XMVector3TransformCoord(tri1V3, worldMatrix);
 		
 		
 		
@@ -148,28 +155,19 @@ float MousePicking::checkRayIntersectionAgainstObject(std::vector<MyVertexStruct
 
 		U = tri1V2 - tri1V1;
 		V = tri1V3 - tri1V1;
+		faceNormal = XMVector3Cross(U, V); //Compute face normal by crossing U, V
+		faceNormal = XMVector3Normalize(faceNormal); 
 		
-		
+		SimpleMath::Vector4 triPoint = tri1V1; //Calculate a point on the triangle for the plane equation
 
-		//Compute face normal by crossing U, V
-		faceNormal = XMVector3Cross(U, V);
 		
-		
-		faceNormal = XMVector3Normalize(faceNormal);
-		//faceNormal = (faceNormal*-1);
-		
-
-		//Calculate a point on the triangle for the plane equation
-		SimpleMath::Vector4 triPoint = tri1V1;
-
-		//Get plane equation ("Ax + By + Cz + D = 0") Variables
-		float tri1A = faceNormal.x;
+		float tri1A = faceNormal.x; //Get plane equation ("Ax + By + Cz + D = 0") Variables
 		float tri1B = faceNormal.y;
 		float tri1C = faceNormal.z;
 		float tri1D = (-tri1A*triPoint.x - tri1B*triPoint.y - tri1C*triPoint.z);
 
-		//Now we find where (on the ray) the ray intersects with the triangles plane
-		float ep1, ep2, t = 0.0f;
+		
+		float ep1, ep2, t = 0.0f; //Now we find where (on the ray) the ray intersects with the triangles plane
 		float planeIntersectX, planeIntersectY, planeIntersectZ = 0.0f;
 		
 

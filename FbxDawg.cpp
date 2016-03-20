@@ -7,6 +7,7 @@ FbxDawg::FbxDawg()
 
 FbxDawg::~FbxDawg()
 {
+	delete this->FBXIndexArray;
 
 }
 
@@ -58,9 +59,6 @@ void FbxDawg::loadModels(const char* filePath)
 			if (mesh->GetDeformerCount(FbxDeformer::eBlendShape) > 0)
 				this->bsLoader(mesh);
 
-			std::vector<MyPosition> MyPositionVector; //containes all vertex positions
-			std::vector<MyNormal> MyNormalVector; //contains all normals.
-			std::vector<MyUV> MyUVVector; //contain all UVs
 			std::vector<MyIndexStruct> IndexVector; IndexVector.resize(mesh->GetPolygonCount() * 3);
 			
 			static int offsets[] = { 1, 0, 2 }; //offset made because directX is left-hand-oriented else the textures and vertices get mirrored.
@@ -345,7 +343,7 @@ void FbxDawg::makeIndexList()
 			}
 
 
-		}printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
+		}//printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
 		
 		
 	

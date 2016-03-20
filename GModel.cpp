@@ -6,7 +6,7 @@ using namespace DirectX;
 
 GModel::GModel()
 {
-	this->objectWorldMatrix = new XMMATRIX;
+	this->objectWorldMatrix = new SimpleMath::Matrix;
 	this->objectWorldMatrix[0] = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
 	this->blendShape = false;
 	noOfTextures = 1;
@@ -219,13 +219,7 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 #pragma endregion VertexBuffer
 
 #pragma region IndexBuffer
-
-
-
-	this->IndexArray = new int[modelVertices.size()]; //Making it 123... for now. change will be made.
-	for (int i = 0; i < modelVertices.size(); i++)
-		IndexArray[i] = i;
-
+	
 
 	D3D11_BUFFER_DESC indexBufferDesc;
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));

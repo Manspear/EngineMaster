@@ -1,45 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Header Files\Texture">
-      <UniqueIdentifier>{3019b7d4-ae6f-445b-abda-e32ce3e7dc69}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Texture">
-      <UniqueIdentifier>{3207cbdf-0145-486e-8e5b-dffe1a406c7f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Shaders">
-      <UniqueIdentifier>{0a9ac3ed-24d8-452c-b17f-3ae6b1c807e4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Model">
-      <UniqueIdentifier>{0d99d42a-8258-4705-9a56-142f7116271a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Model">
-      <UniqueIdentifier>{80b0ff61-1592-4337-9867-a819ce78c4a9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Quad Tree and BBoxes">
-      <UniqueIdentifier>{7b5b0a48-523b-4057-8cab-0f12cad30879}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Quad Tree and BBoxes">
-      <UniqueIdentifier>{66900ecb-808e-4e80-97de-2179e827acf3}</UniqueIdentifier>
-    </Filter>
+    <FxCompile Include="VertexShaderBS.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ComputeShader.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="GeometryShader.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="GeometryShaderParticle.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Vertex.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShaderParticle.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine.cpp">
+    <ClCompile Include="FbxDawg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GCamera.cpp">
@@ -48,58 +36,36 @@
     <ClCompile Include="GInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WICTextureLoader.cpp">
-      <Filter>Source Files\Texture</Filter>
-    </ClCompile>
-    <ClCompile Include="FbxDawg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GModel.cpp">
-      <Filter>Source Files\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="GModelList.cpp">
-      <Filter>Source Files\Model</Filter>
-    </ClCompile>
     <ClCompile Include="MousePicking.cpp">
       <Filter>Source Files</Filter>
-    <ClCompile Include="GQuadTree.cpp">
-      <Filter>Source Files\Quad Tree and BBoxes</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ParticleSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GFrustum.cpp">
+    <ClCompile Include="WICTextureLoader.cpp">
+      <Filter>Source Files\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="GQuadTreeBoundingBox.cpp">
+      <Filter>Source Files\Quad Tree and BBoxes</Filter>
+    </ClCompile>
+    <ClCompile Include="GQuadTree.cpp">
       <Filter>Source Files\Quad Tree and BBoxes</Filter>
     </ClCompile>
     <ClCompile Include="GBoundingBox.cpp">
       <Filter>Source Files\Quad Tree and BBoxes</Filter>
     </ClCompile>
-    <ClCompile Include="GQuadTreeBoundingBox.cpp">
+    <ClCompile Include="GFrustum.cpp">
       <Filter>Source Files\Quad Tree and BBoxes</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="PixelShader.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="GeometryShader.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Vertex.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="VertexShaderBS.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="ComputeShader.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="VertexShaderParticle.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="GeometryShaderParticle.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
+    <ClCompile Include="GModelList.cpp">
+      <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="GModel.cpp">
+      <Filter>Source Files\Model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -111,37 +77,67 @@
     <ClInclude Include="GCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WICTextureLoader.h">
-      <Filter>Header Files\Texture</Filter>
-    </ClInclude>
-    <ClInclude Include="bth_image.h">
-      <Filter>Source Files\Texture</Filter>
-    </ClInclude>
     <ClInclude Include="FbxDawg.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GModelList.h">
-      <Filter>Header Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="GModel.h">
-      <Filter>Header Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="MousePicking.h">
-      <Filter>Header Files</Filter>
-    <ClInclude Include="GQuadTreeBoundingBox.h">
-      <Filter>Header Files\Quad Tree and BBoxes</Filter>
     </ClInclude>
     <ClInclude Include="ParticleSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GFrustum.h">
-      <Filter>Header Files\Quad Tree and BBoxes</Filter>
+    <ClInclude Include="MousePicking.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GBoundingBox.h">
-      <Filter>Header Files\Quad Tree and BBoxes</Filter>
+    <ClInclude Include="GModel.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="GModelList.h">
+      <Filter>Header Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="GQuadTree.h">
-      <Filter>Header Files\Quad Tree and BBoxes</Filter>
+      <Filter>Header Files\Quad Trees and BBoxes</Filter>
     </ClInclude>
+    <ClInclude Include="GFrustum.h">
+      <Filter>Header Files\Quad Trees and BBoxes</Filter>
+    </ClInclude>
+    <ClInclude Include="GBoundingBox.h">
+      <Filter>Header Files\Quad Trees and BBoxes</Filter>
+    </ClInclude>
+    <ClInclude Include="GQuadTreeBoundingBox.h">
+      <Filter>Header Files\Quad Trees and BBoxes</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader.h">
+      <Filter>Header Files\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="bth_image.h">
+      <Filter>Header Files\Texture</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{f895ec02-2a40-4621-ad02-c415cfbdf982}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Model">
+      <UniqueIdentifier>{31770d61-fd32-41ea-826f-a73e7efa23b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Quad Trees and BBoxes">
+      <UniqueIdentifier>{fc56c689-ff6d-4e21-88d9-ad77565967a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Texture">
+      <UniqueIdentifier>{e78eeb8f-679e-404e-9b45-130b8c198e64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4bb11f2c-4d05-4c48-8a07-e8abad420421}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Texture">
+      <UniqueIdentifier>{27ac7f46-033f-47de-a1d5-ae39b8b3a087}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model">
+      <UniqueIdentifier>{72ddb113-112c-42a7-9752-18471623c3e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Quad Tree and BBoxes">
+      <UniqueIdentifier>{b79f7bcd-402c-492a-807e-eab6e82a0ce7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{e7f310ae-c0e8-486b-b59b-86fceb3e61f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

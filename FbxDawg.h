@@ -6,21 +6,6 @@
 #include <fbxsdk.h>
 
 #pragma region structs
-struct MyPosition
-{
-	float pos[3];
-	int vertexIndex;
-};
-struct MyNormal
-{
-	float direction[3];
-	int normalIndex;
-};
-struct MyUV
-{
-	float uvCoord[2];
-	int uvIndex;
-};
 
 struct MyVertexStruct
 {

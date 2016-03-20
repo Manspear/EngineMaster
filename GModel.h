@@ -22,7 +22,7 @@ private:
 	FbxDawg BSLoader;
 	bool blendShape;
 public:
-	SimpleMath::Matrix objectWorldMatrix;
+	SimpleMath::Matrix* objectWorldMatrix;
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
 	};

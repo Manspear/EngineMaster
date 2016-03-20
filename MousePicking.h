@@ -33,7 +33,7 @@ private:
 	HWND wndHandle2;
 	POINT MousePos;
 	bool CheckBoundingBoxIntersection();
-	GModel* listOfModels;
+	
 public:
 
 	
@@ -45,10 +45,9 @@ public:
 //end of Variables
 	
 	
-	MousePicking(HWND wndHandle, GCamera* camera, GModel* listOfModels, int screenHeight, int screenWidth);
+	MousePicking(HWND wndHandle, GCamera* camera, int screenHeight, int screenWidth);
 	~MousePicking();
-
-	void updateClass(); 
+	void MousePicking::updateClass(std::vector<GModel*> ObjectsforIntersectionTest, bool& BoolAffectingClearColor);
 	bool isLeftMouseButtonClicked();
 	bool getCursorPosition(POINT& MousePosSavedHere);
 	bool calculateCurrentRay();
