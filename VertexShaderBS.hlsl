@@ -8,7 +8,7 @@ struct VS_IN //Input to vertex shader. Must match struct of vertex buffer.
 	float2 bsuv : TEXCOORD1;
 };
 
-cbuffer weightBuff:register(b0)
+cbuffer weightBuff:register(b2)
 {
 	float weight;
 	float padding0;

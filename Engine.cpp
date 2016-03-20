@@ -237,7 +237,6 @@ void Engine::Render()
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 	gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
 	
-	gDeviceContext->IASetInputLayout(gVertexLayout);
 	UINT32 vertexSize;
 	UINT32 offset = 0; 
 
@@ -278,16 +277,19 @@ void Engine::Render()
 		//printf("%d", cullingFrustum->seenObjects.size());
 		if (cullingFrustum->seenObjects[bufferCounter]->hasBlendShape())
 		{
-			vertexSize = sizeof(float) * 16;
+			
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
+			gDeviceContext->VSSetConstantBuffers(2, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
+			vertexSize = sizeof(float) * 16;
 		}
-		else
-		{
+		else {
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayout);
 			vertexSize = sizeof(float) * 8;
 		}
+
 			
-		gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
