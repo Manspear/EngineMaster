@@ -220,6 +220,8 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 
 #pragma region IndexBuffer
 
+	this->IndexArray = modelLoader.FBXIndexArray; //Making it 123... for now. change will be made.
+	this->sizeOfIndexArray = modelLoader.sizeOfFBXIndexArray;
 
 	D3D11_BUFFER_DESC indexBufferDesc;
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
