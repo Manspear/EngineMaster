@@ -17,7 +17,7 @@ void GModelList::initializeModels(ID3D11Device* gDevice, ID3D11DeviceContext * g
 
 	//this->modelList[0].load(".\\Objects/box2.fbx", gDevice, gDeviceContext); 
 	this->modelList[0].load(".\\Objects/itsBoxxyTextured.fbx", gDevice, gDeviceContext, L"./images/Chesterfield_texture.jpg", L"./Images/normal_map.jpg");
-	this->modelList[1].load(".\\Objects/penisblend.fbx", gDevice, gDeviceContext, L"./images/Chesterfield_texture.jpg", NULL);
+	this->modelList[1].load(".\\Objects/itsBoxxyTextured.fbx", gDevice, gDeviceContext, L"./images/Chesterfield_texture.jpg", NULL);
 
 	this->modelList[2].loadBlendShape(".\\Objects/penisblend.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", L"./Images/normal_4.png");
 	//this->modelList[3].load(".\\slak.fbx", gDevice, gDeviceContext, L"./Images/TestPink.jpg", L"./Images/normal_4.png");

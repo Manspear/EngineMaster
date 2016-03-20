@@ -280,7 +280,7 @@ void Engine::Render()
 			
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
-			gDeviceContext->VSSetConstantBuffers(2, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
+			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
 			vertexSize = sizeof(float) * 16;
 		}
 		else {
