@@ -1,14 +1,14 @@
+struct GSInput
+{
+    float4 Pos : SV_Position;
+};
+
 struct GSOutput
 {
 	float4 Pos : SV_Position;
 	float3 normal : NORMAL;
 	float2 UV  : TEXCOORD;
 	float4 worldPosition : WORLDSPACE;
-
-	float3 tangent : TANGENT;
-	float3 biTanget : BITANGENT;
-	float4 camPos : WORLDSPACE1;
-	float4 camDir : WORLDSPACE2;
 };
 
 cbuffer matrixBuffer : register(b0)
@@ -36,7 +36,7 @@ void main(point GSOutput input[1] : SV_POSITION, inout TriangleStream< GSOutput 
 	float4 verts[4];
 	float2 uvs[4];
 
-	float3 planeNormal = normalize(input[0].Pos - input[0].camPos);
+	float3 planeNormal = normalize(input[0].Pos - camPos);
 	float3 upVector = float3(0.0f, 1.0f, 0.0f);
 	float3 rightVector = normalize(cross(planeNormal, upVector));
 
@@ -71,8 +71,6 @@ void main(point GSOutput input[1] : SV_POSITION, inout TriangleStream< GSOutput 
 		element.Pos = mul(verts[i], allMatrix);
 		element.UV = uvs[0];
 		element.normal = norW; //get the normal into worldspace
-		element.camPos = camPos;
-		element.camDir = camDir;
 
 		element.worldPosition = mul(verts[i], worldMatrix);
 

@@ -515,7 +515,7 @@ void Engine::InitializeQuadTree()
 void Engine::initializeParticles()
 {
 	particleSys = new ParticleSystem(gDevice, gDeviceContext);
-	particleSys->setShaders(gVertexShader);
+	//particleSys->setShaders(gVertexShader);
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {

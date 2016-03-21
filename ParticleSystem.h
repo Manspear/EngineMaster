@@ -16,11 +16,10 @@ private:
 	};
 	struct particle
 	{
-		float x, y, z, 
-			  nx, ny, nz, 
-			  u, v;
+		float x, y, z;
 	};
-
+	ID3D11InputLayout* gVertexLayout = nullptr;
+	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11VertexShader* gVertexShader = nullptr;
 	ID3D11GeometryShader* gGeometryShaderParticle = nullptr;
 	ID3D11DeviceContext* gDeviceContext;
