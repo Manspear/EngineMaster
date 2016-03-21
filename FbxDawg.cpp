@@ -352,6 +352,21 @@ void FbxDawg::makeIndexList()
 
 }
 
+
+
+void FbxDawg::getJointData(FbxNode* rootNode)
+{
+	
+}
+
+void FbxDawg::processJointHierarchy(FbxNode * inRootNode)
+{
+}
+
+void FbxDawg::recursiveJointHierarchyTraversal(FbxNode * inNode, int storedIndex, int inNodeParentIndex)
+{
+}
+
 void FbxDawg::bsLoader(FbxMesh * mesh)
 {
 	int bShapeCount = mesh->GetDeformerCount(FbxDeformer::eBlendShape);
