@@ -21,7 +21,6 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 	gDevice->CreateGeometryShader(pGSps->GetBufferPointer(), pGSps->GetBufferSize(), nullptr, &gGeometryShaderParticle);
 	pGSps->Release();
 
-
 	party.x = 0.0f;
 	party.y = 0.0f;
 	party.z = -4.0f;
