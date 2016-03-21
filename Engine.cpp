@@ -226,13 +226,14 @@ void Engine::Render()
 	else
 		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor2);
 
-
+	
 
 
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 	gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
@@ -242,13 +243,13 @@ void Engine::Render()
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
-
-	listOfModels = modelListObject.getModelList();
-
-
-
+																					   
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);					   
+																					   
+	listOfModels = modelListObject.getModelList();									   
+																					   
+																					   
+																					   
 	//bool isRoot = true;
 	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
 	//cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
@@ -261,15 +262,15 @@ void Engine::Render()
 	//		gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	//		gDeviceContext->IASetInputLayout(gVertexLayout);
 	//		vertexSize = sizeof(float) * 8;
-	//	}
-
-
-	//struct frustumVert {
-	//		float x, y, z, xn, yn, zn, u, v;
-	//	};
-	//	frustumVert frustumVertices[6]; //...
-
-
+	//	}														  	 
+																  	 
+																  	 
+	//struct frustumVert {										  	 
+	//		float x, y, z, xn, yn, zn, u, v;					  	 
+	//	};														  	 
+	//	frustumVert frustumVertices[6]; //...					  	 
+																  	 
+																	 
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
@@ -514,7 +515,7 @@ void Engine::InitializeQuadTree()
 
 void Engine::initializeParticles()
 {
-	particleSys = new ParticleSystem(gDevice, gDeviceContext);
+	particleSys = new ParticleSystem(gDevice, gDeviceContext, gConstantBuffer);
 	//particleSys->setShaders(gVertexShader);
 }
 

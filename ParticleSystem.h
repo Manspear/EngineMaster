@@ -17,14 +17,17 @@ private:
 	struct particle
 	{
 		float x, y, z;
+		float r, g, b;
 	};
-	ID3D11InputLayout* gVertexLayout = nullptr;
+
+	ID3D11InputLayout* gVertexLayoutParticle = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11VertexShader* gVertexShader = nullptr;
 	ID3D11GeometryShader* gGeometryShaderParticle = nullptr;
 	ID3D11DeviceContext* gDeviceContext;
 	ID3D11Buffer* particleConstantBuffer = nullptr;
 	ID3D11Buffer* particleVertexBuffer = nullptr;
+	ID3D11Buffer* gConstantBuffer = nullptr;
 	XMMATRIX particleWorldMatrix;
 	int maxParticles;
 	float gTime;
@@ -39,7 +42,7 @@ public:
 
 	particle party;
 
-	ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext);
+	ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, ID3D11Buffer* vp);
 	~ParticleSystem();
 
 	void renderParticles();

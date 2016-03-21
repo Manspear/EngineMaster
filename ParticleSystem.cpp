@@ -2,14 +2,16 @@
 
 
 
-ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext)
+ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, ID3D11Buffer* vp)
 {
 	this->gDeviceContext = gDeviceContext;
+	this->gConstantBuffer = vp;
+	particleWorldMatrix = XMMatrixTranspose( XMMatrixIdentity());
 
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;
 	D3DCompileFromFile(
-		L"PixelShader.hlsl", // filename
+		L"PixelShaderParticle.hlsl", // filename
 		nullptr,		// optional macros
 		nullptr,		// optional include files
 		"PS_main",		// entry point
@@ -55,19 +57,24 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 						// how to use the Error blob, see here
 						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
 		);
-	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShader);
+	HRESULT hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShader);
 
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
+	hr = gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayoutParticle);
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
 
 	//TESTPARTICLE
 	party.x = 0.0f;
-	party.y = 2.0f;
+	party.y = 1.0f;
 	party.z = 0.0f;
+
+	party.r = 1.0f;
+	party.g = 0.0f;
+	party.b = 0.0f;
 	//END TESTPARTICLE
 
 	//vertexbuffer
@@ -112,16 +119,23 @@ ParticleSystem::~ParticleSystem()
 
 void ParticleSystem::renderParticles()
 {
-	UINT vertSize = sizeof(float) * 3;
+	UINT vertSize = sizeof(float) * 6;
 	UINT offset = 0;
 
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShaderParticle, nullptr, 0);
 	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+	gDeviceContext->IASetInputLayout(gVertexLayoutParticle);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 	gDeviceContext->GSSetConstantBuffers(1, 1, &particleConstantBuffer);
 	gDeviceContext->IASetVertexBuffers(0, 1, &particleVertexBuffer, &vertSize, &offset);
-	gDeviceContext->Draw(vertSize, offset);
+
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+	gDeviceContext->Draw(1, 0);
 
 }
 
