@@ -300,7 +300,7 @@ void Engine::Render()
 		gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray, 0, 0);
 	}
 
-	//particleSys->renderParticles();
+	particleSys->renderParticles();
 
 	//{
 	//	//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
