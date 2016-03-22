@@ -52,11 +52,17 @@ public:
 	void bsLoader(FbxMesh * mesh);
 
 	//Core datatypes: FbxSkeleton, eRoot, eLimb, eEffector
-	struct skeleton {
-		std::vector<FbxSkeleton*> skeleton;
+	struct sJoint { //s as in struct :D
+		const char* name;
+		int parentIndex;
 	};
 
-	skeleton jointList;
+	struct sSkeleton {
+		std::vector<sJoint*> joints;
+		//more things... Hmm
+	};
+
+	sSkeleton skeleton;
 	//std::vector<FbxSkeleton*> skeleton;
 	std::vector<MyBSposStruct> blendShapes;
 	std::vector<MyVertexStruct> modelVertexList;
