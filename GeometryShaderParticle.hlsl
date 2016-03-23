@@ -44,15 +44,15 @@ void main(point GSInput input[1] : SV_POSITION, inout TriangleStream< GSOutput >
     //TRANSFORM ZE POSITION IN WOERLD VIEW
     float4 pos = mul(input[0].Pos, wv);
 
-    //THEN DO MATH WITH X AND Y IN WOERLD VIEW BEFOER MULTIPLYING PROJECTION MATRIZ FOR BILLBOARDING ACTIONPOWER
-    float2 v1 = pos.xy + float2(-0.5, -0.5) * size;
-    verts[0] = mul(float4(v1, pos.zw), projectionMatrix);
-    float2 v2 = pos.xy + float2(-0.5, 0.5) * size;
-    verts[1] = mul(float4(v2, pos.zw), projectionMatrix);
-    float2 v3 = pos.xy + float2(0.5, -0.5) * size;
-    verts[2] = mul(float4(v3, pos.zw), projectionMatrix);
-    float2 v4 = pos.xy + float2(0.5, 0.5) * size;
-    verts[3] = mul(float4(v4, pos.zw), projectionMatrix);
+    //THEN DO MATH WITH X AND Y IN WOERLDVIEW BEFOER MULTIPLYING PROJECTION MATRIZ FOR BILLBOARDING ACTIONPOWER
+    float2 v0 = pos.xy + float2(-0.5, -0.5) * size;
+    verts[0] = mul(float4(v0, pos.zw), projectionMatrix);
+    float2 v1 = pos.xy + float2(-0.5, 0.5) * size;
+    verts[1] = mul(float4(v1, pos.zw), projectionMatrix);
+    float2 v2 = pos.xy + float2(0.5, -0.5) * size;
+    verts[2] = mul(float4(v2, pos.zw), projectionMatrix);
+    float2 v3 = pos.xy + float2(0.5, 0.5) * size;
+    verts[3] = mul(float4(v3, pos.zw), projectionMatrix);
 
 	uvs[0] = float2(0.0f, 1.0f);
 	uvs[1] = float2(1.0f, 1.0f);

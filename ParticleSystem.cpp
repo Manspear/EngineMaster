@@ -1,7 +1,5 @@
 #include "ParticleSystem.h"
 
-
-
 ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, ID3D11Buffer* vp)
 {
 	this->gDeviceContext = gDeviceContext;
