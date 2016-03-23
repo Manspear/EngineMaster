@@ -8,7 +8,7 @@
 #include "GCamera.h"
 #include <DirectXColors.h>
 
-class DCM
+class DCM//hej
 {
 private:
 	GCamera DCM_CubeMapCamera[6];
