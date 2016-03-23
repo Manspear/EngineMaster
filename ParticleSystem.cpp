@@ -7,7 +7,6 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 	this->gDevice = gDevice;
 	this->gDeviceContext = gDeviceContext;
 	this->gConstantBuffer = vp;
-	particleWorldMatrix = XMMatrixTranspose( XMMatrixIdentity());
 
 	//TESTPARTICLE
 	//will become the emitter position. to do this replace with translation multiplied in to world matrix.
@@ -20,8 +19,8 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 	party.b = 0.0f;
 	//END TESTPARTICLE
 
-
 	particleWorldMatrix = XMMatrixTranspose(XMMatrixTranslation(party.x, party.y, party.z));
+	
 
 	this->initializeParticles();
 	this->initializeBuffers();
