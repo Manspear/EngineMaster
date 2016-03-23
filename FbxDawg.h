@@ -43,10 +43,27 @@ public:
 	void loadModels(const char* filePath);
 	void makeIndexList();
 
+	void getJointData(FbxNode* rootNode);
+	void processJointHierarchy(FbxNode* inRootNode);
+	void recursiveJointHierarchyTraversal(FbxNode* inNode, int storedIndex, int inNodeParentIndex);
+
 	int* FBXIndexArray = nullptr;
 	int sizeOfFBXIndexArray = 0;
 	void bsLoader(FbxMesh * mesh);
 
+	//Core datatypes: FbxSkeleton, eRoot, eLimb, eEffector
+	struct sJoint { //s as in struct :D
+		const char* name;
+		int parentIndex;
+	};
+
+	struct sSkeleton {
+		std::vector<sJoint*> joints;
+		//more things... Hmm
+	};
+
+	sSkeleton skeleton;
+	//std::vector<FbxSkeleton*> skeleton;
 	std::vector<MyBSposStruct> blendShapes;
 	std::vector<MyVertexStruct> modelVertexList;
 	std::vector<FbxVector4 *> bsVert;

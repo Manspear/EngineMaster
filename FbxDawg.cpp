@@ -352,6 +352,45 @@ void FbxDawg::makeIndexList()
 
 }
 
+
+
+void FbxDawg::getJointData(FbxNode* rootNode)
+{
+	//Explanation of FBX-terminology regarding Animation-Related things:
+	//___________________________________________________________________________________________________________________________
+	//Deformers are ways of deforming your mesh. Joints are deformers, but constraints like parent constraints are also deformers.
+	//Therefore, one can think of a skeleton as a bunch of deformers of joint-type.
+	//Inside each Deformer is a Cluster. Clusters contain "links" to the actual type of deformer. 
+	//For a jointDeformer, it's Cluster would contain a link to the actual joint.
+	//___________________________________________________________________________________________________________________________
+
+}
+
+void FbxDawg::processJointHierarchy(FbxNode * inRootNode)
+{
+	//for (int childIndex = 0; childIndex < inRootNode->GetChildCount(); ++childIndex) {
+	//	FbxNode* currNode = inRootNode->GetChild(childIndex);
+	//	recursiveJointHierarchyTraversal(currNode, 0, -1); 
+	//}
+}
+
+void FbxDawg::recursiveJointHierarchyTraversal(FbxNode * inNode, int currentIndex, int inNodeParentIndex)
+{
+	//every node will only know about it's direct parent's index. 
+	if (inNode->GetNodeAttribute() && inNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+	{
+		sJoint currJoint;
+		currJoint.parentIndex = inNodeParentIndex;
+		currJoint.name = inNode->GetName();
+		this->skeleton.joints.push_back(&currJoint);
+	}
+	for (int i = 0; i < inNode->GetChildCount(); i++) {
+		//currentIndex becomes the "old index". And the size of the joint-hierarchy-list "becomes" the currentIndex instead
+		//We process each and every child of this node, we search for children of AttributeType eSkeleton to add to the list of joints.
+		recursiveJointHierarchyTraversal(inNode->GetChild(i), skeleton.joints.size(), currentIndex); 
+	}
+}
+
 void FbxDawg::bsLoader(FbxMesh * mesh)
 {
 	int bShapeCount = mesh->GetDeformerCount(FbxDeformer::eBlendShape);
