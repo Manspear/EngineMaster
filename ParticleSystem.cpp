@@ -2,10 +2,46 @@
 
 ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, ID3D11Buffer* vp)
 {
+
+	particleCount = 0;
+	this->gDevice = gDevice;
 	this->gDeviceContext = gDeviceContext;
 	this->gConstantBuffer = vp;
 	particleWorldMatrix = XMMatrixTranspose( XMMatrixIdentity());
 
+	//TESTPARTICLE
+	//will become the emitter position. to do this replace with translation multiplied in to world matrix.
+	party.x = 0.0f;
+	party.y = 1.0f;
+	party.z = 0.0f;
+
+	party.r = 1.0f;
+	party.g = 0.0f;
+	party.b = 0.0f;
+	//END TESTPARTICLE
+
+
+	particleWorldMatrix = XMMatrixTranspose(XMMatrixTranslation(party.x, party.y, party.z));
+
+	this->initializeParticles();
+	this->initializeBuffers();
+
+}
+
+ParticleSystem::~ParticleSystem()
+{
+	gGeometryShaderParticle->Release();
+}
+
+void ParticleSystem::emitParticles()
+{
+
+
+
+}
+
+void ParticleSystem::initializeBuffers()
+{
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;
 	D3DCompileFromFile(
@@ -65,29 +101,18 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
 
-	//TESTPARTICLE
-	party.x = 0.0f;
-	party.y = 1.0f;
-	party.z = 0.0f;
-
-	party.r = 1.0f;
-	party.g = 0.0f;
-	party.b = 0.0f;
-	//END TESTPARTICLE
-
 	//vertexbuffer
 	D3D11_BUFFER_DESC bufferDescV;
 	memset(&bufferDescV, 0, sizeof(bufferDescV));
 	bufferDescV.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDescV.Usage = D3D11_USAGE_DYNAMIC;
 	bufferDescV.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	bufferDescV.ByteWidth = sizeof(particle);
+	bufferDescV.ByteWidth = sizeof(vertexData)*particleCount;
 	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = &party;
+	data.pSysMem = &particleList->data;
 
 	gDevice->CreateBuffer(&bufferDescV, &data, &particleVertexBuffer);
 
-	
 	//constantbuffer
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
@@ -101,7 +126,7 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
 	modelWorldStruct* dataPtr;
-	
+
 	gDeviceContext->Map(particleConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (modelWorldStruct*)gMappedResource.pData;
 
@@ -110,9 +135,30 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 	gDeviceContext->Unmap(particleConstantBuffer, NULL);
 }
 
-ParticleSystem::~ParticleSystem()
+void ParticleSystem::initializeParticles()
 {
-	gGeometryShaderParticle->Release();
+	deviationX = 0.5f;
+	deviationY = 0.1f;
+	deviationZ = 2.0f;
+
+	velocity = 1.0f;
+	velocityVariation = 0.2f;
+
+	size = 0.2f;
+
+	particlesPerSecond = 250.0f;
+
+	maxParticles = 5000;
+
+	this->particleList = new particle[this->maxParticles];
+
+	for (int i = 0; i < maxParticles; i++)
+	{
+		particleList[i].active = false;
+	}
+
+	particleCount = 0;
+	accumulatedTime = 0.0f;
 }
 
 void ParticleSystem::renderParticles()
@@ -134,6 +180,7 @@ void ParticleSystem::renderParticles()
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 	gDeviceContext->Draw(1, 0);
+	//gDeviceContext->Draw(particleCount, 0);
 
 }
 

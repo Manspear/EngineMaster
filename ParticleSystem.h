@@ -10,29 +10,52 @@ using namespace DirectX;
 
 class ParticleSystem
 {
-private:
-	struct modelWorldStruct {
-		XMMATRIX worldMatrix;
-	};
-	struct particle
+public:
+	struct vertexData
 	{
 		float x, y, z;
 		float r, g, b;
 	};
 
+	struct particle
+	{
+		float x, y, z;
+		float r, g, b;
+		float velocity;
+		bool active;
+		vertexData data;
+	};
+
+private:
+	struct modelWorldStruct {
+		XMMATRIX worldMatrix;
+	};
+
+
 	ID3D11InputLayout* gVertexLayoutParticle = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11VertexShader* gVertexShader = nullptr;
 	ID3D11GeometryShader* gGeometryShaderParticle = nullptr;
+	ID3D11Device* gDevice = nullptr;
 	ID3D11DeviceContext* gDeviceContext;
 	ID3D11Buffer* particleConstantBuffer = nullptr;
 	ID3D11Buffer* particleVertexBuffer = nullptr;
 	ID3D11Buffer* gConstantBuffer = nullptr;
 	XMMATRIX particleWorldMatrix;
+
+	particle * particleList;
+
+	float deviationX, deviationY, deviationZ;
+	float velocity, velocityVariation;
+	float size;
+	float particlesPerSecond;
+
 	int maxParticles;
+	int particleCount;
+
 	float gTime;
 	float timeStep;
-	float age;
+	float accumulatedTime;
 
 public:
 
@@ -45,6 +68,9 @@ public:
 	ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, ID3D11Buffer* vp);
 	~ParticleSystem();
 
+	void emitParticles();
+	void initializeBuffers();
+	void initializeParticles();
 	void renderParticles();
 	void setShaders(ID3D11VertexShader* gVertexShader);
 };
