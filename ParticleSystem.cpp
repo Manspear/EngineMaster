@@ -32,11 +32,72 @@ ParticleSystem::~ParticleSystem()
 	gGeometryShaderParticle->Release();
 }
 
-void ParticleSystem::emitParticles()
+void ParticleSystem::emitParticles(float dTime)
 {
+	float posX, posY, posZ;
+	float red, green, blue;
+	float velocity;
+	bool emit,found;
+	int index, i, j;
 
 
+	if (accumulatedTime > (1000.0f / particlesPerSecond))
+	{
+		accumulatedTime = 0.0f;
+		emit = true;
+	}
 
+	if ((emit == true) && (particleCount < (maxParticles - 1)))
+	{
+		particleCount++;
+
+		//randomize a particle
+		posX = (((float)rand() - (float)rand()) / RAND_MAX) * deviationX;
+		posY = (((float)rand() - (float)rand()) / RAND_MAX) * deviationY;
+		posZ = (((float)rand() - (float)rand()) / RAND_MAX) * deviationZ;
+
+		velocity = this->velocity + (((float)rand() - (float)rand()) / RAND_MAX) * velocityVariation;
+
+		red = (((float)rand() - (float)rand()) / RAND_MAX) +0.5f;
+		green = (((float)rand() - (float)rand()) / RAND_MAX) +0.5f;
+		blue = (((float)rand() - (float)rand()) / RAND_MAX) +0.5f;
+
+		//rendering from back to front seems like a good idea so let's sort shit!
+		found = false;
+		index = 0;
+
+		while (!found)
+		{
+			if ((particleList[index].active == false) || (particleList[index].z < posZ))
+				found = true;
+			else
+				index++;
+		}
+
+		i = particleCount;
+		j = i - 1;
+
+		while (i != index)
+		{
+			particleList[i].x = particleList[j].x;
+			particleList[i].y = particleList[j].y;
+			particleList[i].z = particleList[j].z;
+			particleList[i].r = particleList[j].r;
+			particleList[i].g = particleList[j].g;
+			particleList[i].b = particleList[j].b;
+			particleList[i].velocity = particleList[j].velocity;
+			particleList[i].active = particleList[j].active;
+		}
+		particleList[index].x = posX;
+		particleList[index].y = posY;
+		particleList[index].z = posZ;
+		particleList[index].r = red;
+		particleList[index].g = green;
+		particleList[index].b = blue;
+		particleList[index].velocity = velocity;
+		particleList[index].active = true;
+	}
+	return;
 }
 
 void ParticleSystem::initializeBuffers()
@@ -178,8 +239,8 @@ void ParticleSystem::renderParticles()
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
-	gDeviceContext->Draw(1, 0);
-	//gDeviceContext->Draw(particleCount, 0);
+	//gDeviceContext->Draw(1, 0);
+	gDeviceContext->Draw(particleCount, 0);
 
 }
 
