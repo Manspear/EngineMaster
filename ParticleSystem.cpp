@@ -32,6 +32,14 @@ ParticleSystem::~ParticleSystem()
 	gGeometryShaderParticle->Release();
 }
 
+
+void ParticleSystem::doShit(float dTime)
+{
+	this->emitParticles(dTime);
+	this->updateParticles(dTime);
+	this->updateBuffers();
+}
+
 void ParticleSystem::updateBuffers()
 {
 	HRESULT hr;
@@ -70,6 +78,9 @@ void ParticleSystem::emitParticles(float dTime)
 	bool emit,found;
 	int index, i, j;
 
+	accumulatedTime += dTime;
+
+	emit = false;
 
 	if (accumulatedTime > (1000.0f / particlesPerSecond))
 	{
@@ -117,6 +128,8 @@ void ParticleSystem::emitParticles(float dTime)
 			particleList[i].b = particleList[j].b;
 			particleList[i].velocity = particleList[j].velocity;
 			particleList[i].active = particleList[j].active;
+			i--;
+			j--;
 		}
 		particleList[index].x = posX;
 		particleList[index].y = posY;
@@ -199,7 +212,7 @@ void ParticleSystem::initializeBuffers()
 	bufferDescV.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDescV.Usage = D3D11_USAGE_DYNAMIC;
 	bufferDescV.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	bufferDescV.ByteWidth = sizeof(vertexData)*particleCount;
+	bufferDescV.ByteWidth = sizeof(vertexData)*maxParticles;
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = &particleList->data;
 
@@ -280,3 +293,5 @@ void ParticleSystem::setShaders(ID3D11VertexShader * gVertexShader)
 {
 	this->gVertexShader = gVertexShader;
 }
+
+

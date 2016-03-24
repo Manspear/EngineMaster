@@ -334,7 +334,7 @@ void Engine::Update()
 	}
 	dt = getFrameTime();
 
-
+	particleSys->doShit(dt);
 	//XMFLOAT4X4 viewMatrix;
 	//XMFLOAT4X4 projectionMatrix;
 

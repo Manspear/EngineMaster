@@ -64,6 +64,8 @@ public:
 	ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, ID3D11Buffer* vp);
 	~ParticleSystem();
 
+
+	void doShit(float dTime);
 	void updateBuffers();
 	void updateParticles(float dTime);
 	void emitParticles(float dTime);
