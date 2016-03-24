@@ -1,5 +1,7 @@
 #include "FbxDawg.h"
 
+
+
 FbxDawg::FbxDawg()
 {
 
@@ -304,9 +306,10 @@ void FbxDawg::loadModels(const char* filePath)
 
 #pragma endregion >>ASSEMBLY OF VERTEXDATA<<
 
-
-
-
+			//>>>>>>>CREATING THE MAP OF CONTROL POINTS<<<<<<<<<
+			//________________________________________________
+			makeControlPointMap(mesh);//<---------------------
+			//________________________________________________
 
 		}//for mesh
 	}//if fbxnode
@@ -352,9 +355,17 @@ void FbxDawg::makeIndexList()
 
 }
 
+void FbxDawg::makeControlPointMap(FbxMesh* currMesh)
+{
+	int aids = currMesh->GetControlPointsCount();
 
+	for (int i = 0; i < aids; ++i) {
+		sAnimationData iAmHereToFillVector;
+		dataPerControlPoint.push_back(&iAmHereToFillVector);
+	}
+}
 
-void FbxDawg::getJointData(FbxNode* rootNode)
+void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 {
 	//Explanation of FBX-terminology regarding Animation-Related things:
 	//___________________________________________________________________________________________________________________________
@@ -364,14 +375,87 @@ void FbxDawg::getJointData(FbxNode* rootNode)
 	//For a jointDeformer, it's Cluster would contain a link to the actual joint.
 	//___________________________________________________________________________________________________________________________
 
+	FbxMesh* currMesh = rootNode->GetMesh();
+	unsigned int deformerCount = currMesh->GetDeformerCount();
+
+	for (unsigned int deformerIndex = 0; deformerIndex < deformerCount; ++deformerIndex)
+	{
+		FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(currMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
+		if (!currSkin)
+			continue;
+
+		unsigned int numberOfClusters = currSkin->GetClusterCount();
+		for (unsigned int clusterIndex = 0; clusterIndex < numberOfClusters; ++clusterIndex) 
+		{
+			FbxCluster* currentCluster = currSkin->GetCluster(clusterIndex);
+			const char* currentJointName = currentCluster->GetName();
+			unsigned int currentJointIndex = findJointIndexByName(currentJointName);
+			
+			FbxAMatrix transformMatrix;
+			FbxAMatrix transformLinkMatrix;
+			FbxAMatrix globalBindposeInverseMatrix;
+
+			currentCluster->GetTransformMatrix(transformMatrix); //The transform of the MESH at bind-time
+			currentCluster->GetTransformLinkMatrix(transformLinkMatrix); //The transformation of the cluster(joint) in bindtime from localspace to worldspace 
+			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix; 
+
+			//Update the information in skeleton
+			skeleton.joints[currentJointIndex]->globalBindPoseInverse = &globalBindposeInverseMatrix;
+			skeleton.joints[currentJointIndex]->jointNode = currentCluster->GetLink();
+
+			//Associate each joint with the control points it affects
+			unsigned int numOfIndices = currentCluster->GetControlPointIndicesCount();
+
+			for (unsigned int i = 0; i < numOfIndices; ++i) 
+			{
+				//currentCluster->GetControlPointWe
+				sBlendingIndexWeightPair currBlendingIndexWeightPair;
+				currBlendingIndexWeightPair.affectingJointIndex = currentJointIndex;
+				currBlendingIndexWeightPair.blendingWeight = currentCluster->GetControlPointWeights()[i];
+				//FUUUUCK what am I supposed to do next? Our code diverges here...
+				//currCluster->GetControlPointIndices()[i] gets the returned value at index i. Meaning that the returned item is a list.
+				//Uhmm... i need to have all of the control points somewhere... So that I can map the cluster's "affected Control Points"
+				//somewhere. OR... Hmm... Can I map them here? Can I get all of the indices of the model? Do I have them already?
+				dataPerControlPoint[currentCluster->GetControlPointIndices()[i]]->weightData.push_back(&currBlendingIndexWeightPair);
+			}
+
+			//Now start getting animation information
+			//--> site says "Now only supports one take" in comment here.
+			//stack, according to the "comment" in FbxAnimStack describes a stack as a 
+			//collection of "animation layers". The Fbx-file can have one or more stacks.
+			int count = 0;
+			FbxAnimStack* aids;
+			int numStacks = Fbx_Scene->GetSrcObjectCount<FbxAnimStack>();
+			FbxAnimStack* currentAnimStack = Fbx_Scene->GetSrcObject<FbxAnimStack>(0);
+			
+		}
+	}
+}
+
+unsigned int FbxDawg::findJointIndexByName(const char* jointName)
+{
+	try
+	{
+		for (unsigned int i = 0; i < skeleton.joints.size(); ++i)
+		{
+			int compareValue = std::strcmp(jointName, skeleton.joints[i]->name);
+			if (compareValue == 0)
+				return skeleton.joints[i]->parentIndex + 1; //parentIndex + 1 gets the index of this joint.
+		}
+	}
+
+	catch (const std::exception&)
+	{
+		printf("Error in FbxDawg::findJointIndexByName(const char* jointName): cannot find matching joint name\n");
+	}
 }
 
 void FbxDawg::processJointHierarchy(FbxNode * inRootNode)
 {
-	//for (int childIndex = 0; childIndex < inRootNode->GetChildCount(); ++childIndex) {
-	//	FbxNode* currNode = inRootNode->GetChild(childIndex);
-	//	recursiveJointHierarchyTraversal(currNode, 0, -1); 
-	//}
+	for (int childIndex = 0; childIndex < inRootNode->GetChildCount(); ++childIndex) {
+		FbxNode* currNode = inRootNode->GetChild(childIndex);
+		recursiveJointHierarchyTraversal(currNode, 0, -1); 
+	}
 }
 
 void FbxDawg::recursiveJointHierarchyTraversal(FbxNode * inNode, int currentIndex, int inNodeParentIndex)
@@ -420,5 +504,7 @@ void FbxDawg::bsLoader(FbxMesh * mesh)
 		}
 	}
 }
+
+
 
 
