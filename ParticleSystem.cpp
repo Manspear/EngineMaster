@@ -32,6 +32,36 @@ ParticleSystem::~ParticleSystem()
 	gGeometryShaderParticle->Release();
 }
 
+void ParticleSystem::updateBuffers()
+{
+	HRESULT hr;
+	D3D11_MAPPED_SUBRESOURCE gMappedResource;
+	vertexData * dataPtr;
+
+	hr = gDeviceContext->Map(particleVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &gMappedResource);
+	dataPtr = (vertexData*)gMappedResource.pData;
+	memcpy(dataPtr, &particleList->data, (sizeof(vertexData)*particleCount));
+	gDeviceContext->Unmap(particleVertexBuffer, 0);
+
+	return;
+}
+
+void ParticleSystem::updateParticles(float dTime)
+{
+	for (int i = 0; i < particleCount; i++)
+	{
+		particleList[i].y = (particleList[i].y - particleList[i].velocity * dTime * 0.001);
+		particleList[i].data.x = particleList[i].x;
+		particleList[i].data.y = particleList[i].y;
+		particleList[i].data.z = particleList[i].z;
+
+		particleList[i].data.r = particleList[i].r;
+		particleList[i].data.g = particleList[i].g;
+		particleList[i].data.b = particleList[i].b;
+	}
+	return;
+}
+
 void ParticleSystem::emitParticles(float dTime)
 {
 	float posX, posY, posZ;
@@ -99,6 +129,8 @@ void ParticleSystem::emitParticles(float dTime)
 	}
 	return;
 }
+
+
 
 void ParticleSystem::initializeBuffers()
 {
