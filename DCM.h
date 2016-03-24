@@ -8,7 +8,7 @@
 #include "GCamera.h"
 #include <DirectXColors.h>
 
-class DCM//hej
+class DCM
 {
 private:
 	GCamera DCM_CubeMapCamera[6];
@@ -23,7 +23,7 @@ public://bitch
 	void Dynamic_Cube_Map(ID3D11Device *gDevice);
 	void BuildCubeFaceCamera(float x, float y, float z, float w);
 	D3D11_VIEWPORT getDCM_CubeMapViewport();
-	ID3D11ShaderResourceView* getSubResourceView();
+	ID3D11ShaderResourceView* getShaderResourceView();
 	ID3D11RenderTargetView* getDCM_RenderTargetView(int i);
 	ID3D11DepthStencilView* getDCM_DepthStencilView();
 	GCamera getDCM_CubeMapCamera(int i);// ifall detta kommer behövas i engine, om inte, ta bort

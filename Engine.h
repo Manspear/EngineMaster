@@ -67,9 +67,12 @@ public:
 
 	ID3D11InputLayout* gVertexLayout = nullptr;
 	ID3D11InputLayout* gVertexLayoutBS = nullptr;
+	ID3D11InputLayout* gVertexLayoutDCM = nullptr;//DCM
 	ID3D11VertexShader* gVertexShader = nullptr;
 	ID3D11VertexShader* gVertexShaderBS = nullptr;
+	ID3D11VertexShader* gVertexShaderDCM = nullptr;//DCM
 	ID3D11PixelShader* gPixelShader = nullptr;
+	ID3D11PixelShader* gPixelShaderDCM = nullptr;//DCM
 	ID3D11GeometryShader* gGeometryShader = nullptr;
 
 	struct matrixBuffer {
@@ -111,6 +114,7 @@ public:
 	void CreateDepthStencilBuffer();
 	void SetViewport();
 	void Render();
+	void Render_DCM_Faces(GCamera &DCM_CubeMapCamera, bool renderAble);
 	void Update();
 	void Clean(); //releases all resources
 	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once

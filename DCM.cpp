@@ -178,16 +178,10 @@ void DCM::BuildCubeFaceCamera(float x, float y, float z, float w)
 	}
 }//end, moved drawscene to engine
 
-ID3D11ShaderResourceView* DCM::getSubResourceView()
-{
-	return this->DCM_ShaderResourceView;
-}
-
 ID3D11RenderTargetView * DCM::getDCM_RenderTargetView(int i)
 {
 	return this->DCM_RenderTargetView[i];
 }
-
 
 ID3D11DepthStencilView * DCM::getDCM_DepthStencilView()
 {
@@ -202,4 +196,9 @@ GCamera DCM::getDCM_CubeMapCamera(int i)
 D3D11_VIEWPORT DCM::getDCM_CubeMapViewport()
 {
 	return this->DCM_CubeMapViewport;
+}
+
+ID3D11ShaderResourceView * DCM::getShaderResourceView()
+{
+	return this->DCM_ShaderResourceView;
 }

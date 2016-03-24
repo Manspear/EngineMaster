@@ -22,12 +22,12 @@ cbuffer matrixBuffer:register(b0) {
 	float4 camPos;
 	float4 camDir;
 };
+
 cbuffer worldBuffer:register(b1) { //Gotten from the GModel class.
 	matrix worldMatrix;
 };
 
 [maxvertexcount(3)] //returns a maximum of x vertices
-
 
 void GS_main(triangle GSOutput input[3] : SV_POSITION, inout TriangleStream< GSOutput > output)
 {

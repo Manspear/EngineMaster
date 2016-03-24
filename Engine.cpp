@@ -55,6 +55,8 @@ void Engine::CreateShaders()
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
+
+	//jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
 	//create vertex shader
@@ -90,8 +92,60 @@ void Engine::CreateShaders()
 
 	pVSbs->Release();
 
+	//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+	//create vertex shader
+	ID3DBlob* pVS_DCM = nullptr;
+	D3DCompileFromFile(
+		L"DCM_VertexShader.hlsl", // filename
+		nullptr,		// optional macros
+		nullptr,		// optional include files
+		"VS_main",		// entry point
+		"vs_4_0",		// shader model (target)
+		0,				// shader compile options
+		0,				// effect compile options
+		&pVS_DCM,			// double pointer to ID3DBlob		
+		nullptr			// pointer for Error Blob messages.
+						// how to use the Error blob, see here
+						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+		);
+
+
+	hr = gDevice->CreateVertexShader(pVS_DCM->GetBufferPointer(), pVS_DCM->GetBufferSize(), nullptr, &gVertexShaderDCM);
+
+	D3D11_INPUT_ELEMENT_DESC inputDescDCM[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },//pos
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },//normal
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },//uv
+	};
+	hr = gDevice->CreateInputLayout(inputDescDCM, ARRAYSIZE(inputDescDCM), pVS_DCM->GetBufferPointer(), pVS_DCM->GetBufferSize(), &gVertexLayoutDCM);
+
+	//DCM PIxelshader
+
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;
+	D3DCompileFromFile(
+		L"DCM_PixelShader.hlsl", // filename
+		nullptr,		// optional macros
+		nullptr,		// optional include files
+		"PS_main",		// entry point
+		"ps_4_0",		// shader model (target)
+		0,				// shader compile options
+		0,				// effect compile options
+		&pPS,			// double pointer to ID3DBlob		
+		nullptr			// pointer for Error Blob messages.
+						// how to use the Error blob, see here
+						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+		);
+
+	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShaderDCM);
+	// we do not need anymore this COM object, so we release it.
+	pPS->Release();
+
+
+	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+	//create pixel shader
+	pPS = nullptr;
 	D3DCompileFromFile(
 		L"PixelShader.hlsl", // filename
 		nullptr,		// optional macros
@@ -170,7 +224,8 @@ void Engine::SetViewport()
 	vp.TopLeftY = 0;
 	gDeviceContext->RSSetViewports(1, &vp);
 }
-// SWAG
+
+
 void Engine::Render()
 {
 #pragma region //EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM
@@ -212,8 +267,6 @@ void Engine::Render()
 
 	//override void DrawScene() Vad menas med override? Ärvs några functioner? Nej Den kunde lika gärna heta DrawScene2().
 
-	gDeviceContext->RSSetViewports(1, &dcm.getDCM_CubeMapViewport());
-	
 	for (int i = 0; i < 6; i++)
 	{
 		gDeviceContext->ClearRenderTargetView(dcm.getDCM_RenderTargetView(i), reinterpret_cast<const float*>(&Colors::Silver));//fortsätt läsa sid 486
@@ -224,22 +277,18 @@ void Engine::Render()
 		gDeviceContext->OMSetRenderTargets(1, &DCM_RenderTargetView, dcm.getDCM_DepthStencilView());
 
 		//Draw the scene with exception of the center sphere, to this cube map face
-		// DrawScene2(DCM_CubeMapCamera[i], false); Engines draw funktion
+		Render_DCM_Faces(dcm.getDCM_CubeMapCamera(i), false); //Engines draw funktion // renderAble == false.
 	}
 
 	SetViewport();
 
 	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);// jag gör ju detta där nere, måste jag göra det igen här?
 
-	//Have hardware generate lower mipmap levels of cube map.
-	gDeviceContext->GenerateMips(dcm.getSubResourceView());
-
 	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
-	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+	
 	UINT32 vertexSize;
 	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
 	
@@ -248,14 +297,19 @@ void Engine::Render()
 	
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
+
 	listOfModels = modelListObject->getModelList();
+
+	ID3D11ShaderResourceView *DCM_ShaderResourceView = dcm.getShaderResourceView();
 
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
 		if (listOfModels[bufferCounter].hasBlendShape())
 		{	// gör en check om dcm här också, blend shapes ska ju också kunna ha
+			gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 			gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
+			gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
 			vertexSize = sizeof(float) * 16;
 
@@ -264,12 +318,20 @@ void Engine::Render()
 		else if (listOfModels[bufferCounter].hasDCM()==true)//modelLoader->DCMmaterial->IsValid()
 		{
 			printf("hej");
-			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);//VSSetShader(gVertexShader, nullptr, 0);
-			gDeviceContext->IASetInputLayout(gVertexLayout);
+			gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+			gDeviceContext->VSSetShader(gVertexShaderDCM, nullptr, 0);//VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->PSSetShader(gPixelShaderDCM, nullptr, 0);
+			gDeviceContext->PSSetShaderResources(0, 1, &DCM_ShaderResourceView);
+			gDeviceContext->PSSetConstantBuffers(0, 1, &gConstantBuffer);//
+
+			//DCM_ShaderResourceView
+			gDeviceContext->IASetInputLayout(gVertexLayoutDCM);
 			vertexSize = sizeof(float) * 8;
 		}
 
 		else{
+			gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+			gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
 			vertexSize = sizeof(float) * 8;
@@ -289,9 +351,65 @@ void Engine::Render()
 	}
 }
 
+void Engine::Render_DCM_Faces(GCamera &DCM_CubeMapCamera, bool renderAble)
+{
+
+	// Generate the cube map by rendering to each cube map face.
+	gDeviceContext->RSSetViewports(1, &dcm.getDCM_CubeMapViewport());
+
+	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);// jag gör ju detta där nere, måste jag göra det igen här?
+
+	 //Have hardware generate lower mipmap levels of cube map.
+	gDeviceContext->GenerateMips(dcm.getShaderResourceView());
+
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
+
+	UINT32 vertexSize;
+	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
+
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 
-void Engine::Update() {
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
+
+
+	listOfModels = modelListObject->getModelList();
+
+	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
+	{
+		if (listOfModels[bufferCounter].hasBlendShape())
+		{	// gör en check om dcm här också, blend shapes ska ju också kunna ha
+			gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+			gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
+			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
+			vertexSize = sizeof(float) * 16;
+		}
+		else {
+			gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayout);
+			vertexSize = sizeof(float) * 8;
+		}
+
+		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
+
+		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
+		gDeviceContext->PSSetShaderResources(0, listOfModels[bufferCounter].getNumberOfTextures(), listOfModels[bufferCounter].modelTextureView);
+
+		gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
+		gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
+		//gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0); //Uses indexbuffer
+		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
+	}
+}
+
+void Engine::Update()
+{
 	frameCount++;
 	if (getTime() > 1.0f)
 	{
@@ -420,7 +538,8 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 	return hr;
 }
 
-void Engine::Clean() {
+void Engine::Clean()
+{
 
 	gVertexLayout->Release();
 	gVertexShader->Release();
@@ -441,6 +560,7 @@ void Engine::Clean() {
 	delete modelListObject;
 	//delete[] loops through the new-objects in the array, and deletes them!
 }
+
 void Engine::InitializeCamera()
 {
 	camera = new GCamera;//										vv far plane	dessa är 400 gånger ifrån varandra. Det är okej att ha runt 10 000 - 20 000
@@ -472,7 +592,6 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	SetViewport();
 
 	input->initialize(hinstance, wndHandle, wWIDTH, wHEIGHT);
-
 
 	CreateDynamicCubeMap();
 
