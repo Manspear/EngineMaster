@@ -39,7 +39,7 @@ void main(point GSInput input[1] : SV_POSITION, inout TriangleStream< GSOutput >
 
     matrix wv = mul(worldMatrix, viewMatrix);
 
-    float size = 0.5f;
+    float size = 0.1f;
 
     //TRANSFORM ZE POSITION IN WOERLD VIEW
     float4 pos = mul(input[0].Pos, wv);
