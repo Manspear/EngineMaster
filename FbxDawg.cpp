@@ -1,6 +1,27 @@
 #include "FbxDawg.h"
 
+//How to organize code for readability:
 
+//
+//In h-files:
+//- Public before private.
+//- Everything only used within the function, should be in private.
+//- Have attributes at the top.
+//-	Have comments above each function explaining clearly what the parameters and return values are used for.
+//	Those comments must be written as /** text **/ and placed above the function. This way the comment
+//	will be displayed when hovering pointer over function-name.
+//- Organize functions alphabetically, or by frequency of use.
+//- Organize attributes by type, alphabetically, or frequency of use.
+//- Have the destructors and constructors at the bottom.
+//- Come to an agreement on naming standards of functions, booleans, classes, structs, and variables.
+//- Come to an agreement on how to write out {}.
+//- Generally have short, to-the-point names of functions, variables, and classes.
+
+//In cpp-files:
+//- Have the functions appear in the same order as in the header.
+//- Have functions be the maximum length of one "screen-height"
+//- If some code is within an if-statement: consider making it a function.
+//- Have comments describing parts of the code, and what it's used for.
 
 FbxDawg::FbxDawg()
 {
@@ -426,7 +447,42 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 			int count = 0;
 			FbxAnimStack* aids;
 			int numStacks = Fbx_Scene->GetSrcObjectCount<FbxAnimStack>();
-			FbxAnimStack* currentAnimStack = Fbx_Scene->GetSrcObject<FbxAnimStack>(0);
+			for (unsigned int stackCounter = 0; stackCounter < numStacks; ++stackCounter) 
+			{
+
+				FbxAnimStack* currentAnimStack = Fbx_Scene->GetSrcObject<FbxAnimStack>(stackCounter);
+
+				int numAnimLayers = currentAnimStack->GetMemberCount<FbxAnimLayer>();
+
+				//In this for-loop I am trying to figure out how animation curves work...
+				for (unsigned int animLayerCounter = 0; animLayerCounter < numAnimLayers; ++animLayerCounter) 
+				{
+					FbxAnimLayer* currAnimLayer = currentAnimStack->GetMember<FbxAnimLayer>();
+					//FbxAnimCurve* curveRotation = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_TRANSFORM, false);
+					//FbxAnimCurve* curveRotation = skeleton.joints[currentJointIndex]->jointNode->LclRotation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_ROTATION, false);
+					FbxAnimCurve* currAnimCurve = skeleton.joints[currentJointIndex]->jointNode->LclRotation.GetCurve(currAnimLayer, false);
+					
+					
+				    //currAnimCurve->
+					//KeyGet, KeyFind, etc are functions belonging to an animationcurve. Keys are "animation graph keys" that you can find in maya. 
+					//The only thing they contain is a time (x-axis in graph), a value (y-axis in graph), and some info about tangents.
+					//The tangents tells us of how the interpolation behaves between keys.
+				}
+
+				//Most of the code below is most likely going to become obsolete once I figure out how animation layers work.
+				FbxString animStackName = currentAnimStack->GetName();
+				FbxString temp = animStackName.Buffer();
+				animationName.push_back(&temp);
+				FbxTakeInfo* takeInfo = Fbx_Scene->GetTakeInfo(animStackName);
+				FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
+				FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
+				animationLength.push_back(end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1);
+				//Now get the animation curves that determine the rotation and translation of this joint at different times
+				//FbxAnimCurve* yolo = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve();
+				
+				
+			}
+			
 			
 		}
 	}
