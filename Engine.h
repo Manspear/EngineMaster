@@ -89,7 +89,9 @@ public:
 	
 
 	FbxDawg * fbxobj = nullptr;
-	DCM dcm;
+
+	D3D11_VIEWPORT vp;
+	
 
 	int wHEIGHT = 480;
 	int wWIDTH = 640;
@@ -112,9 +114,10 @@ public:
 	//void CreateTexture(int modelCounter);
 	void CreateConstantBuffer();
 	void CreateDepthStencilBuffer();
-	void SetViewport();
+	void SetViewport(D3D11_VIEWPORT &vp);
 	void Render();
-	void Render_DCM_Faces(GCamera &DCM_CubeMapCamera, bool renderAble);
+	void Render2();// utan DCM
+
 	void Update();
 	void Clean(); //releases all resources
 	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once

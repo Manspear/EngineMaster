@@ -24,7 +24,7 @@ Engine::~Engine()
 
 void Engine::CreateDynamicCubeMap()
 {
-	dcm.Dynamic_Cube_Map(gDevice);
+	DCM dcm(gDevice, depthStencilView, gBackbufferRTV, vp);
 }
 
 void Engine::CreateShaders()
@@ -213,9 +213,8 @@ void Engine::CreateDepthStencilBuffer() {
 	gDevice->CreateDepthStencilView(gDepthStencilBuffer, NULL, &depthStencilView);
 }
 
-void Engine::SetViewport()
+void Engine::SetViewport(D3D11_VIEWPORT &vp)
 {
-	D3D11_VIEWPORT vp;
 	vp.Width = (float)640;
 	vp.Height = (float)480;
 	vp.MinDepth = 0.0f;
@@ -261,30 +260,7 @@ void Engine::Render()
 	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	
 
-	//vvvvvvvvvv	< Dynamic cube map >	vvvvvvvvvvvvv
-
-	//override void DrawScene() Vad menas med override? Ärvs några functioner? Nej Den kunde lika gärna heta DrawScene2().
-
-	for (int i = 0; i < 6; i++)
-	{
-		gDeviceContext->ClearRenderTargetView(dcm.getDCM_RenderTargetView(i), reinterpret_cast<const float*>(&Colors::Silver));//fortsätt läsa sid 486
-		gDeviceContext->ClearDepthStencilView(dcm.getDCM_DepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-		ID3D11RenderTargetView* DCM_RenderTargetView = dcm.getDCM_RenderTargetView(i); // för den ville ha //&DCM_RenderTargetView[i]
-		//Bind cube map face as render target
-		gDeviceContext->OMSetRenderTargets(1, &DCM_RenderTargetView, dcm.getDCM_DepthStencilView());
-
-		//Draw the scene with exception of the center sphere, to this cube map face
-		Render_DCM_Faces(dcm.getDCM_CubeMapCamera(i), false); //Engines draw funktion // renderAble == false.
-	}
-
-	SetViewport();
-
-	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);// jag gör ju detta där nere, måste jag göra det igen här?
-
-	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
@@ -299,8 +275,8 @@ void Engine::Render()
 
 
 	listOfModels = modelListObject->getModelList();
-
-	ID3D11ShaderResourceView *DCM_ShaderResourceView = dcm.getShaderResourceView();
+	
+	
 
 	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
 	{
@@ -317,14 +293,16 @@ void Engine::Render()
 		}
 		else if (listOfModels[bufferCounter].hasDCM()==true)//modelLoader->DCMmaterial->IsValid()
 		{
-			printf("hej");
+			//DCM_Render();
+			
+			printf("DCM \t ");
 			gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 			gDeviceContext->VSSetShader(gVertexShaderDCM, nullptr, 0);//VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->PSSetShader(gPixelShaderDCM, nullptr, 0);
-			gDeviceContext->PSSetShaderResources(0, 1, &DCM_ShaderResourceView);
+			//gDeviceContext->PSSetShaderResources(0, 1, &DCM_ShaderResourceView);
 			gDeviceContext->PSSetConstantBuffers(0, 1, &gConstantBuffer);//
 
-			//DCM_ShaderResourceView
+																		 //DCM_ShaderResourceView
 			gDeviceContext->IASetInputLayout(gVertexLayoutDCM);
 			vertexSize = sizeof(float) * 8;
 		}
@@ -351,16 +329,12 @@ void Engine::Render()
 	}
 }
 
-void Engine::Render_DCM_Faces(GCamera &DCM_CubeMapCamera, bool renderAble)
+
+void Engine::Render2()
 {
-
-	// Generate the cube map by rendering to each cube map face.
-	gDeviceContext->RSSetViewports(1, &dcm.getDCM_CubeMapViewport());
-
-	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);// jag gör ju detta där nere, måste jag göra det igen här?
-
-	 //Have hardware generate lower mipmap levels of cube map.
-	gDeviceContext->GenerateMips(dcm.getShaderResourceView());
+	float clearColor[] = { 1, 0.537, 0.812, 1 };
+	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
@@ -371,9 +345,7 @@ void Engine::Render_DCM_Faces(GCamera &DCM_CubeMapCamera, bool renderAble)
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
-
 
 	listOfModels = modelListObject->getModelList();
 
@@ -402,8 +374,6 @@ void Engine::Render_DCM_Faces(GCamera &DCM_CubeMapCamera, bool renderAble)
 		gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
 		gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
-		//gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0); //Uses indexbuffer
 		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
 	}
 }
@@ -589,7 +559,7 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	InitializeModels();
 
-	SetViewport();
+	SetViewport(vp);
 
 	input->initialize(hinstance, wndHandle, wWIDTH, wHEIGHT);
 

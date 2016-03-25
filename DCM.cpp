@@ -1,5 +1,13 @@
 #include "DCM.h"
 
+DCM::DCM(ID3D11Device * gDevice, ID3D11DepthStencilView * depthStencilView, ID3D11RenderTargetView * gBackbufferRTV, D3D11_VIEWPORT &vp)
+{
+	this->gDevice = gDevice;
+	this->depthStencilView = depthStencilView;
+	this->gBackbufferRTV = gBackbufferRTV;
+	this->vp = vp;
+}
+
 DCM::DCM()
 {
 
@@ -177,6 +185,41 @@ void DCM::BuildCubeFaceCamera(float x, float y, float z, float w)
 		DCM_CubeMapCamera[i].LookAt(center, targets[i], ups[i]);
 	}
 }//end, moved drawscene to engine
+
+void DCM::DCM_Render()
+{
+
+	// Generate the cube map by rendering to each cube map face.
+	gDeviceContext->RSSetViewports(1, &DCM_CubeMapViewport);
+
+	//vvvvvvvvvv	< Dynamic cube map >	vvvvvvvvvvvvv
+
+	for (int i = 0; i < 6; i++)
+	{
+		gDeviceContext->ClearRenderTargetView(DCM_RenderTargetView[i], reinterpret_cast<const float*>(&Colors::Silver));//fortsätt läsa sid 486
+		gDeviceContext->ClearDepthStencilView(DCM_DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+		ID3D11RenderTargetView* DCM_RenderTargetView = &DCM_RenderTargetView[i]; // för den ville ha //&DCM_RenderTargetView[i]
+																					   //Bind cube map face as render target
+		gDeviceContext->OMSetRenderTargets(1, &DCM_RenderTargetView, DCM_DepthStencilView);
+
+		//Draw the scene with exception of the center sphere, to this cube map face
+		//Render2();//		med DCM vertex // pixelshader?  Hur når jag render utan Engine engine object
+	}
+
+	// Restore old viewport and render targets.
+	gDeviceContext->RSSetViewports(1, &vp);
+	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);
+
+
+	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+	// Have hardware generate lower mipmap levels of cube map.
+	gDeviceContext->GenerateMips(DCM_ShaderResourceView);
+
+	// Now draw the scene as normal, but WITH the CENTER SPHERE. // som jag i for(6) loopen genererade? HUR?
+	//Render(); //vanliga
+}
 
 ID3D11RenderTargetView * DCM::getDCM_RenderTargetView(int i)
 {

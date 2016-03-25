@@ -17,11 +17,20 @@ private:
 	ID3D11RenderTargetView* DCM_RenderTargetView[6];
 	ID3D11DepthStencilView* DCM_DepthStencilView;
 
-public://bitch
+	ID3D11DeviceContext* gDeviceContext = nullptr;
+	ID3D11Device * gDevice;
+	ID3D11DepthStencilView * depthStencilView;
+	ID3D11RenderTargetView * gBackbufferRTV;
+	D3D11_VIEWPORT vp;
+
+public:
+
+	DCM(ID3D11Device * gDevice, ID3D11DepthStencilView * depthStencilView, ID3D11RenderTargetView * gBackbufferRTV, D3D11_VIEWPORT &vp);
 	DCM();
 	~DCM();
 	void Dynamic_Cube_Map(ID3D11Device *gDevice);
 	void BuildCubeFaceCamera(float x, float y, float z, float w);
+	void DCM_Render();
 	D3D11_VIEWPORT getDCM_CubeMapViewport();
 	ID3D11ShaderResourceView* getShaderResourceView();
 	ID3D11RenderTargetView* getDCM_RenderTargetView(int i);
