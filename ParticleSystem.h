@@ -13,14 +13,13 @@ class ParticleSystem
 public:
 	struct vertexData
 	{
-		float x, y, z;
-		float r, g, b;
+		XMFLOAT3 pos;
+		XMFLOAT3 color;
+		//float x, y, z, r, g, b;
 	};
 
 	struct particle
 	{
-		float x, y, z;
-		float r, g, b;
 		float velocity;
 		bool active;
 		vertexData data;
@@ -33,8 +32,8 @@ private:
 
 
 	ID3D11InputLayout* gVertexLayoutParticle = nullptr;
-	ID3D11PixelShader* gPixelShader = nullptr;
-	ID3D11VertexShader* gVertexShader = nullptr;
+	ID3D11PixelShader* gPixelShaderParticle = nullptr;
+	ID3D11VertexShader* gVertexShaderParticle = nullptr;
 	ID3D11GeometryShader* gGeometryShaderParticle = nullptr;
 	ID3D11Device* gDevice = nullptr;
 	ID3D11DeviceContext* gDeviceContext;
@@ -58,12 +57,10 @@ private:
 	float accumulatedTime;
 
 public:
-
-	particle party;
-
 	ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, ID3D11Buffer* vp);
 	~ParticleSystem();
 
+	void killALL();
 	void killParticles();
 	void doShit(float dTime);
 	void updateBuffers();
@@ -72,7 +69,6 @@ public:
 	void initializeBuffers();
 	void initializeParticles();
 	void renderParticles();
-	void setShaders(ID3D11VertexShader* gVertexShader);
 };
 
 

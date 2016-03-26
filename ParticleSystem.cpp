@@ -9,18 +9,8 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 	this->gDeviceContext = gDeviceContext;
 	this->gConstantBuffer = vp;
 
-	//TESTPARTICLE
-	//will become the emitter position. to do this replace with translation multiplied in to world matrix.
-	party.x = 0.0f;
-	party.y = 1.0f;
-	party.z = 0.0f;
 
-	party.r = 1.0f;
-	party.g = 0.0f;
-	party.b = 0.0f;
-	//END TESTPARTICLE
-
-	particleWorldMatrix = XMMatrixTranspose(XMMatrixTranslation(party.x, party.y, party.z));
+	particleWorldMatrix = XMMatrixTranspose(XMMatrixTranslation(4.0f, 1.0f, 0.0f));
 
 
 	this->initializeParticles();
@@ -42,32 +32,28 @@ void ParticleSystem::doShit(float dTime)
 	this->updateBuffers();
 }
 
-void ParticleSystem::killParticles()
+void ParticleSystem::killALL()
 {
 	for (int i = 0; i < (maxParticles); i++)
 	{
-		int k;
-
-
-		if ((particleList[i].y < -3.0f) && particleList[i].active == true)
+		if (particleList[i].active == true)
 		{
 			particleList[i].active = false;
-			//particleList.erase(particleList.begin()+i);
 			particleCount--;
-
-			//for (int j = i; j < maxParticles; j++)
-			//{
-			//	particleList[j].x = particleList[j + 1].x;
-			//	particleList[j].y = particleList[j + 1].y;
-			//	particleList[j].z = particleList[j + 1].z;
-			//	particleList[j].r = particleList[j + 1].r;
-			//	particleList[j].g = particleList[j + 1].g;
-			//	particleList[j].b = particleList[j + 1].b;
-			//	particleList[j].velocity = particleList[j + 1].velocity;
-			//	particleList[j].active = particleList[j + 1].active;
-			//}
 		}
-		//printf("active: %d\nfalse: %d\n", activecount, falsecount);
+	}
+}
+
+void ParticleSystem::killParticles()
+{
+
+	for (int i = 0; i < (maxParticles); i++)
+	{
+		if ((particleList[i].data.pos.y < -3.0f) && particleList[i].active == true)
+		{
+			particleList[i].active = false;
+			particleCount--;
+		}
 	}
 }
 
@@ -90,21 +76,11 @@ void ParticleSystem::updateBuffers()
 
 void ParticleSystem::updateParticles(float dTime)
 {
-
-
 	for (int i = 0; i < maxParticles; i++)
 	{
-
 		if (particleList[i].active == true)
 		{
-			particleList[i].y = (particleList[i].y - particleList[i].velocity * dTime * 0.01);
-			particleList[i].data.x = particleList[i].x;
-			particleList[i].data.y = particleList[i].y;
-			particleList[i].data.z = particleList[i].z;
-
-			particleList[i].data.r = particleList[i].r;
-			particleList[i].data.g = particleList[i].g;
-			particleList[i].data.b = particleList[i].b;
+			particleList[i].data.pos.y = particleList[i].data.pos.y - particleList[i].velocity * dTime * 0.01;
 		}
 		else {
 			//printf("here's error\n");
@@ -114,6 +90,33 @@ void ParticleSystem::updateParticles(float dTime)
 
 
 	return;
+}
+
+void ParticleSystem::initializeParticles()
+{
+	deviationX = 0.01f;
+	deviationY = 0.01f;
+	deviationZ = 0.01f;
+
+	velocity = 24.0f;
+	velocityVariation = 9.0f;
+
+	particlesPerSecond = 600.0f;
+
+	maxParticles = 5000;
+
+
+
+
+	this->particleList = new particle[this->maxParticles];
+
+	for (int i = 0; i < maxParticles; i++)
+	{
+		particleList[i].active = false;
+	}
+
+	particleCount = 0;
+	accumulatedTime = 0.0f;
 }
 
 void ParticleSystem::emitParticles(float dTime)
@@ -136,24 +139,25 @@ void ParticleSystem::emitParticles(float dTime)
 
 	//randomize a particle
 
-	if ((emit == true) && (particleCount < (maxParticles - 1)))
+	if ((emit == true) && (particleCount < (maxParticles)))
 	{
 		particleCount++;
 
 
 
 		//randomize a particle
-		posX = (((float)rand() - (float)rand()) / RAND_MAX) * deviationX;
-		posY = (((float)rand() - (float)rand()) / RAND_MAX) * deviationY;
-		posZ = (((float)rand() - (float)rand()) / RAND_MAX) * deviationZ;
+		posX = deviationX;
+		posY = deviationY;
+		posZ = deviationZ;
 
-		vel = this->velocity + (((float)rand() - (float)rand()) / RAND_MAX) * velocityVariation;
+	
 
-		red = (((float)rand() - (float)rand()) / RAND_MAX) + 0.5f;
-		green = (((float)rand() - (float)rand()) / RAND_MAX) + 0.5f;
-		blue = (((float)rand() - (float)rand()) / RAND_MAX) + 0.5f;
+		red = 0.5f;
+		green = 2.0f;
+		blue =  0.5f;
 
-		//rendering from back to front seems like a good idea so let's sort shit!
+		vel = 1; //this->velocity + (((float)rand() - (float)rand()) / RAND_MAX) * velocityVariation;
+
 		found = false;
 		index = 0;
 
@@ -165,45 +169,10 @@ void ParticleSystem::emitParticles(float dTime)
 				index++;
 		}
 
-
-		particleList[index].x = posX;
-		particleList[index].y = posY;
-		particleList[index].z = posZ;
-		particleList[index].r = red;
-		particleList[index].g = green;
-		particleList[index].b = blue;
+		particleList[index].data.pos = XMFLOAT3(posX, posY, posZ);
+		particleList[index].data.color = XMFLOAT3(red, green, blue);
 		particleList[index].velocity = vel;
 		particleList[index].active = true;
-
-
-		////rendering from back to front seems like a good idea so let's sort shit!
-		//found = false;
-		//index = 0;
-
-		//while (!found)
-		//{
-		//	if ((particleList[index].active == false) || (particleList[index].z < posZ))
-		//		found = true;
-		//	else
-		//		index++;
-		//}
-
-		//i = particleCount;
-		//j = i - 1;
-
-		//while (i != index)
-		//{
-		//	particleList[i].x = particleList[j].x;
-		//	particleList[i].y = particleList[j].y;
-		//	particleList[i].z = particleList[j].z;
-		//	particleList[i].r = particleList[j].r;
-		//	particleList[i].g = particleList[j].g;
-		//	particleList[i].b = particleList[j].b;
-		//	particleList[i].velocity = particleList[j].velocity;
-		//	particleList[i].active = particleList[j].active;
-		//	i--;
-		//	j--;
-		//}
 
 	}
 
@@ -214,6 +183,8 @@ void ParticleSystem::emitParticles(float dTime)
 
 void ParticleSystem::initializeBuffers()
 {
+	HRESULT hr;
+
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;
 	D3DCompileFromFile(
@@ -230,7 +201,7 @@ void ParticleSystem::initializeBuffers()
 						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
 		);
 
-	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShader);
+	hr = gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShaderParticle);
 	// we do not need anymore this COM object, so we release it.
 	pPS->Release();
 
@@ -246,7 +217,7 @@ void ParticleSystem::initializeBuffers()
 		&pGSps,
 		nullptr
 		);
-	gDevice->CreateGeometryShader(pGSps->GetBufferPointer(), pGSps->GetBufferSize(), nullptr, &gGeometryShaderParticle);
+	hr = gDevice->CreateGeometryShader(pGSps->GetBufferPointer(), pGSps->GetBufferSize(), nullptr, &gGeometryShaderParticle);
 	pGSps->Release();
 
 	ID3DBlob* pVS = nullptr;
@@ -263,7 +234,7 @@ void ParticleSystem::initializeBuffers()
 						// how to use the Error blob, see here
 						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
 		);
-	HRESULT hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShader);
+	hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShaderParticle);
 
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -287,7 +258,7 @@ void ParticleSystem::initializeBuffers()
 	data.SysMemPitch = 0;
 	data.SysMemSlicePitch = 0;
 
-	gDevice->CreateBuffer(&bufferDescV, &data, &particleVertexBuffer);
+	hr = gDevice->CreateBuffer(&bufferDescV, &data, &particleVertexBuffer);
 
 	//constantbuffer
 	D3D11_BUFFER_DESC bufferDesc;
@@ -303,7 +274,7 @@ void ParticleSystem::initializeBuffers()
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
 	modelWorldStruct* dataPtr;
 
-	gDeviceContext->Map(particleConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
+	hr = gDeviceContext->Map(particleConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (modelWorldStruct*)gMappedResource.pData;
 
 	dataPtr->worldMatrix = particleWorldMatrix;
@@ -311,46 +282,20 @@ void ParticleSystem::initializeBuffers()
 	gDeviceContext->Unmap(particleConstantBuffer, NULL);
 }
 
-void ParticleSystem::initializeParticles()
-{
-	deviationX = 2.0f;
-	deviationY = 2.0f;
-	deviationZ = 2.0f;
 
-	velocity = 24.0f;
-	velocityVariation = 9.0f;
-
-	size = 0.2f;
-
-	particlesPerSecond = 250.0f;
-
-	maxParticles = 5000;
-
-
-
-
-	this->particleList = new particle[this->maxParticles];
-
-	for (int i = 0; i < maxParticles; i++)
-	{
-		particleList[i].active = false;
-	}
-
-	particleCount = 0;
-	accumulatedTime = 0.0f;
-}
 
 void ParticleSystem::renderParticles()
 {
-	UINT vertSize = sizeof(float) * 6;
+
+	UINT vertSize = sizeof(vertexData);
 	UINT offset = 0;
 
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->GSSetShader(gGeometryShaderParticle, nullptr, 0);
-	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+	gDeviceContext->VSSetShader(gVertexShaderParticle, nullptr, 0);
 	gDeviceContext->IASetInputLayout(gVertexLayoutParticle);
-	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+	gDeviceContext->PSSetShader(gPixelShaderParticle, nullptr, 0);
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 	gDeviceContext->GSSetConstantBuffers(1, 1, &particleConstantBuffer);
@@ -363,9 +308,6 @@ void ParticleSystem::renderParticles()
 
 }
 
-void ParticleSystem::setShaders(ID3D11VertexShader * gVertexShader)
-{
-	this->gVertexShader = gVertexShader;
-}
+
 
 

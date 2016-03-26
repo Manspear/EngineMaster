@@ -1,23 +1,20 @@
 struct GSInput
 {
-    float4 Pos : SV_Position;
+    float4 Pos : SV_POSITION;
     float3 Color : COLOR;
 };
 
 struct GSOutput
 {
-	float4 Pos : SV_Position;
+	float4 Pos : SV_POSITION;
+    float3 Color : COLOR;
 	float2 UV  : TEXCOORD;
 	float4 worldPosition : WORLDSPACE;
-    float3 Color : COLOR;
+    
 };
 
 cbuffer matrixBuffer : register(b0)
 {
-	//register b0 says that this buffer takes up slot 0 in the 
-	//"buffer array" belonging to the Vertex Shader. So if more
-	//buffers are to be added to the Vertex Buffer, they must 
-	//be registered as b1, b2, etc...
 	matrix viewMatrix;
 	matrix projectionMatrix;
 
@@ -26,7 +23,7 @@ cbuffer matrixBuffer : register(b0)
 };
 
 cbuffer worldBuffer : register(b1)
-{ //Gotten from the GModel class.
+{ 
 	matrix worldMatrix;
 };
 
@@ -39,7 +36,7 @@ void main(point GSInput input[1] : SV_POSITION, inout TriangleStream< GSOutput >
 
     matrix wv = mul(worldMatrix, viewMatrix);
 
-    float size = 0.1f;
+    float size = 0.05f;
 
     //TRANSFORM ZE POSITION IN WOERLD VIEW
     float4 pos = mul(input[0].Pos, wv);
