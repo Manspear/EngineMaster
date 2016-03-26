@@ -1,4 +1,5 @@
 #include "ParticleSystem.h"
+#include <time.h>
 
 ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, ID3D11Buffer* vp)
 {
@@ -20,7 +21,7 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 	//END TESTPARTICLE
 
 	particleWorldMatrix = XMMatrixTranspose(XMMatrixTranslation(party.x, party.y, party.z));
-	
+
 
 	this->initializeParticles();
 	this->initializeBuffers();
@@ -35,9 +36,37 @@ ParticleSystem::~ParticleSystem()
 
 void ParticleSystem::doShit(float dTime)
 {
+	this->killParticles();
 	this->emitParticles(dTime);
 	this->updateParticles(dTime);
 	this->updateBuffers();
+}
+
+void ParticleSystem::killParticles()
+{
+	for (int i = 0; i < particleCount; i++)
+	{
+
+		if ((particleList[i].y < -3.0f))
+		{
+			particleList[i].active = false;
+			//particleList.erase(particleList.begin()+i);
+			particleCount--;
+
+			//for (int j = i; j < maxParticles; j++)
+			//{
+			//	particleList[j].x = particleList[j + 1].x;
+			//	particleList[j].y = particleList[j + 1].y;
+			//	particleList[j].z = particleList[j + 1].z;
+			//	particleList[j].r = particleList[j + 1].r;
+			//	particleList[j].g = particleList[j + 1].g;
+			//	particleList[j].b = particleList[j + 1].b;
+			//	particleList[j].velocity = particleList[j + 1].velocity;
+			//	particleList[j].active = particleList[j + 1].active;
+			//}
+		}
+		//printf("active: %d\nfalse: %d\n", activecount, falsecount);
+	}
 }
 
 void ParticleSystem::updateBuffers()
@@ -46,27 +75,42 @@ void ParticleSystem::updateBuffers()
 	D3D11_MAPPED_SUBRESOURCE gMappedResource;
 	vertexData * dataPtr;
 
+
+
 	hr = gDeviceContext->Map(particleVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &gMappedResource);
 	dataPtr = (vertexData*)gMappedResource.pData;
 	memcpy(dataPtr, &particleList->data, (sizeof(vertexData)*particleCount));
 	gDeviceContext->Unmap(particleVertexBuffer, 0);
+
 
 	return;
 }
 
 void ParticleSystem::updateParticles(float dTime)
 {
-	for (int i = 0; i < particleCount; i++)
-	{
-		particleList[i].y = (particleList[i].y - particleList[i].velocity * dTime * 0.001);
-		particleList[i].data.x = particleList[i].x;
-		particleList[i].data.y = particleList[i].y;
-		particleList[i].data.z = particleList[i].z;
 
-		particleList[i].data.r = particleList[i].r;
-		particleList[i].data.g = particleList[i].g;
-		particleList[i].data.b = particleList[i].b;
+
+	for (int i = 0; i < maxParticles; i++)
+	{
+
+		if (particleList[i].active == true)
+		{
+			particleList[i].y = (particleList[i].y - particleList[i].velocity * dTime * 0.01);
+			particleList[i].data.x = particleList[i].x;
+			particleList[i].data.y = particleList[i].y;
+			particleList[i].data.z = particleList[i].z;
+
+			particleList[i].data.r = particleList[i].r;
+			particleList[i].data.g = particleList[i].g;
+			particleList[i].data.b = particleList[i].b;
+		}
+		else {
+			//printf("here's error\n");
+		}
 	}
+
+
+
 	return;
 }
 
@@ -74,34 +118,38 @@ void ParticleSystem::emitParticles(float dTime)
 {
 	float posX, posY, posZ;
 	float red, green, blue;
-	float velocity;
-	bool emit,found;
-	int index, i, j;
+	float vel;
+	bool emit, found;
+	int index;
 
 	accumulatedTime += dTime;
 
 	emit = false;
 
-	if (accumulatedTime > (1000.0f / particlesPerSecond))
+	if (accumulatedTime > (1.0f / particlesPerSecond))
 	{
 		accumulatedTime = 0.0f;
 		emit = true;
 	}
 
+	//randomize a particle
+
 	if ((emit == true) && (particleCount < (maxParticles - 1)))
 	{
 		particleCount++;
+
+
 
 		//randomize a particle
 		posX = (((float)rand() - (float)rand()) / RAND_MAX) * deviationX;
 		posY = (((float)rand() - (float)rand()) / RAND_MAX) * deviationY;
 		posZ = (((float)rand() - (float)rand()) / RAND_MAX) * deviationZ;
 
-		velocity = this->velocity + (((float)rand() - (float)rand()) / RAND_MAX) * velocityVariation;
+		vel = this->velocity + (((float)rand() - (float)rand()) / RAND_MAX) * velocityVariation;
 
-		red = (((float)rand() - (float)rand()) / RAND_MAX) +0.5f;
-		green = (((float)rand() - (float)rand()) / RAND_MAX) +0.5f;
-		blue = (((float)rand() - (float)rand()) / RAND_MAX) +0.5f;
+		red = (((float)rand() - (float)rand()) / RAND_MAX) + 0.5f;
+		green = (((float)rand() - (float)rand()) / RAND_MAX) + 0.5f;
+		blue = (((float)rand() - (float)rand()) / RAND_MAX) + 0.5f;
 
 		//rendering from back to front seems like a good idea so let's sort shit!
 		found = false;
@@ -109,37 +157,54 @@ void ParticleSystem::emitParticles(float dTime)
 
 		while (!found)
 		{
-			if ((particleList[index].active == false) || (particleList[index].z < posZ))
+			if ((particleList[index].active == false))
 				found = true;
 			else
 				index++;
 		}
 
-		i = particleCount;
-		j = i - 1;
 
-		while (i != index)
-		{
-			particleList[i].x = particleList[j].x;
-			particleList[i].y = particleList[j].y;
-			particleList[i].z = particleList[j].z;
-			particleList[i].r = particleList[j].r;
-			particleList[i].g = particleList[j].g;
-			particleList[i].b = particleList[j].b;
-			particleList[i].velocity = particleList[j].velocity;
-			particleList[i].active = particleList[j].active;
-			i--;
-			j--;
-		}
 		particleList[index].x = posX;
 		particleList[index].y = posY;
 		particleList[index].z = posZ;
 		particleList[index].r = red;
 		particleList[index].g = green;
 		particleList[index].b = blue;
-		particleList[index].velocity = velocity;
+		particleList[index].velocity = vel;
 		particleList[index].active = true;
+
+
+		////rendering from back to front seems like a good idea so let's sort shit!
+		//found = false;
+		//index = 0;
+
+		//while (!found)
+		//{
+		//	if ((particleList[index].active == false) || (particleList[index].z < posZ))
+		//		found = true;
+		//	else
+		//		index++;
+		//}
+
+		//i = particleCount;
+		//j = i - 1;
+
+		//while (i != index)
+		//{
+		//	particleList[i].x = particleList[j].x;
+		//	particleList[i].y = particleList[j].y;
+		//	particleList[i].z = particleList[j].z;
+		//	particleList[i].r = particleList[j].r;
+		//	particleList[i].g = particleList[j].g;
+		//	particleList[i].b = particleList[j].b;
+		//	particleList[i].velocity = particleList[j].velocity;
+		//	particleList[i].active = particleList[j].active;
+		//	i--;
+		//	j--;
+		//}
+
 	}
+
 	return;
 }
 
@@ -206,6 +271,8 @@ void ParticleSystem::initializeBuffers()
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
 
+	memset(&particleList->data, 0, sizeof(vertexData)*maxParticles);
+
 	//vertexbuffer
 	D3D11_BUFFER_DESC bufferDescV;
 	memset(&bufferDescV, 0, sizeof(bufferDescV));
@@ -215,6 +282,8 @@ void ParticleSystem::initializeBuffers()
 	bufferDescV.ByteWidth = sizeof(vertexData)*maxParticles;
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = &particleList->data;
+	data.SysMemPitch = 0;
+	data.SysMemSlicePitch = 0;
 
 	gDevice->CreateBuffer(&bufferDescV, &data, &particleVertexBuffer);
 
@@ -242,18 +311,21 @@ void ParticleSystem::initializeBuffers()
 
 void ParticleSystem::initializeParticles()
 {
-	deviationX = 0.5f;
-	deviationY = 0.1f;
+	deviationX = 2.0f;
+	deviationY = 2.0f;
 	deviationZ = 2.0f;
 
-	velocity = 1.0f;
-	velocityVariation = 0.2f;
+	velocity = 24.0f;
+	velocityVariation = 9.0f;
 
 	size = 0.2f;
 
 	particlesPerSecond = 250.0f;
 
 	maxParticles = 5000;
+
+
+
 
 	this->particleList = new particle[this->maxParticles];
 
