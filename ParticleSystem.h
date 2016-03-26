@@ -20,9 +20,10 @@ public:
 
 	struct particle
 	{
+		float x, y, z, r, g, b;
 		float velocity;
 		bool active;
-		vertexData data;
+		//vertexData data;
 	};
 
 private:
@@ -43,6 +44,7 @@ private:
 	XMMATRIX particleWorldMatrix;
 
 	particle * particleList;
+	vertexData * partyDataList;
 
 	float deviationX, deviationY, deviationZ;
 	float velocity, velocityVariation;

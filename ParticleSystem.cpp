@@ -49,7 +49,8 @@ void ParticleSystem::killParticles()
 
 	for (int i = 0; i < (maxParticles); i++)
 	{
-		if ((particleList[i].data.pos.y < -3.0f) && particleList[i].active == true)
+		//if ((particleList[i].data.pos.y < -3.0f) && particleList[i].active == true)
+		if ((particleList[i].y < -3.0f) && particleList[i].active == true)
 		{
 			particleList[i].active = false;
 			particleCount--;
@@ -67,7 +68,7 @@ void ParticleSystem::updateBuffers()
 
 	hr = gDeviceContext->Map(particleVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &gMappedResource);
 	dataPtr = (vertexData*)gMappedResource.pData;
-	memcpy(dataPtr, &particleList->data, (sizeof(vertexData)*particleCount));
+	memcpy(dataPtr, (void*)partyDataList, (sizeof(vertexData)*particleCount));
 	gDeviceContext->Unmap(particleVertexBuffer, 0);
 
 
@@ -80,10 +81,12 @@ void ParticleSystem::updateParticles(float dTime)
 	{
 		if (particleList[i].active == true)
 		{
-			particleList[i].data.pos.y = particleList[i].data.pos.y - particleList[i].velocity * dTime * 0.01;
-		}
-		else {
-			//printf("here's error\n");
+			particleList[i].y = particleList[i].y - particleList[i].velocity * dTime * 0.01;
+			//particleList[i].data.pos.y = particleList[i].data.pos.y - particleList[i].velocity * dTime * 0.01;
+
+			partyDataList[i].pos = XMFLOAT3(particleList[i].x, particleList[i].y, particleList[i].z);
+			partyDataList[i].color = XMFLOAT3(particleList[i].r, particleList[i].g, particleList[i].b);
+
 		}
 	}
 
@@ -94,9 +97,9 @@ void ParticleSystem::updateParticles(float dTime)
 
 void ParticleSystem::initializeParticles()
 {
-	deviationX = 0.01f;
-	deviationY = 0.01f;
-	deviationZ = 0.01f;
+	deviationX = 2.0f;
+	deviationY = 2.0f;
+	deviationZ = 2.0f;
 
 	velocity = 24.0f;
 	velocityVariation = 9.0f;
@@ -106,14 +109,14 @@ void ParticleSystem::initializeParticles()
 	maxParticles = 5000;
 
 
-
-
 	this->particleList = new particle[this->maxParticles];
 
 	for (int i = 0; i < maxParticles; i++)
 	{
 		particleList[i].active = false;
 	}
+
+	this->partyDataList = new vertexData[this->maxParticles];
 
 	particleCount = 0;
 	accumulatedTime = 0.0f;
@@ -146,17 +149,17 @@ void ParticleSystem::emitParticles(float dTime)
 
 
 		//randomize a particle
-		posX = deviationX;
-		posY = deviationY;
-		posZ = deviationZ;
+		posX = (((float)rand() - (float)rand()) / RAND_MAX) * deviationX;
+		posY = (((float)rand() - (float)rand()) / RAND_MAX) * deviationY;
+		posZ = (((float)rand() - (float)rand()) / RAND_MAX) * deviationZ;
 
 	
 
-		red = 0.5f;
-		green = 2.0f;
-		blue =  0.5f;
+		red = (((float)rand() - (float)rand()) / RAND_MAX) + 0.5f;
+		green = (((float)rand() - (float)rand()) / RAND_MAX)+ 0.5f;
+		blue = (((float)rand() - (float)rand()) / RAND_MAX)+ 0.5f;
 
-		vel = 1; //this->velocity + (((float)rand() - (float)rand()) / RAND_MAX) * velocityVariation;
+		vel = this->velocity + (((float)rand() - (float)rand()) / RAND_MAX) * velocityVariation;
 
 		found = false;
 		index = 0;
@@ -168,9 +171,16 @@ void ParticleSystem::emitParticles(float dTime)
 			else
 				index++;
 		}
+		particleList[index].x = posX;
+		particleList[index].y = posY;
+		particleList[index].z = posZ;
+		particleList[index].r = red;
+		particleList[index].g = green;
+		particleList[index].b = blue;
 
-		particleList[index].data.pos = XMFLOAT3(posX, posY, posZ);
-		particleList[index].data.color = XMFLOAT3(red, green, blue);
+
+		//particleList[index].data.pos = XMFLOAT3(posX, posY, posZ);
+		//particleList[index].data.color = XMFLOAT3(red, green, blue);
 		particleList[index].velocity = vel;
 		particleList[index].active = true;
 
@@ -244,7 +254,7 @@ void ParticleSystem::initializeBuffers()
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
 
-	memset(&particleList->data, 0, sizeof(vertexData)*maxParticles);
+	//memset(&partyDataList, 0, sizeof(vertexData)*maxParticles);
 
 	//vertexbuffer
 	D3D11_BUFFER_DESC bufferDescV;
@@ -254,7 +264,7 @@ void ParticleSystem::initializeBuffers()
 	bufferDescV.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDescV.ByteWidth = sizeof(vertexData)*maxParticles;
 	D3D11_SUBRESOURCE_DATA data;
-	data.pSysMem = &particleList->data;
+	data.pSysMem = partyDataList;
 	data.SysMemPitch = 0;
 	data.SysMemSlicePitch = 0;
 
