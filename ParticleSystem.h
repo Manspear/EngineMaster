@@ -14,13 +14,13 @@ public:
 	struct vertexData
 	{
 		XMFLOAT3 pos;
-		XMFLOAT3 color;
+		XMFLOAT4 color;
 		//float x, y, z, r, g, b;
 	};
 
 	struct particle
 	{
-		float x, y, z, r, g, b;
+		float x, y, z, r, g, b, a;
 		float velocity;
 		bool active;
 		//vertexData data;
@@ -48,7 +48,7 @@ private:
 
 	float deviationX, deviationY, deviationZ;
 	float velocity, velocityVariation;
-	float size;
+	float size, sizeDeviation;;
 	float particlesPerSecond;
 
 	int maxParticles;

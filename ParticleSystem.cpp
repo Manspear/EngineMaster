@@ -21,6 +21,12 @@ ParticleSystem::ParticleSystem(ID3D11Device* gDevice, ID3D11DeviceContext* gDevi
 ParticleSystem::~ParticleSystem()
 {
 	gGeometryShaderParticle->Release();
+	gPixelShaderParticle->Release();
+	gVertexLayoutParticle->Release();
+	gVertexShaderParticle->Release();
+
+	delete[] particleList;
+	delete[] partyDataList;
 }
 
 
@@ -85,7 +91,7 @@ void ParticleSystem::updateParticles(float dTime)
 			//particleList[i].data.pos.y = particleList[i].data.pos.y - particleList[i].velocity * dTime * 0.01;
 
 			partyDataList[i].pos = XMFLOAT3(particleList[i].x, particleList[i].y, particleList[i].z);
-			partyDataList[i].color = XMFLOAT3(particleList[i].r, particleList[i].g, particleList[i].b);
+			partyDataList[i].color = XMFLOAT4(particleList[i].r, particleList[i].g, particleList[i].b, particleList[i].a);
 
 		}
 	}
@@ -98,15 +104,17 @@ void ParticleSystem::updateParticles(float dTime)
 void ParticleSystem::initializeParticles()
 {
 	deviationX = 2.0f;
-	deviationY = 2.0f;
+	deviationY = 0.5f;
 	deviationZ = 2.0f;
 
-	velocity = 24.0f;
-	velocityVariation = 9.0f;
+	velocity = 50.0f;
+	velocityVariation = 20.0f;
 
-	particlesPerSecond = 600.0f;
+	particlesPerSecond = 5000.0f;
 
-	maxParticles = 5000;
+	size = 0.05;
+	sizeDeviation = 0.1;
+	maxParticles = 50000;
 
 
 	this->particleList = new particle[this->maxParticles];
@@ -127,6 +135,7 @@ void ParticleSystem::emitParticles(float dTime)
 	float posX, posY, posZ;
 	float red, green, blue;
 	float vel;
+	float siz;
 	bool emit, found;
 	int index;
 
@@ -159,6 +168,8 @@ void ParticleSystem::emitParticles(float dTime)
 		green = (((float)rand() - (float)rand()) / RAND_MAX)+ 0.5f;
 		blue = (((float)rand() - (float)rand()) / RAND_MAX)+ 0.5f;
 
+
+		siz = size + (((float)rand() - (float)rand()) / RAND_MAX) * sizeDeviation;
 		vel = this->velocity + (((float)rand() - (float)rand()) / RAND_MAX) * velocityVariation;
 
 		found = false;
@@ -177,10 +188,8 @@ void ParticleSystem::emitParticles(float dTime)
 		particleList[index].r = red;
 		particleList[index].g = green;
 		particleList[index].b = blue;
+		particleList[index].a = siz;
 
-
-		//particleList[index].data.pos = XMFLOAT3(posX, posY, posZ);
-		//particleList[index].data.color = XMFLOAT3(red, green, blue);
 		particleList[index].velocity = vel;
 		particleList[index].active = true;
 
@@ -248,7 +257,7 @@ void ParticleSystem::initializeBuffers()
 
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	hr = gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayoutParticle);
 	// we do not need anymore this COM object, so we release it.

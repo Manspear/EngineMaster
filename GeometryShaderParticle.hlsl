@@ -1,13 +1,13 @@
 struct GSInput
 {
     float4 Pos : SV_POSITION;
-    float3 Color : COLOR;
+    float4 Color : COLOR;
 };
 
 struct GSOutput
 {
 	float4 Pos : SV_POSITION;
-    float3 Color : COLOR;
+    float4 Color : COLOR;
 	float2 UV  : TEXCOORD;
 	float4 worldPosition : WORLDSPACE;
     
@@ -36,19 +36,19 @@ void main(point GSInput input[1] : SV_POSITION, inout TriangleStream< GSOutput >
 
     matrix wv = mul(worldMatrix, viewMatrix);
 
-    float size = 0.05f;
+
 
     //TRANSFORM ZE POSITION IN WOERLD VIEW
     float4 pos = mul(input[0].Pos, wv);
 
     //THEN DO MATH WITH X AND Y IN WOERLDVIEW BEFOER MULTIPLYING PROJECTION MATRIZ FOR BILLBOARDING ACTIONPOWER
-    float2 v0 = pos.xy + float2(-0.5, -0.5) * size;
+    float2 v0 = pos.xy + float2(-0.5, -0.5) * input[0].Color.a;
     verts[0] = mul(float4(v0, pos.zw), projectionMatrix);
-    float2 v1 = pos.xy + float2(-0.5, 0.5) * size;
+    float2 v1 = pos.xy + float2(-0.5, 0.5) * input[0].Color.a;
     verts[1] = mul(float4(v1, pos.zw), projectionMatrix);
-    float2 v2 = pos.xy + float2(0.5, -0.5) * size;
+    float2 v2 = pos.xy + float2(0.5, -0.5) * input[0].Color.a;
     verts[2] = mul(float4(v2, pos.zw), projectionMatrix);
-    float2 v3 = pos.xy + float2(0.5, 0.5) * size;
+    float2 v3 = pos.xy + float2(0.5, 0.5) * input[0].Color.a;
     verts[3] = mul(float4(v3, pos.zw), projectionMatrix);
 
 	uvs[0] = float2(0.0f, 1.0f);
