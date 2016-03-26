@@ -44,10 +44,12 @@ void ParticleSystem::doShit(float dTime)
 
 void ParticleSystem::killParticles()
 {
-	for (int i = 0; i < particleCount; i++)
+	for (int i = 0; i < (maxParticles); i++)
 	{
+		int k;
 
-		if ((particleList[i].y < -3.0f))
+
+		if ((particleList[i].y < -3.0f) && particleList[i].active == true)
 		{
 			particleList[i].active = false;
 			//particleList.erase(particleList.begin()+i);
