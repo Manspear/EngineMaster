@@ -431,13 +431,14 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 			{
 				//currentCluster->GetControlPointWe
 				sBlendingIndexWeightPair currBlendingIndexWeightPair;
-				currBlendingIndexWeightPair.affectingJointIndex = currentJointIndex;
+				currBlendingIndexWeightPair.affectedJointIndex = currentJointIndex;
 				currBlendingIndexWeightPair.blendingWeight = currentCluster->GetControlPointWeights()[i];
 				//FUUUUCK what am I supposed to do next? Our code diverges here...
 				//currCluster->GetControlPointIndices()[i] gets the returned value at index i. Meaning that the returned item is a list.
 				//Uhmm... i need to have all of the control points somewhere... So that I can map the cluster's "affected Control Points"
 				//somewhere. OR... Hmm... Can I map them here? Can I get all of the indices of the model? Do I have them already?
 				dataPerControlPoint[currentCluster->GetControlPointIndices()[i]]->weightData.push_back(&currBlendingIndexWeightPair);
+				
 			}
 
 			//Now start getting animation information
@@ -447,38 +448,61 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 			int count = 0;
 			FbxAnimStack* aids;
 			int numStacks = Fbx_Scene->GetSrcObjectCount<FbxAnimStack>();
-			for (unsigned int stackCounter = 0; stackCounter < numStacks; ++stackCounter) 
+			for (unsigned int stackIndex = 0; stackIndex < numStacks; ++stackIndex) 
 			{
 
-				FbxAnimStack* currentAnimStack = Fbx_Scene->GetSrcObject<FbxAnimStack>(stackCounter);
+				FbxAnimStack* currentAnimStack = Fbx_Scene->GetSrcObject<FbxAnimStack>(stackIndex);
 
 				int numAnimLayers = currentAnimStack->GetMemberCount<FbxAnimLayer>();
 
-				//In this for-loop I am trying to figure out how animation curves work...
-				for (unsigned int animLayerCounter = 0; animLayerCounter < numAnimLayers; ++animLayerCounter) 
+				for (unsigned int animLayerCounter = 0; animLayerCounter < numAnimLayers; ++animLayerCounter)
 				{
 					FbxAnimLayer* currAnimLayer = currentAnimStack->GetMember<FbxAnimLayer>();
 					//FbxAnimCurve* curveRotation = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_TRANSFORM, false);
 					//FbxAnimCurve* curveRotation = skeleton.joints[currentJointIndex]->jointNode->LclRotation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_ROTATION, false);
-					FbxAnimCurve* currAnimCurve = skeleton.joints[currentJointIndex]->jointNode->LclRotation.GetCurve(currAnimLayer, false);
-					
-					
-				    //currAnimCurve->
-					//KeyGet, KeyFind, etc are functions belonging to an animationcurve. Keys are "animation graph keys" that you can find in maya. 
-					//The only thing they contain is a time (x-axis in graph), a value (y-axis in graph), and some info about tangents.
-					//The tangents tells us of how the interpolation behaves between keys.
-				}
 
-				//Most of the code below is most likely going to become obsolete once I figure out how animation layers work.
-				FbxString animStackName = currentAnimStack->GetName();
-				FbxString temp = animStackName.Buffer();
-				animationName.push_back(&temp);
-				FbxTakeInfo* takeInfo = Fbx_Scene->GetTakeInfo(animStackName);
-				FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
-				FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
-				animationLength.push_back(end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1);
-				//Now get the animation curves that determine the rotation and translation of this joint at different times
-				//FbxAnimCurve* yolo = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve();
+
+					//get the Translation and Rotation XYZ component curves. Also the scaling curve to "normalize" the scale.
+					FbxAnimCurve* translationCurve_X = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+					translationCurve_X->KeyGetCount();
+
+					FbxAnimEvaluator* animEvaluator = Fbx_Scene->GetAnimationEvaluator();
+					
+					FbxString animStackName = currentAnimStack->GetName();
+					FbxString temp = animStackName.Buffer();
+					animationName.push_back(&temp);
+
+					FbxTakeInfo* takeInfo = Fbx_Scene->GetTakeInfo(animStackName);
+					FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
+					FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
+					animationLength.push_back(end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1);
+
+					//I need to loop through all keyframes, get their respective time-values, and input them into the animEvaluator
+					for (long keyIndex = 0; keyIndex < translationCurve_X->KeyGetCount(); ++keyIndex)
+					{
+						FbxAnimCurveKey* currKey = &translationCurve_X->KeyGet(keyIndex);
+						
+						FbxNode::Pivots aids = skeleton.joints[currentJointIndex]->jointNode->GetPivots();
+						//skeleton.joints[currentJointIndex]->jointNode->GetPivots;
+						FbxNode::Pivot alba;
+
+						//FIGURE OUT HOW TO GET LOCAL TRANSFORMS FROM FbxAnimEvaluator !!!
+
+						//FbxNode::EPivotSet lol = skeleton.joints[currentJointIndex]->jointNode->GetPivots();
+						
+						//animEvaluator->GetNodeLocalTransform(skeleton.joints[currentJointIndex]->jointNode, currKey->GetTime(), skeleton.joints[currentJointIndex]->jointNode->GetPivots, false, false);
+					}
+					
+					//Now get the animation curves that determine the rotation and translation of this joint at different times
+					//FbxAnimCurve* yolo = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve();
+
+				}
+				//THIS IS THE EASIER WAY BUT LENDS LESS CONTROL
+				
+				//"Official Way" to "Evaluate" animationdata. Which means that the right "settings" are 
+				//used to get the local or global transformationmatrices for a PyNode (of joint type)
+				
+				
 				
 				
 			}
@@ -487,6 +511,38 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 		}
 	}
 }
+
+//GRAVEYARD
+//THIS IS THE HARD WAY THAT GIVES THE USER MORE CONTROL
+//In this for-loop I am trying to figure out how animation curves work...
+//
+//for (unsigned int animLayerCounter = 0; animLayerCounter < numAnimLayers; ++animLayerCounter)
+//{
+//	FbxAnimLayer* currAnimLayer = currentAnimStack->GetMember<FbxAnimLayer>();
+//	//FbxAnimCurve* curveRotation = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_TRANSFORM, false);
+//	//FbxAnimCurve* curveRotation = skeleton.joints[currentJointIndex]->jointNode->LclRotation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_ROTATION, false);
+//
+//
+//	//get the Translation and Rotation XYZ component curves. Also the scaling curve to "normalize" the scale.
+//	FbxAnimCurve* translationCurve_X = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+//	FbxAnimCurve* translationCurve_Y = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+//	FbxAnimCurve* translationCurve_Z = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+//
+//	FbxAnimCurve* rotationCurve_X = skeleton.joints[currentJointIndex]->jointNode->LclRotation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+//	FbxAnimCurve* rotationCurve_Y = skeleton.joints[currentJointIndex]->jointNode->LclRotation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+//	FbxAnimCurve* rotationCurve_Z = skeleton.joints[currentJointIndex]->jointNode->LclRotation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+//
+//	FbxAnimCurve* scaleCurve_X = skeleton.joints[currentJointIndex]->jointNode->LclScaling.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+//	FbxAnimCurve* scaleCurve_Y = skeleton.joints[currentJointIndex]->jointNode->LclScaling.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+//	FbxAnimCurve* scaleCurve_Z = skeleton.joints[currentJointIndex]->jointNode->LclScaling.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+//	//currAnimCurve->
+//	//KeyGet, KeyFind, etc are functions belonging to an animationcurve. Keys are "animation graph keys" that you can find in maya. 
+//	//The only thing they contain is a time (x-axis in graph), a value (y-axis in graph), and some info about tangents.
+//	//The tangents tells us of how the interpolation behaves between keys.
+//
+//	//Hmm... But the value held by a key might be relevant, if we've a curve for each individual XYZ curve! HMM!
+//	//This is the way to go. Oh my god so EZ!
+//}
 
 unsigned int FbxDawg::findJointIndexByName(const char* jointName)
 {

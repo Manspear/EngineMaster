@@ -68,7 +68,7 @@ public:
 	};
 
 	struct sBlendingIndexWeightPair {
-		int affectingJointIndex;
+		int affectedJointIndex;
 		double blendingWeight; //Used to blend the animation of two animation layers. An example is transition between walk and run.
 	};
 
