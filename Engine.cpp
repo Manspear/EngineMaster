@@ -22,10 +22,6 @@ Engine::~Engine()
 	
 }
 
-void Engine::CreateDynamicCubeMap()
-{
-	DCM dcm(gDevice, depthStencilView, gBackbufferRTV, vp);
-}
 
 void Engine::CreateShaders()
 {
@@ -181,6 +177,15 @@ void Engine::CreateShaders()
 	pGS->Release();
 }
 
+void Engine::CreateDynamicCubeMap()
+{
+	dcm.Initialize(gDevice, depthStencilView, gBackbufferRTV, vp,
+		gGeometryShader, gPixelShader, gVertexShader, gVertexLayout,
+		gConstantBuffer, gVertexShaderBS, gVertexLayoutBS);
+	dcm.Dynamic_Cube_Map(gDevice);
+
+
+}
 
 void Engine::CreateConstantBuffer() {
 
@@ -293,7 +298,7 @@ void Engine::Render()
 		}
 		else if (listOfModels[bufferCounter].hasDCM()==true)//modelLoader->DCMmaterial->IsValid()
 		{
-			//DCM_Render();
+
 			
 			printf("DCM \t ");
 			gDeviceContext->GSSetShader(nullptr, nullptr, 0);
@@ -305,6 +310,11 @@ void Engine::Render()
 																		 //DCM_ShaderResourceView
 			gDeviceContext->IASetInputLayout(gVertexLayoutDCM);
 			vertexSize = sizeof(float) * 8;
+			
+			
+			dcm.DCM_Render_Main(listOfModels, modelListObject);
+			//DCM_Render(listOfModels, modelListObject);
+
 		}
 
 		else{
@@ -325,55 +335,6 @@ void Engine::Render()
 
 		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
 		//gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0); //Uses indexbuffer
-		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
-	}
-}
-
-
-void Engine::Render2()
-{
-	float clearColor[] = { 1, 0.537, 0.812, 1 };
-	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
-	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
-
-	UINT32 vertexSize;
-	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
-
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
-
-	listOfModels = modelListObject->getModelList();
-
-	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
-	{
-		if (listOfModels[bufferCounter].hasBlendShape())
-		{	// gör en check om dcm här också, blend shapes ska ju också kunna ha
-			gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-			gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
-			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
-			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
-			vertexSize = sizeof(float) * 16;
-		}
-		else {
-			gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-			gDeviceContext->IASetInputLayout(gVertexLayout);
-			vertexSize = sizeof(float) * 8;
-		}
-
-		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
-
-		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
-		gDeviceContext->PSSetShaderResources(0, listOfModels[bufferCounter].getNumberOfTextures(), listOfModels[bufferCounter].modelTextureView);
-
-		gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
-		gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
 		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
 	}
 }
@@ -571,6 +532,8 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	InitializeCamera();
 }
+
+
 
 void Engine::renderText(std::wstring text)
 {

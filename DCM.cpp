@@ -1,12 +1,6 @@
 #include "DCM.h"
 
-DCM::DCM(ID3D11Device * gDevice, ID3D11DepthStencilView * depthStencilView, ID3D11RenderTargetView * gBackbufferRTV, D3D11_VIEWPORT &vp)
-{
-	this->gDevice = gDevice;
-	this->depthStencilView = depthStencilView;
-	this->gBackbufferRTV = gBackbufferRTV;
-	this->vp = vp;
-}
+
 
 DCM::DCM()
 {
@@ -15,6 +9,24 @@ DCM::DCM()
 
 DCM::~DCM()
 {
+}
+
+void DCM::Initialize(ID3D11Device * gDevice, ID3D11DepthStencilView * depthStencilView, ID3D11RenderTargetView * gBackbufferRTV, D3D11_VIEWPORT &vp,
+	ID3D11GeometryShader* gGeometryShader, ID3D11PixelShader* gPixelShader, ID3D11VertexShader* gVertexShader, ID3D11InputLayout* gVertexLayout,
+	ID3D11Buffer* gConstantBuffer, ID3D11VertexShader* gVertexShaderBS, ID3D11InputLayout* gVertexLayoutBS)
+{
+	this->gDevice = gDevice;
+	this->depthStencilView = depthStencilView;
+	this->gBackbufferRTV = gBackbufferRTV;
+	this->vp = vp;
+
+	this->gGeometryShader = gGeometryShader;
+	this->gPixelShader = gPixelShader;
+	this->gVertexShader = gVertexShader;
+	this->gVertexLayout = gVertexLayout;
+	this->gConstantBuffer = gConstantBuffer;
+	this->gVertexShaderBS = gVertexShaderBS;
+	this->gVertexLayoutBS = gVertexLayoutBS;
 }
 
 void DCM::Dynamic_Cube_Map(ID3D11Device *gDevice)
@@ -186,7 +198,7 @@ void DCM::BuildCubeFaceCamera(float x, float y, float z, float w)
 	}
 }//end, moved drawscene to engine
 
-void DCM::DCM_Render()
+void DCM::DCM_Render_Main(GModel* listOfModels, GModelList* modelListObject)
 {
 
 	// Generate the cube map by rendering to each cube map face.
@@ -204,7 +216,7 @@ void DCM::DCM_Render()
 		gDeviceContext->OMSetRenderTargets(1, &DCM_RenderTargetView, DCM_DepthStencilView);
 
 		//Draw the scene with exception of the center sphere, to this cube map face
-		//Render2();//		med DCM vertex // pixelshader?  Hur når jag render utan Engine engine object
+		Render_Enviroment(listOfModels, modelListObject);//		med DCM vertex // pixelshader?  Hur når jag render utan Engine engine object
 	}
 
 	// Restore old viewport and render targets.
@@ -219,6 +231,54 @@ void DCM::DCM_Render()
 
 	// Now draw the scene as normal, but WITH the CENTER SPHERE. // som jag i for(6) loopen genererade? HUR?
 	//Render(); //vanliga
+}
+
+void DCM::Render_Enviroment(GModel* listOfModels, GModelList* modelListObject)
+{
+	float clearColor[] = { 1, 0.537, 0.812, 1 };
+	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
+
+	UINT32 vertexSize;
+	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
+
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
+
+	listOfModels = modelListObject->getModelList();
+
+	for (int bufferCounter = 0; bufferCounter < modelListObject->numberOfModels; bufferCounter++)
+	{
+		if (listOfModels[bufferCounter].hasBlendShape())
+		{	// gör en check om dcm här också, blend shapes ska ju också kunna ha
+			gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+			gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
+			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
+			vertexSize = sizeof(float) * 16;
+		}
+		else {
+			gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayout);
+			vertexSize = sizeof(float) * 8;
+		}
+
+		gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
+
+		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
+		gDeviceContext->PSSetShaderResources(0, listOfModels[bufferCounter].getNumberOfTextures(), listOfModels[bufferCounter].modelTextureView);
+
+		gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
+		gDeviceContext->IASetIndexBuffer(listOfModels[bufferCounter].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0);
+	}
 }
 
 ID3D11RenderTargetView * DCM::getDCM_RenderTargetView(int i)

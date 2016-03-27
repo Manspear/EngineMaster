@@ -30,6 +30,7 @@ public:
 	};
 	GModel();
 	~GModel();
+	XMFLOAT4* modelCenterPoint;
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11Buffer* modelIndexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;

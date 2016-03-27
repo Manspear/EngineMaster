@@ -91,7 +91,11 @@ public:
 	FbxDawg * fbxobj = nullptr;
 
 	D3D11_VIEWPORT vp;
-	
+
+	//DCM dcm(gDevice, depthStencilView, gBackbufferRTV, vp,
+		//gGeometryShader, gPixelShader, gVertexShader, gVertexLayout,
+		//gConstantBuffer, gVertexShaderBS, gVertexLayoutBS);
+	DCM dcm;
 
 	int wHEIGHT = 480;
 	int wWIDTH = 640;
@@ -116,7 +120,7 @@ public:
 	void CreateDepthStencilBuffer();
 	void SetViewport(D3D11_VIEWPORT &vp);
 	void Render();
-	void Render2();// utan DCM
+	//void Render2();// utan DCM
 
 	void Update();
 	void Clean(); //releases all resources
