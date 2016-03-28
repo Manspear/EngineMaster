@@ -52,6 +52,7 @@ public:
 	int* FBXIndexArray = nullptr;
 	int sizeOfFBXIndexArray = 0;
 	void bsLoader(FbxMesh * mesh);
+	FbxProperty *DCMmaterial;//Material per object skickar vi. Så jobbigt annars. Eller sök upp bra exempel syntax
 
 	//Core datatypes: FbxSkeleton, eRoot, eLimb, eEffector
 	struct sJoint { //s as in struct :D

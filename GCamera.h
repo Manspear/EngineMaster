@@ -26,6 +26,7 @@ public:
 
 
 
+
 	//VEIW
 	void reset();
 	void moveForward(float speed);
@@ -35,9 +36,12 @@ public:
 	void setPosition(XMFLOAT4& newPosition);
 	const XMFLOAT4 getPosition();
 	const XMVECTOR& getTarget() const { return cTarget; }
-	const XMVECTOR getUp(); //returns camera up vector
-	const XMVECTOR getLookAtTarget(); //returns camera look at target vector
+	const XMFLOAT4 getUp(); //returns camera up vector
+	const XMFLOAT4 getLookAtTarget(); //returns camera look at target vector
 	const XMMATRIX getViewMatrix();
+	void LookAt(XMFLOAT4 pos, XMFLOAT4 target, XMFLOAT4 worldUp);
+	void setUp(XMFLOAT4 cUp);
+	void setTarget(XMFLOAT4 nTarget);
 	XMFLOAT4 getCameraDirection();
 
 

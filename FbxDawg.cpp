@@ -256,6 +256,9 @@ void FbxDawg::loadModels(const char* filePath)
 				if (material)//.. if material
 				{
 					FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
+
+					DCMmaterial = &material->FindProperty(FbxSurfaceMaterial::sReflection);
+
 					int texture_Count = prop.GetSrcObjectCount<FbxTexture>();
 					for (int i = 0; i < texture_Count; i++)// how many texturefiles attached to the material
 					{

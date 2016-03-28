@@ -28,6 +28,8 @@
 
 #include "ParticleSystem.h"
 
+#include "DCM.h"
+
 #ifndef ENGINE_H
 #define ENGINE_H
 #define XAXIS 0
@@ -74,10 +76,14 @@ public:
 
 	ID3D11InputLayout* gVertexLayout = nullptr;
 	ID3D11InputLayout* gVertexLayoutBS = nullptr;
+	ID3D11InputLayout* gVertexLayoutDCM = nullptr;//DCM
 	ID3D11VertexShader* gVertexShader = nullptr;
 	ID3D11VertexShader* gVertexShaderBS = nullptr;
+	ID3D11VertexShader* gVertexShaderDCM = nullptr;//DCM
 	ID3D11PixelShader* gPixelShader = nullptr;
+	ID3D11PixelShader* gPixelShaderDCM = nullptr;//DCM
 	ID3D11GeometryShader* gGeometryShader = nullptr;
+
 
 
 	struct matrixBuffer {
@@ -97,6 +103,9 @@ public:
 	FbxDawg * fbxobj = nullptr;
 	ParticleSystem * particleSys;
 
+	D3D11_VIEWPORT vp; //flyttade den hit
+	DCM dcm;
+
 	int wHEIGHT = 480;
 	int wWIDTH = 640;//was 640
 	byte * keys;
@@ -115,10 +124,11 @@ public:
 	//end delta dime stuff
 
 	void CreateShaders();
+	void CreateDynamicCubeMap();
 	//void CreateTexture(int modelCounter);
 	void CreateConstantBuffer();
 	void CreateDepthStencilBuffer();
-	void SetViewport();
+	void SetViewport(D3D11_VIEWPORT &vp);
 	void Render();
 	void Update();
 	void Clean(); //releases all resources
