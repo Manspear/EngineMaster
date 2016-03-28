@@ -36,6 +36,7 @@ class FbxDawg
 private:
 	/****/
 	void makeControlPointMap(FbxMesh* currMesh); //Only call once per mesh. Makes a list with length equal to number of control points.
+	void fillOutSkeleton(unsigned int numberOfDeformers);
 
 public:
 	FbxDawg();
@@ -45,7 +46,7 @@ public:
 	void loadModels(const char* filePath);
 	void makeIndexList();
 
-	void getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene);
+	void getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene);
 	void processJointHierarchy(FbxNode* inRootNode);
 	void recursiveJointHierarchyTraversal(FbxNode* inNode, int storedIndex, int inNodeParentIndex);
 
@@ -63,7 +64,7 @@ public:
 	};
 
 	struct sSkeleton {
-		std::vector<sJoint*> joints;
+		std::vector<sJoint> joints;
 		//more things... Hmm
 	};
 
@@ -73,13 +74,13 @@ public:
 	};
 
 	struct sAnimationData {
-		std::vector<sBlendingIndexWeightPair*> weightData;
+		std::vector<sBlendingIndexWeightPair> weightData;
 	};
 
 	std::vector<FbxString*> animationName;
 	std::vector<long> animationLength;
 
-	std::vector<sAnimationData*> dataPerControlPoint;
+	std::vector<sAnimationData> dataPerControlPoint; //Cannot maintain the current structure of dataPerControlPoint if it's pointers.
 	
 
 	unsigned int findJointIndexByName(const char* jointName);

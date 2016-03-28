@@ -63,6 +63,7 @@ void FbxDawg::loadModels(const char* filePath)
 
 	if (FBXRootNode)
 	{
+		processJointHierarchy(FBXRootNode);
 
 		for (int i = 0; i < FBXRootNode->GetChildCount(); i++)//For each and every childnode...
 		{
@@ -78,6 +79,7 @@ void FbxDawg::loadModels(const char* filePath)
 
 			FbxMesh* mesh = (FbxMesh*)FbxChildNode->GetNodeAttribute();//we are sure that there was a mesh that went through, we get the content of the node.
 
+			getJointData(mesh, Fbx_Scene); //Here joint data is gathered.
 
 			if (mesh->GetDeformerCount(FbxDeformer::eBlendShape) > 0)
 				this->bsLoader(mesh);
@@ -382,11 +384,20 @@ void FbxDawg::makeControlPointMap(FbxMesh* currMesh)
 
 	for (int i = 0; i < aids; ++i) {
 		sAnimationData iAmHereToFillVector;
-		dataPerControlPoint.push_back(&iAmHereToFillVector);
+		dataPerControlPoint.push_back(iAmHereToFillVector);
 	}
 }
 
-void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
+void FbxDawg::fillOutSkeleton(unsigned int numberOfDeformers) 
+{
+	for (unsigned int p = 0; p < numberOfDeformers; p++)
+	{
+		sJoint fillUpSkeleton;
+		skeleton.joints.push_back(fillUpSkeleton);
+	}
+}
+
+void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 {
 	//Explanation of FBX-terminology regarding Animation-Related things:
 	//___________________________________________________________________________________________________________________________
@@ -396,8 +407,18 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 	//For a jointDeformer, it's Cluster would contain a link to the actual joint.
 	//___________________________________________________________________________________________________________________________
 
-	FbxMesh* currMesh = rootNode->GetMesh();
-	unsigned int deformerCount = currMesh->GetDeformerCount();
+	//FbxMesh* currMesh = rootNode->GetMesh();
+	unsigned int deformerCount = currMesh->GetDeformerCount(FbxDeformer::eSkin);
+
+	if (deformerCount > 0) {
+		makeControlPointMap(currMesh);
+		
+		
+		//fillOutSkeleton(deformerCount);
+
+	}
+
+	
 
 	for (unsigned int deformerIndex = 0; deformerIndex < deformerCount; ++deformerIndex)
 	{
@@ -421,8 +442,9 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix; 
 
 			//Update the information in skeleton
-			skeleton.joints[currentJointIndex]->globalBindPoseInverse = &globalBindposeInverseMatrix;
-			skeleton.joints[currentJointIndex]->jointNode = currentCluster->GetLink();
+			//THE PROGRAM CRASHES HERE!!!
+			skeleton.joints[currentJointIndex].globalBindPoseInverse = &globalBindposeInverseMatrix;
+			skeleton.joints[currentJointIndex].jointNode = currentCluster->GetLink();
 
 			//Associate each joint with the control points it affects
 			unsigned int numOfIndices = currentCluster->GetControlPointIndicesCount();
@@ -437,7 +459,11 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 				//currCluster->GetControlPointIndices()[i] gets the returned value at index i. Meaning that the returned item is a list.
 				//Uhmm... i need to have all of the control points somewhere... So that I can map the cluster's "affected Control Points"
 				//somewhere. OR... Hmm... Can I map them here? Can I get all of the indices of the model? Do I have them already?
-				dataPerControlPoint[currentCluster->GetControlPointIndices()[i]]->weightData.push_back(&currBlendingIndexWeightPair);
+				
+				//You cannot add stuff to a vector within another vector, since the memory adress will be changed when allocating memory for a new object.
+				//But you can if you only handle objects... -_- Inefficient shit.
+				dataPerControlPoint[currentCluster->GetControlPointIndices()[i]].weightData.push_back(currBlendingIndexWeightPair); 
+				//dataPerControlPoint[i]->weightData.push_back(popo); //cannot have a vector within a vector?
 				
 			}
 
@@ -463,11 +489,11 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 
 
 					//get the Translation and Rotation XYZ component curves. Also the scaling curve to "normalize" the scale.
-					FbxAnimCurve* translationCurve_X = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+					FbxAnimCurve* translationCurve_X = skeleton.joints[currentJointIndex].jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
 					translationCurve_X->KeyGetCount();
 
 					FbxAnimEvaluator* animEvaluator = Fbx_Scene->GetAnimationEvaluator();
-					
+
 					FbxString animStackName = currentAnimStack->GetName();
 					FbxString temp = animStackName.Buffer();
 					animationName.push_back(&temp);
@@ -482,15 +508,17 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 					{
 						FbxAnimCurveKey* currKey = &translationCurve_X->KeyGet(keyIndex);
 						
-						FbxNode::Pivots aids = skeleton.joints[currentJointIndex]->jointNode->GetPivots();
+						FbxNode::Pivots aids = skeleton.joints[currentJointIndex].jointNode->GetPivots();
 						//skeleton.joints[currentJointIndex]->jointNode->GetPivots;
 						FbxNode::Pivot alba;
 
 						//FIGURE OUT HOW TO GET LOCAL TRANSFORMS FROM FbxAnimEvaluator !!!
 
-						//FbxNode::EPivotSet lol = skeleton.joints[currentJointIndex]->jointNode->GetPivots();
+						FbxNode::EPivotSet lol;
 						
-						//animEvaluator->GetNodeLocalTransform(skeleton.joints[currentJointIndex]->jointNode, currKey->GetTime(), skeleton.joints[currentJointIndex]->jointNode->GetPivots, false, false);
+						FbxAMatrix* popo = &animEvaluator->GetNodeLocalTransform(skeleton.joints[currentJointIndex].jointNode, currKey->GetTime()); //Hmm... Not suer if this gets it right... I set no pivot.
+						
+
 					}
 					
 					//Now get the animation curves that determine the rotation and translation of this joint at different times
@@ -550,9 +578,10 @@ unsigned int FbxDawg::findJointIndexByName(const char* jointName)
 	{
 		for (unsigned int i = 0; i < skeleton.joints.size(); ++i)
 		{
-			int compareValue = std::strcmp(jointName, skeleton.joints[i]->name);
+			//* before pointer to get object
+			int compareValue = std::strcmp(jointName, skeleton.joints[i].name);
 			if (compareValue == 0)
-				return skeleton.joints[i]->parentIndex + 1; //parentIndex + 1 gets the index of this joint.
+				return skeleton.joints[i].parentIndex + 1; //parentIndex + 1 gets the index of this joint.
 		}
 	}
 
@@ -578,13 +607,14 @@ void FbxDawg::recursiveJointHierarchyTraversal(FbxNode * inNode, int currentInde
 		sJoint currJoint;
 		currJoint.parentIndex = inNodeParentIndex;
 		currJoint.name = inNode->GetName();
-		this->skeleton.joints.push_back(&currJoint);
+		this->skeleton.joints.push_back(currJoint);
 	}
 	for (int i = 0; i < inNode->GetChildCount(); i++) {
 		//currentIndex becomes the "old index". And the size of the joint-hierarchy-list "becomes" the currentIndex instead
 		//We process each and every child of this node, we search for children of AttributeType eSkeleton to add to the list of joints.
 		recursiveJointHierarchyTraversal(inNode->GetChild(i), skeleton.joints.size(), currentIndex); 
 	}
+	//Erm... Apparently this node ain't got no child
 }
 
 void FbxDawg::bsLoader(FbxMesh * mesh)
