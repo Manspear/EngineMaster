@@ -443,8 +443,9 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 
 			//Update the information in skeleton
 			//THE PROGRAM CRASHES HERE!!!
-			skeleton.joints[currentJointIndex].globalBindPoseInverse = &globalBindposeInverseMatrix;
-			skeleton.joints[currentJointIndex].jointNode = currentCluster->GetLink();
+			currentJointIndex;
+			skeleton.joints[currentJointIndex-1].globalBindPoseInverse = &globalBindposeInverseMatrix;
+			skeleton.joints[currentJointIndex-1].jointNode = currentCluster->GetLink();
 
 			//Associate each joint with the control points it affects
 			unsigned int numOfIndices = currentCluster->GetControlPointIndicesCount();
@@ -508,7 +509,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 					{
 						FbxAnimCurveKey* currKey = &translationCurve_X->KeyGet(keyIndex);
 						
-						FbxNode::Pivots aids = skeleton.joints[currentJointIndex].jointNode->GetPivots();
+						FbxNode::Pivots aids = skeleton.joints[currentJointIndex-1].jointNode->GetPivots();
 						//skeleton.joints[currentJointIndex]->jointNode->GetPivots;
 						FbxNode::Pivot alba;
 
