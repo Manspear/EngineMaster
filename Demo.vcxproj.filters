@@ -81,6 +81,9 @@
     <ClCompile Include="ParticleSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DeferredBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -154,7 +157,7 @@
     <ClInclude Include="Particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DefferedBuffers.h">
+    <ClInclude Include="DeferredBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

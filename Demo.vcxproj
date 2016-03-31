@@ -80,6 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DeferredBuffer.cpp" />
     <ClCompile Include="Engine.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -164,7 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bth_image.h" />
-    <ClInclude Include="DefferedBuffers.h" />
+    <ClInclude Include="DeferredBuffer.h" />
     <ClInclude Include="Engine.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
