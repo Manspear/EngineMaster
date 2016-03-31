@@ -432,6 +432,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 			FbxCluster* currentCluster = currSkin->GetCluster(clusterIndex);
 			const char* currentJointName = currentCluster->GetName();
 			unsigned int currentJointIndex = findJointIndexByName(currentJointName);
+			currentJointIndex = currentJointIndex - 1; //This makes the joint indices properly 0-based.
 			
 			FbxAMatrix transformMatrix;
 			FbxAMatrix transformLinkMatrix;
@@ -442,10 +443,8 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix; 
 
 			//Update the information in skeleton
-			//THE PROGRAM CRASHES HERE!!!
-			currentJointIndex;
-			skeleton.joints[currentJointIndex-1].globalBindPoseInverse = &globalBindposeInverseMatrix;
-			skeleton.joints[currentJointIndex-1].jointNode = currentCluster->GetLink();
+			skeleton.joints[currentJointIndex].globalBindPoseInverse = &globalBindposeInverseMatrix;
+			skeleton.joints[currentJointIndex].jointNode = currentCluster->GetLink();
 
 			//Associate each joint with the control points it affects
 			unsigned int numOfIndices = currentCluster->GetControlPointIndicesCount();
@@ -491,7 +490,6 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 
 					//get the Translation and Rotation XYZ component curves. Also the scaling curve to "normalize" the scale.
 					FbxAnimCurve* translationCurve_X = skeleton.joints[currentJointIndex].jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
-					translationCurve_X->KeyGetCount();
 
 					FbxAnimEvaluator* animEvaluator = Fbx_Scene->GetAnimationEvaluator();
 
@@ -504,22 +502,43 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 					FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
 					animationLength.push_back(end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1);
 
+					int lolipop = translationCurve_X->KeyGetCount();
+
 					//I need to loop through all keyframes, get their respective time-values, and input them into the animEvaluator
 					for (long keyIndex = 0; keyIndex < translationCurve_X->KeyGetCount(); ++keyIndex)
 					{
 						FbxAnimCurveKey* currKey = &translationCurve_X->KeyGet(keyIndex);
-						
-						FbxNode::Pivots aids = skeleton.joints[currentJointIndex-1].jointNode->GetPivots();
-						//skeleton.joints[currentJointIndex]->jointNode->GetPivots;
-						FbxNode::Pivot alba;
 
-						//FIGURE OUT HOW TO GET LOCAL TRANSFORMS FROM FbxAnimEvaluator !!!
+						//Access violation..? No clue.
+						fbxsdk::FbxAnimCurveDef::EInterpolationType keyInterpolType = currKey->GetInterpolation();
 
-						FbxNode::EPivotSet lol;
-						
-						FbxAMatrix* popo = &animEvaluator->GetNodeLocalTransform(skeleton.joints[currentJointIndex].jointNode, currKey->GetTime()); //Hmm... Not suer if this gets it right... I set no pivot.
-						
+						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationConstant) {
+							//do something...
+						}
+						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationCubic) {
+							//do something...
+						}
+						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationLinear) {
+							//do something...
+						}
 
+						//New concept: Scoping! Man kommer åt "understuff" genom att lägga till :: efter typnamn tills man kommer till variabeln man vill åt.
+						currKey->GetInterpolation();
+			
+
+						FbxAMatrix* localTransform;
+						FbxVector4 translationTransform = animEvaluator->GetNodeLocalTranslation(skeleton.joints[currentJointIndex].jointNode, currKey->GetTime());
+						FbxVector4 rotationTransform = animEvaluator->GetNodeLocalRotation(skeleton.joints[currentJointIndex].jointNode, currKey->GetTime());	
+						FbxVector4 scalingTransform = animEvaluator->GetNodeLocalScaling(skeleton.joints[currentJointIndex].jointNode, currKey->GetTime());
+
+						//converts the right-handed coordinate system of Maya to the left-handed
+						//system of DirectX. 
+						translationTransform[2] *= -1.0; 
+						rotationTransform[0] *= -1.0;  
+						rotationTransform[1] *= -1.0;
+						scalingTransform[2] *= -1.0;
+
+						localTransform->SetTRS(translationTransform, rotationTransform, scalingTransform);
 					}
 					
 					//Now get the animation curves that determine the rotation and translation of this joint at different times
