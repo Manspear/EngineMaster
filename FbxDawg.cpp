@@ -479,6 +479,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 
 				FbxAnimStack* currentAnimStack = Fbx_Scene->GetSrcObject<FbxAnimStack>(stackIndex);
 
+
 				int numAnimLayers = currentAnimStack->GetMemberCount<FbxAnimLayer>();
 
 				for (unsigned int animLayerCounter = 0; animLayerCounter < numAnimLayers; ++animLayerCounter)
@@ -509,24 +510,38 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 					{
 						FbxAnimCurveKey* currKey = &translationCurve_X->KeyGet(keyIndex);
 
-						//Access violation..? No clue.
-						fbxsdk::FbxAnimCurveDef::EInterpolationType keyInterpolType = currKey->GetInterpolation();
+						FbxAnimCurveKey testKey = translationCurve_X->KeyGet(keyIndex);
+						
+
+						//currKey->SetInterpolation(FbxAnimCurveDef::EInterpolationType::eInterpolationLinear);
+
+						//Access violation..? No clue.'
+						
+						fbxsdk::FbxAnimCurveDef::EInterpolationType keyInterpolType = testKey.GetInterpolation();
 
 						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationConstant) {
 							//do something...
+							int awesome = 1;
 						}
 						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationCubic) {
 							//do something...
+							int awesomer = 2;
+							FbxAnimCurveDef::ETangentMode keyTangentMode = testKey.GetTangentMode();
+							
 						}
 						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationLinear) {
 							//do something...
+							int awesomest = 3;
 						}
 
-						//New concept: Scoping! Man kommer åt "understuff" genom att lägga till :: efter typnamn tills man kommer till variabeln man vill åt.
-						currKey->GetInterpolation();
-			
+						FbxAnimCurveDef asdf;
+						FbxAnimCurveDef::EInterpolationType popo;
+						FbxAnimCurveDef::EInterpolationType::eInterpolationConstant;
 
-						FbxAMatrix* localTransform;
+						//New concept: Scoping! Man kommer åt "understuff" genom att lägga till :: efter typnamn tills man kommer till variabeln man vill åt.
+						//currKey->GetInterpolation();
+
+						FbxAMatrix localTransform;
 						FbxVector4 translationTransform = animEvaluator->GetNodeLocalTranslation(skeleton.joints[currentJointIndex].jointNode, currKey->GetTime());
 						FbxVector4 rotationTransform = animEvaluator->GetNodeLocalRotation(skeleton.joints[currentJointIndex].jointNode, currKey->GetTime());	
 						FbxVector4 scalingTransform = animEvaluator->GetNodeLocalScaling(skeleton.joints[currentJointIndex].jointNode, currKey->GetTime());
@@ -538,7 +553,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						rotationTransform[1] *= -1.0;
 						scalingTransform[2] *= -1.0;
 
-						localTransform->SetTRS(translationTransform, rotationTransform, scalingTransform);
+						localTransform.SetTRS(translationTransform, rotationTransform, scalingTransform);
 					}
 					
 					//Now get the animation curves that determine the rotation and translation of this joint at different times
