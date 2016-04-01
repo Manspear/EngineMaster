@@ -16,7 +16,6 @@ DeferredShader::DeferredShader(const DeferredShader &)
 
 DeferredShader::~DeferredShader()
 {
-
 }
 
 void DeferredShader::initialize(ID3D11Device *, ID3D11DeviceContext *, HWND)

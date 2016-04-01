@@ -81,6 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DeferredBuffer.cpp" />
+    <ClCompile Include="DeferredShader.cpp" />
     <ClCompile Include="Engine.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -166,6 +167,7 @@
   <ItemGroup>
     <ClInclude Include="bth_image.h" />
     <ClInclude Include="DeferredBuffer.h" />
+    <ClInclude Include="DeferredShader.h" />
     <ClInclude Include="Engine.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>

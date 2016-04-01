@@ -127,7 +127,7 @@ void DeferredBuffer::clearRenderTargets(float red, float green, float blue, floa
 
 	color[0] = red;
 	color[1] = green;
-	color[2] = blue; 
+	color[2] = blue;
 	color[3] = alpha;
 
 	for (int i = 0; i < BUFFER_COUNT; i++)

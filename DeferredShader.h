@@ -31,11 +31,21 @@ private:
 	ID3D11DeviceContext* gDeviceContext;
 	HWND wnd;
 
-	void initializeShader();
+	void initializeShader(WCHAR*, WCHAR*);
 	void shutdownShader();
 	
-	void outputShaderErrorMessage(ID3DBlob, WCHAR);
+	void outputShaderErrorMessage(ID3DBlob*, WCHAR);
 	void setShaderParameters(XMFLOAT4X4, XMFLOAT4X4, XMFLOAT4X4, ID3D11ShaderResourceView*);
+	void RenderShader(int);
+
+	ID3D11VertexShader* gVertexShader;
+	ID3D11VertexShader* gVertexShaderBS;
+	ID3D11GeometryShader * gGeometryShader;
+	ID3D11PixelShader* gPixelShader;
+	ID3D11InputLayout* gVertexLayout;
+	ID3D11InputLayout* gVertexLayoutBS;
+	ID3D11SamplerState* gPSTextureSampler;
+	ID3D11Buffer* matrixBuffer;
 
 
 };
