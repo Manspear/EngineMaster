@@ -453,7 +453,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 			{
 				//currentCluster->GetControlPointWe
 				sBlendingIndexWeightPair currBlendingIndexWeightPair;
-				currBlendingIndexWeightPair.affectedJointIndex = currentJointIndex;
+				currBlendingIndexWeightPair.jointIndex = currentJointIndex;
 				currBlendingIndexWeightPair.blendingWeight = currentCluster->GetControlPointWeights()[i];
 				//FUUUUCK what am I supposed to do next? Our code diverges here...
 				//currCluster->GetControlPointIndices()[i] gets the returned value at index i. Meaning that the returned item is a list.

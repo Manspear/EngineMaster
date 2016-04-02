@@ -10,7 +10,7 @@
 
 struct MyVertexStruct
 {
-	float x, y, z, norX, norY, norZ, u, v;
+	float x, y, z, norX, norY, norZ, u, v, jointIndex1, jointIndex2, jointIndex3, jointIndex4, weight1, weight2, weight3, weight4;
 };
 
 struct MyBSposStruct
@@ -70,7 +70,7 @@ public:
 	};
 
 	struct sBlendingIndexWeightPair {
-		int affectedJointIndex;
+		int jointIndex;
 		double blendingWeight; //Used to blend the animation of two animation layers. An example is transition between walk and run.
 	};
 
@@ -81,7 +81,7 @@ public:
 	std::vector<FbxString*> animationName;
 	std::vector<long> animationLength;
 
-	std::vector<sAnimationData> dataPerControlPoint; //Cannot maintain the current structure of dataPerControlPoint if it's pointers.
+	std::vector<sAnimationData> dataPerControlPoint; 
 	
 
 	unsigned int findJointIndexByName(const char* jointName);
