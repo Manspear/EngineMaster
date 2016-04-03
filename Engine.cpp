@@ -287,7 +287,7 @@ void Engine::Render()
 		else {
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
-			vertexSize = sizeof(float) * 8;
+			vertexSize = sizeof(float) * 8 + sizeof(int);
 		}
 
 			

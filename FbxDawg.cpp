@@ -300,6 +300,10 @@ void FbxDawg::loadModels(const char* filePath)
 				tempVertex.u = UVValue.mData[0];
 				tempVertex.v = 1 - UVValue.mData[1];
 
+				//This should save the index of the control point. This will be used to get skin-weights 
+				//for skeletal animation.
+				tempVertex.controlPointIndex = IndexVector[i].posIndex;
+
 				this->modelVertexList.push_back(tempVertex);
 			}
 
@@ -383,7 +387,7 @@ void FbxDawg::makeControlPointMap(FbxMesh* currMesh)
 	int aids = currMesh->GetControlPointsCount();
 
 	for (int i = 0; i < aids; ++i) {
-		sAnimationData iAmHereToFillVector;
+		sAnimWeightData iAmHereToFillVector;
 		dataPerControlPoint.push_back(iAmHereToFillVector);
 	}
 }
@@ -430,21 +434,47 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 		for (unsigned int clusterIndex = 0; clusterIndex < numberOfClusters; ++clusterIndex) 
 		{
 			FbxCluster* currentCluster = currSkin->GetCluster(clusterIndex);
-			const char* currentJointName = currentCluster->GetName();
-			unsigned int currentJointIndex = findJointIndexByName(currentJointName);
-			currentJointIndex = currentJointIndex - 1; //This makes the joint indices properly 0-based.
+			//const char* currentJointName = currentCluster->GetName();
+			FbxNode* currentJoint = currentCluster->GetLink();
+			const char* currentJointName = currentJoint->GetName();
+			int currentJointIndex = findJointIndexByName(currentJointName);
+			currentJointIndex = currentJointIndex; //This makes the joint indices properly 0-based.
 			
 			FbxAMatrix transformMatrix;
 			FbxAMatrix transformLinkMatrix;
 			FbxAMatrix globalBindposeInverseMatrix;
+			//FbxAMatrix globalBindposeMatrix;
 
+			//The "parent-chain"-bindpose matrix
 			currentCluster->GetTransformMatrix(transformMatrix); //The transform of the MESH at bind-time
+			//The matrix local to the joint. Linknodes are joints in this context.
 			currentCluster->GetTransformLinkMatrix(transformLinkMatrix); //The transformation of the cluster(joint) in bindtime from localspace to worldspace 
-			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix; 
+			//Can be used to "nullify" the bindpose-transform in "parent-chain"-space.
+			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix;
+			//globalBindposeMatrix = transformLinkMatrix * transformMatrix;
+			
+			DirectX::XMVECTOR transformComponent;
+			DirectX::XMVECTOR rotationComponent;
+			DirectX::XMVECTOR scalingComponent;
+
+			DirectX::XMMATRIX bindPoseMatrix;
+
+			//DirectX assumes row-major vertices, maya does too.
+			//Maya is right handed, directX is left-handed.
+			//Gotta convert between them.
+
+
+			globalBindposeInverseMatrix.
+			
+			//Need to switch from right handed to left handed. A change of basis must be performed.
+			bindPoseMatrix = DirectX::XMMatrixSet;
+			
+			
 
 			//Update the information in skeleton
+
 			skeleton.joints[currentJointIndex].globalBindPoseInverse = &globalBindposeInverseMatrix;
-			skeleton.joints[currentJointIndex].jointNode = currentCluster->GetLink();
+			currentJoint = currentCluster->GetLink();
 
 			//Associate each joint with the control points it affects
 			unsigned int numOfIndices = currentCluster->GetControlPointIndicesCount();
@@ -490,7 +520,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 
 
 					//get the Translation and Rotation XYZ component curves. Also the scaling curve to "normalize" the scale.
-					FbxAnimCurve* translationCurve_X = skeleton.joints[currentJointIndex].jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+					FbxAnimCurve* translationCurve_X = currentJoint->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
 
 					FbxAnimEvaluator* animEvaluator = Fbx_Scene->GetAnimationEvaluator();
 
@@ -503,21 +533,19 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 					FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
 					animationLength.push_back(end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1);
 
-					int lolipop = translationCurve_X->KeyGetCount();
-
 					//I need to loop through all keyframes, get their respective time-values, and input them into the animEvaluator
 					for (long keyIndex = 0; keyIndex < translationCurve_X->KeyGetCount(); ++keyIndex)
 					{
-						FbxAnimCurveKey* currKey = &translationCurve_X->KeyGet(keyIndex);
+						//FbxAnimCurveKey* currKey = &translationCurve_X->KeyGet(keyIndex);
 
-						FbxAnimCurveKey testKey = translationCurve_X->KeyGet(keyIndex);
+						FbxAnimCurveKey currKey = translationCurve_X->KeyGet(keyIndex);
 						
 
 						//currKey->SetInterpolation(FbxAnimCurveDef::EInterpolationType::eInterpolationLinear);
 
 						//Access violation..? No clue.'
 						
-						fbxsdk::FbxAnimCurveDef::EInterpolationType keyInterpolType = testKey.GetInterpolation();
+						fbxsdk::FbxAnimCurveDef::EInterpolationType keyInterpolType = currKey.GetInterpolation();
 
 						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationConstant) {
 							//do something...
@@ -526,7 +554,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationCubic) {
 							//do something...
 							int awesomer = 2;
-							FbxAnimCurveDef::ETangentMode keyTangentMode = testKey.GetTangentMode();
+							FbxAnimCurveDef::ETangentMode keyTangentMode = currKey.GetTangentMode();
 							
 						}
 						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationLinear) {
@@ -534,26 +562,44 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 							int awesomest = 3;
 						}
 
-						FbxAnimCurveDef asdf;
-						FbxAnimCurveDef::EInterpolationType popo;
-						FbxAnimCurveDef::EInterpolationType::eInterpolationConstant;
-
 						//New concept: Scoping! Man kommer åt "understuff" genom att lägga till :: efter typnamn tills man kommer till variabeln man vill åt.
 						//currKey->GetInterpolation();
 
 						FbxAMatrix localTransform;
-						FbxVector4 translationTransform = animEvaluator->GetNodeLocalTranslation(skeleton.joints[currentJointIndex].jointNode, currKey->GetTime());
-						FbxVector4 rotationTransform = animEvaluator->GetNodeLocalRotation(skeleton.joints[currentJointIndex].jointNode, currKey->GetTime());	
-						FbxVector4 scalingTransform = animEvaluator->GetNodeLocalScaling(skeleton.joints[currentJointIndex].jointNode, currKey->GetTime());
-
+						FbxVector4 translationTransform = animEvaluator->GetNodeLocalTranslation(currentJoint, currKey.GetTime());
+						FbxVector4 rotationTransform = animEvaluator->GetNodeLocalRotation(currentJoint, currKey.GetTime());	
+						FbxVector4 scalingTransform = animEvaluator->GetNodeLocalScaling(currentJoint, currKey.GetTime());
+						//The RotationPivot is gotten outta the eSourcePivot context.
+						FbxVector4 rotationPivot = currentJoint->GetRotationPivot(FbxNode::EPivotSet::eSourcePivot);
+				
 						//converts the right-handed coordinate system of Maya to the left-handed
 						//system of DirectX. 
 						translationTransform[2] *= -1.0; 
 						rotationTransform[0] *= -1.0;  
 						rotationTransform[1] *= -1.0;
 						scalingTransform[2] *= -1.0;
+						rotationPivot[2] *= -1.0;
 
 						localTransform.SetTRS(translationTransform, rotationTransform, scalingTransform);
+						//FbxQuaternion quaternionThing = localTransform.GetQ(); <-- Experiment.
+						
+
+						DirectX::XMVECTOR translationValues;
+						DirectX::XMVECTOR rotationValues;
+						DirectX::XMVECTOR scalingValues;
+						DirectX::XMVECTOR pivotValues;
+						DirectX::XMMATRIX transformMatrix;
+
+						translationValues = DirectX::XMVectorSet(translationTransform[0], translationTransform[1], translationTransform[2], translationTransform[3]);
+						rotationValues = DirectX::XMVectorSet(rotationTransform[0], rotationTransform[1], rotationTransform[2], rotationTransform[3]);
+						scalingValues = DirectX::XMVectorSet(scalingTransform[0], scalingTransform[1], scalingTransform[2], scalingTransform[3]);
+						pivotValues = DirectX::XMVectorSet(rotationPivot[0], rotationPivot[1], rotationPivot[2], rotationPivot[3]);
+						
+						//THis function expects a quaternion vector. Hope it's satisfied anyway.
+						transformMatrix = DirectX::XMMatrixAffineTransformation(scalingValues, pivotValues, rotationValues, translationValues);
+						
+						//Save all of the transform-matrices into a vector held on a per-joint-basis
+
 					}
 					
 					//Now get the animation curves that determine the rotation and translation of this joint at different times
@@ -614,9 +660,12 @@ unsigned int FbxDawg::findJointIndexByName(const char* jointName)
 		for (unsigned int i = 0; i < skeleton.joints.size(); ++i)
 		{
 			//* before pointer to get object
+			char ass1 = jointName[i];
+			char ass2 = skeleton.joints[i].name[i];
 			int compareValue = std::strcmp(jointName, skeleton.joints[i].name);
-			if (compareValue == 0)
-				return skeleton.joints[i].parentIndex + 1; //parentIndex + 1 gets the index of this joint.
+			if (compareValue == 0) { //Apparently no matching name can be found...
+				return skeleton.joints[i].jointIndex; //parentIndex + 1 gets the index of this joint.
+			}
 		}
 	}
 
@@ -640,8 +689,9 @@ void FbxDawg::recursiveJointHierarchyTraversal(FbxNode * inNode, int currentInde
 	if (inNode->GetNodeAttribute() && inNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 	{
 		sJoint currJoint;
-		currJoint.parentIndex = inNodeParentIndex;
+		currJoint.parentJointIndex = inNodeParentIndex;
 		currJoint.name = inNode->GetName();
+		currJoint.jointIndex = currentIndex;
 		this->skeleton.joints.push_back(currJoint);
 	}
 	for (int i = 0; i < inNode->GetChildCount(); i++) {

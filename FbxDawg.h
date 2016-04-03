@@ -10,7 +10,8 @@
 
 struct MyVertexStruct
 {
-	float x, y, z, norX, norY, norZ, u, v, jointIndex1, jointIndex2, jointIndex3, jointIndex4, weight1, weight2, weight3, weight4;
+	float x, y, z, norX, norY, norZ, u, v;
+	int controlPointIndex;
 };
 
 struct MyBSposStruct
@@ -58,10 +59,12 @@ public:
 	//Core datatypes: FbxSkeleton, eRoot, eLimb, eEffector
 	struct sJoint { //s as in struct :D
 		const char* name;
-		int parentIndex;
-		FbxAMatrix* globalBindPoseInverse;
-		FbxNode* jointNode;
-		
+		int parentJointIndex;
+		int jointIndex;
+		DirectX::XMFLOAT4X4* globalBindPoseInverse;
+		std::vector<DirectX::XMFLOAT4X4*> keyTransform;
+		std::vector<float> keyTime;
+		//FbxNode* jointNode;
 	};
 
 	struct sSkeleton {
@@ -74,14 +77,15 @@ public:
 		double blendingWeight; //Used to blend the animation of two animation layers. An example is transition between walk and run.
 	};
 
-	struct sAnimationData {
+	struct sAnimWeightData {
 		std::vector<sBlendingIndexWeightPair> weightData;
 	};
 
-	std::vector<FbxString*> animationName;
-	std::vector<long> animationLength;
+	std::vector<FbxString*> animationName; //One for each stack, i.e one for each joint
+	
+	std::vector<long> animationLength; //One for each stack, i.e one for each joint
 
-	std::vector<sAnimationData> dataPerControlPoint; 
+	std::vector<sAnimWeightData> dataPerControlPoint; //One for each Control point.
 	
 
 	unsigned int findJointIndexByName(const char* jointName);
