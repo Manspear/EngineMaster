@@ -401,6 +401,40 @@ void FbxDawg::fillOutSkeleton(unsigned int numberOfDeformers)
 	}
 }
 
+DirectX::XMMATRIX FbxDawg::convertFbxMatrixToXMMatrix(FbxAMatrix input)
+{
+	//THis function assumes row-major matrices.
+	float mV[16]; //(00, 01, 02, 03, 10, 11, 12, 13, 20 etc...
+	
+	unsigned int localCounter = 0;
+	for (unsigned int g = 0; g < 4; ++g) {
+		for (unsigned int h = 0; h < 4; ++h) {
+			mV[localCounter] = input.Get(g, h); //0 1 2 3
+			localCounter++;
+		}
+	}
+
+	DirectX::XMMATRIX output = DirectX::XMMatrixSet(mV[0], mV[1], mV[2], mV[3],
+													mV[4], mV[5], mV[6], mV[7], 
+													mV[8], mV[9], mV[10],mV[11], 
+													mV[12],mV[13],mV[14],mV[15]);
+	
+
+
+	return output;
+}
+
+void FbxDawg::makeLH(DirectX::XMMATRIX * input)
+{
+	//Hope this works as a change of basis from RH to LH...
+	DirectX::XMMATRIX newBase = DirectX::XMMatrixSet(1.0, 0.0, 0.0, 0.0,
+													 0.0, 1.0, 0.0, 0.0,
+													 0.0, 0.0, -1.0, 0.0,
+													 0.0, 0.0, 0.0, 0.0);
+
+	*input *= newBase;
+}
+
 void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 {
 	//Explanation of FBX-terminology regarding Animation-Related things:
@@ -442,7 +476,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 			
 			FbxAMatrix transformMatrix;
 			FbxAMatrix transformLinkMatrix;
-			FbxAMatrix globalBindposeInverseMatrix;
+			FbxAMatrix GBPIM; //globalBindPoseInverseMatrix
 			//FbxAMatrix globalBindposeMatrix;
 
 			//The "parent-chain"-bindpose matrix
@@ -450,7 +484,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 			//The matrix local to the joint. Linknodes are joints in this context.
 			currentCluster->GetTransformLinkMatrix(transformLinkMatrix); //The transformation of the cluster(joint) in bindtime from localspace to worldspace 
 			//Can be used to "nullify" the bindpose-transform in "parent-chain"-space.
-			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix;
+			GBPIM = transformLinkMatrix.Inverse() * transformMatrix;
 			//globalBindposeMatrix = transformLinkMatrix * transformMatrix;
 			
 			DirectX::XMVECTOR transformComponent;
@@ -459,21 +493,18 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 
 			DirectX::XMMATRIX bindPoseMatrix;
 
-			//DirectX assumes row-major vertices, maya does too.
-			//Maya is right handed, directX is left-handed.
-			//Gotta convert between them.
+			//Need to switch from right handed to left handed. Simple change of basis is performed.
+			bindPoseMatrix = convertFbxMatrixToXMMatrix(GBPIM);
+			//Also, convert the FbxMatrix to a directX matrix.
+			makeLH(&bindPoseMatrix);
 
-
-			globalBindposeInverseMatrix.
+			//bindPoseMatrix = bindPoseMatrix * newBase; //Hope this is the right order...
+			DirectX::XMFLOAT4X4 finalBindPoseMatrix;
+			DirectX::XMStoreFloat4x4(&finalBindPoseMatrix, bindPoseMatrix);
 			
-			//Need to switch from right handed to left handed. A change of basis must be performed.
-			bindPoseMatrix = DirectX::XMMatrixSet;
-			
-			
-
 			//Update the information in skeleton
 
-			skeleton.joints[currentJointIndex].globalBindPoseInverse = &globalBindposeInverseMatrix;
+			skeleton.joints[currentJointIndex].globalBindPoseInverse = &finalBindPoseMatrix;
 			currentJoint = currentCluster->GetLink();
 
 			//Associate each joint with the control points it affects
@@ -598,7 +629,24 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						//THis function expects a quaternion vector. Hope it's satisfied anyway.
 						transformMatrix = DirectX::XMMatrixAffineTransformation(scalingValues, pivotValues, rotationValues, translationValues);
 						
-						//Save all of the transform-matrices into a vector held on a per-joint-basis
+						//Changes the base to left-handed one.
+						makeLH(&transformMatrix);
+						{ //forcing convertedTransform to run out of scope...
+							DirectX::XMFLOAT4X4 convertedTransform;
+							DirectX::XMStoreFloat4x4(&convertedTransform, transformMatrix);
+
+							//Save all of the transform-matrices into a vector held on a per-joint-basis
+							skeleton.joints[currentJointIndex].keyTransform.push_back(convertedTransform);
+
+							//Save the time of the key
+							FbxTime keyTimeTemp = currKey.GetTime();
+							float keyTime = keyTimeTemp.GetSecondDouble();
+
+							skeleton.joints[currentJointIndex].keyTime.push_back(keyTime);
+						}
+						
+						skeleton.joints[currentJointIndex];
+
 
 					}
 					

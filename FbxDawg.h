@@ -39,6 +39,8 @@ private:
 	/****/
 	void makeControlPointMap(FbxMesh* currMesh); //Only call once per mesh. Makes a list with length equal to number of control points.
 	void fillOutSkeleton(unsigned int numberOfDeformers);
+	DirectX::XMMATRIX convertFbxMatrixToXMMatrix(FbxAMatrix input);
+	void makeLH(DirectX::XMMATRIX* input);
 
 public:
 	FbxDawg();
@@ -62,7 +64,7 @@ public:
 		int parentJointIndex;
 		int jointIndex;
 		DirectX::XMFLOAT4X4* globalBindPoseInverse;
-		std::vector<DirectX::XMFLOAT4X4*> keyTransform;
+		std::vector<DirectX::XMFLOAT4X4> keyTransform;
 		std::vector<float> keyTime;
 		//FbxNode* jointNode;
 	};
