@@ -14,6 +14,14 @@ struct MyVertexStruct
 	int controlPointIndex;
 };
 
+struct AnimVertexStruct
+{
+	float x, y, z, norX, norY, norZ, u, v;
+	int controlPointIndex;
+	int influences[4];
+	float weights[4];
+};
+
 struct MyBSposStruct
 {
 	float x, y, z;

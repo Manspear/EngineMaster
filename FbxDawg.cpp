@@ -431,8 +431,7 @@ void FbxDawg::makeLH(DirectX::XMMATRIX * input)
 													 0.0, 1.0, 0.0, 0.0,
 													 0.0, 0.0, -1.0, 0.0,
 													 0.0, 0.0, 0.0, 0.0);
-
-	*input *= newBase;
+	*input = DirectX::XMMatrixMultiply(*input, newBase);
 }
 
 void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
@@ -472,7 +471,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 			FbxNode* currentJoint = currentCluster->GetLink();
 			const char* currentJointName = currentJoint->GetName();
 			int currentJointIndex = findJointIndexByName(currentJointName);
-			currentJointIndex = currentJointIndex; //This makes the joint indices properly 0-based.
+			//currentJointIndex = currentJointIndex; //This makes the joint indices properly 0-based.
 			
 			FbxAMatrix transformMatrix;
 			FbxAMatrix transformLinkMatrix;
@@ -516,16 +515,8 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 				sBlendingIndexWeightPair currBlendingIndexWeightPair;
 				currBlendingIndexWeightPair.jointIndex = currentJointIndex;
 				currBlendingIndexWeightPair.blendingWeight = currentCluster->GetControlPointWeights()[i];
-				//FUUUUCK what am I supposed to do next? Our code diverges here...
-				//currCluster->GetControlPointIndices()[i] gets the returned value at index i. Meaning that the returned item is a list.
-				//Uhmm... i need to have all of the control points somewhere... So that I can map the cluster's "affected Control Points"
-				//somewhere. OR... Hmm... Can I map them here? Can I get all of the indices of the model? Do I have them already?
 				
-				//You cannot add stuff to a vector within another vector, since the memory adress will be changed when allocating memory for a new object.
-				//But you can if you only handle objects... -_- Inefficient shit.
 				dataPerControlPoint[currentCluster->GetControlPointIndices()[i]].weightData.push_back(currBlendingIndexWeightPair); 
-				//dataPerControlPoint[i]->weightData.push_back(popo); //cannot have a vector within a vector?
-				
 			}
 
 			//Now start getting animation information
@@ -541,11 +532,20 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 				FbxAnimStack* currentAnimStack = Fbx_Scene->GetSrcObject<FbxAnimStack>(stackIndex);
 
 
-				int numAnimLayers = currentAnimStack->GetMemberCount<FbxAnimLayer>();
+				const unsigned int numAnimLayers = currentAnimStack->GetMemberCount<FbxAnimLayer>();
+
+				for (unsigned int i = 0; i < numAnimLayers; i++)
+				{
+					FbxAnimLayer* currLayer = currentAnimStack->GetMember<FbxAnimLayer>(i);
+					currLayer->Weight = 0;
+					currLayer->Mute = false;
+					currLayer->Solo = false;
+				}
 
 				for (unsigned int animLayerCounter = 0; animLayerCounter < numAnimLayers; ++animLayerCounter)
 				{
-					FbxAnimLayer* currAnimLayer = currentAnimStack->GetMember<FbxAnimLayer>();
+					FbxAnimLayer* currAnimLayer = currentAnimStack->GetMember<FbxAnimLayer>(animLayerCounter);
+					currAnimLayer->Weight = 100;
 					//FbxAnimCurve* curveRotation = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_TRANSFORM, false);
 					//FbxAnimCurve* curveRotation = skeleton.joints[currentJointIndex]->jointNode->LclRotation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_ROTATION, false);
 
@@ -570,31 +570,6 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						//FbxAnimCurveKey* currKey = &translationCurve_X->KeyGet(keyIndex);
 
 						FbxAnimCurveKey currKey = translationCurve_X->KeyGet(keyIndex);
-						
-
-						//currKey->SetInterpolation(FbxAnimCurveDef::EInterpolationType::eInterpolationLinear);
-
-						//Access violation..? No clue.'
-						
-						fbxsdk::FbxAnimCurveDef::EInterpolationType keyInterpolType = currKey.GetInterpolation();
-
-						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationConstant) {
-							//do something...
-							int awesome = 1;
-						}
-						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationCubic) {
-							//do something...
-							int awesomer = 2;
-							FbxAnimCurveDef::ETangentMode keyTangentMode = currKey.GetTangentMode();
-							
-						}
-						if (keyInterpolType == FbxAnimCurveDef::EInterpolationType::eInterpolationLinear) {
-							//do something...
-							int awesomest = 3;
-						}
-
-						//New concept: Scoping! Man kommer åt "understuff" genom att lägga till :: efter typnamn tills man kommer till variabeln man vill åt.
-						//currKey->GetInterpolation();
 
 						FbxAMatrix localTransform;
 						FbxVector4 translationTransform = animEvaluator->GetNodeLocalTranslation(currentJoint, currKey.GetTime());
