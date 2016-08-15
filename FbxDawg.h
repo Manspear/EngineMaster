@@ -61,6 +61,8 @@ public:
 	void getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene);
 	void processJointHierarchy(FbxNode* inRootNode);
 	void recursiveJointHierarchyTraversal(FbxNode* inNode, int storedIndex, int inNodeParentIndex);
+	void getAnimMeshData(FbxMesh* mesh, FbxNode* FbxChildNode);
+	void getStaticMeshData(FbxMesh* mesh, FbxNode* FbxChildNode);
 
 	int* FBXIndexArray = nullptr;
 	int sizeOfFBXIndexArray = 0;
@@ -73,6 +75,9 @@ public:
 		int jointIndex;
 		DirectX::XMFLOAT4X4* globalBindPoseInverse;
 		std::vector<DirectX::XMFLOAT4X4> keyTransform;
+		std::vector<DirectX::XMFLOAT4> keyTrans;
+		std::vector<DirectX::XMFLOAT4> keyRot;
+		std::vector<DirectX::XMFLOAT4> keyScale;
 		std::vector<float> keyTime;
 		//FbxNode* jointNode;
 	};
@@ -105,6 +110,7 @@ public:
 	//std::vector<FbxSkeleton*> skeleton;
 	std::vector<MyBSposStruct> blendShapes;
 	std::vector<MyVertexStruct> modelVertexList;
+	std::vector<AnimVertexStruct> modelAnimVertexList;
 	std::vector<FbxVector4 *> bsVert;
 
 };
