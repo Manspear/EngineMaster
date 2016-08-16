@@ -339,12 +339,8 @@ void FbxDawg::getMeshData(FbxMesh* mesh, FbxNode* FbxChildNode)
 			tempVertex.u = UVValue.mData[0];
 			tempVertex.v = 1 - UVValue.mData[1];
 
-			//This should save the index of the control point. This will be used to get skin-weights 
-			//for skeletal animation.
 			tempVertex.controlPointIndex = IndexVector[i].posIndex;
 
-			dataPerControlPoint.size();
-			IndexVector.size();
 			for (int j = 0; j < 4; j++)
 			{
 				tempVertex.weights[j] = dataPerControlPoint[IndexVector[i].posIndex].weightData[j].blendingWeight;
