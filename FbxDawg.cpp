@@ -84,265 +84,299 @@ void FbxDawg::loadModels(const char* filePath)
 			if (mesh->GetDeformerCount(FbxDeformer::eBlendShape) > 0)
 				this->bsLoader(mesh);
 
-			std::vector<MyIndexStruct> IndexVector; IndexVector.resize(mesh->GetPolygonCount() * 3);
-
-			static int offsets[] = { 1, 0, 2 }; //offset made because directX is left-hand-oriented else the textures and vertices get mirrored.
-
-#pragma region >>VERTEX POSITION<<
-
-			for (int t = 0; t < mesh->GetPolygonCount(); t++)//
-			{
-				int totalVertices = mesh->GetPolygonSize(t);//
-				assert(totalVertices == 3);//
-
-				for (int v = 0; v < totalVertices; v++)//
-				{
-					int controlPointIndex = mesh->GetPolygonVertex(t, v);
-					IndexVector[(t * 3) + offsets[v]].posIndex = controlPointIndex; //adding index to a list. To create vertex later.
-
-				}
-
-			}
-#pragma endregion >>VERTEX POSITION<<
-
-#pragma region >>NORMALS<<
-			FbxVector4 normals;
-			FbxGeometryElementNormal* normalElement = mesh->GetElementNormal();
-			if (normalElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
-			{
-				FbxVector4 normals;
-				int indexByPolygonVertex = 0;
-
-				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
-				{
-					int polygonSize = mesh->GetPolygonSize(polygonIndex);
-
-					for (int i = 0; i < polygonSize; i++) //For every vertex in triangle
-					{
-						int normalIndex = 0; //reference mode is direct, the normal index is the same as indexByPolygonVertex
-
-						if (normalElement->GetReferenceMode() == FbxGeometryElement::eDirect) {
-							normalIndex = indexByPolygonVertex;
-						}
-						if (normalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
-							normalIndex = normalElement->GetIndexArray().GetAt(indexByPolygonVertex);
-						}
-
-						normals = normalElement->GetDirectArray().GetAt(normalIndex);
-						IndexVector[polygonIndex * 3 + offsets[i]].norIndex = normalIndex;
-						indexByPolygonVertex++;
-					}
-				}
-			}
-
-
-			else if (normalElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
-			{
-				FbxVector4 normals;
-				int indexByPolygonVertex = 0;
-
-
-				for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
-				{
-
-					int polygonSize = mesh->GetPolygonSize(polygonIndex);
-
-					for (int i = 0; i < polygonSize; i++) //For every vertex in triangle
-					{
-						int normalIndex = 0;
-						//reference mode is direct, the normal index is the same as indexByPolygonVertex
-						if (normalElement->GetReferenceMode() == FbxGeometryElement::eDirect) {
-							normalIndex = indexByPolygonVertex;
-						}
-						if (normalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
-							normalIndex = normalElement->GetIndexArray().GetAt(indexByPolygonVertex);
-						}
-
-						normals = normalElement->GetDirectArray().GetAt(normalIndex);
-						IndexVector[polygonIndex * 3 + offsets[i]].norIndex = normalIndex;
-						indexByPolygonVertex++;
-					}
-
-				}
-			}
-#pragma endregion >> NORMALS <<
-
-#pragma region >>UV<<
-
-
-			FbxStringList UVSetNameList;  //Gets all UV sets
-			mesh->GetUVSetNames(UVSetNameList);
-			FbxGeometryElementUV* UVElement;
-
-
-			for (int UVSetIndex = 0; UVSetIndex < UVSetNameList.GetCount(); UVSetIndex++) //Iterates through the UV sets. Meshes can have multiple textures, every texture got a different UV set
-			{
-
-				char* UVSetName = UVSetNameList.GetStringAt(UVSetIndex); //Gets name of the current UV set
-
-				UVElement = mesh->GetElementUV(UVSetName); //Gets the UV-element with the name that UVSetName holds
-
-				if (!UVElement) {
-					continue;
-				}
-
-				//Only supports these two modes.
-				if (UVElement->GetMappingMode() != FbxGeometryElement::eByPolygonVertex &&
-					UVElement->GetMappingMode() != FbxGeometryElement::eByControlPoint)
-					return;
-				bool useIndex = UVElement->GetReferenceMode() != FbxGeometryElement::eDirect;
-				int indexCount = (useIndex) ? UVElement->GetIndexArray().GetCount() : 0; //<---- what's happening here??? A questionmark? And the : 0 out of nowhere.
-
-				int polyCount = mesh->GetPolygonCount();
-
-				int polyIndexCounter = 0;
-				if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
-				{
-					for (int polyIndex = 0; polyIndex < polyCount; polyIndex++)
-					{
-						//build the max index array that is needed
-						int polySize = mesh->GetPolygonSize(polyIndex);
-						for (int vertIndex = 0; vertIndex < polySize; ++vertIndex)
-						{
-							FbxVector2 UVValue;
-							//get the index of the current current vertex in the vertex array
-							int polyVertIndex = mesh->GetPolygonVertex(polyIndex, vertIndex);
-							//the UV index depends on the reference mode
-							int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyVertIndex) : polyVertIndex;//<----questionmark and : again...
-
-							UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
-							IndexVector[polyIndex*polySize + offsets[vertIndex]].uvIndex = UVIndex;
-							IndexVector[polyIndex*polySize + offsets[vertIndex]].UVSetName = UVSetName;
-							IndexVector[polyIndex*polySize + offsets[vertIndex]].UVElement = UVElement;
-							polyIndexCounter++;
-
-						}
-					}
-				}
-
-				else if (UVElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
-				{
-
-					for (int polyIndex = 0; polyIndex < polyCount; ++polyIndex)
-					{
-						int polySize = mesh->GetPolygonSize(polyIndex);
-						for (int vertIndex = 0; vertIndex < polySize; ++vertIndex)
-						{
-							if (polyIndexCounter < indexCount)
-							{
-								FbxVector2 UVValue;
-								int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyIndexCounter) : polyIndexCounter;
-
-								UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
-
-								IndexVector[polyIndex*polySize + offsets[vertIndex]].uvIndex = UVIndex;
-								IndexVector[polyIndex*polySize + offsets[vertIndex]].UVSetName = UVSetName;
-								IndexVector[polyIndex*polySize + offsets[vertIndex]].UVElement = UVElement;
-								polyIndexCounter++;
-
-							}
-
-						}
-					}
-				}
-
-
-			}//uv
-
-			 //>>>>>>>>>Texture filepath<<<<<<<<<<<<<<<
-			int material_Count = mesh->GetSrcObjectCount<FbxSurfaceMaterial>();
-			int matCount = FbxChildNode->GetMaterialCount();
-			for (int m = 0; m < matCount; m++)//.. for every material attached to the mesh
-			{
-				FbxSurfaceMaterial* material = FbxChildNode->GetMaterial(m);
-				if (material)//.. if material
-				{
-					FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
-					int texture_Count = prop.GetSrcObjectCount<FbxTexture>();
-					for (int i = 0; i < texture_Count; i++)// how many texturefiles attached to the material
-					{
-						const FbxTexture* texture = FbxCast<FbxTexture>(prop.GetSrcObject<FbxTexture>(i));
-
-						wchar_t* wideName;
-						FbxUTF8ToWC(((const FbxFileTexture*)texture)->GetFileName(), wideName);
-
-						textureFilepath = wideName;
-
-						FbxFree(wideName);
-					}
-				}
-			}
-
-#pragma endregion >>UV<<
-
-#pragma region >>ASSEMBLY OF VERTEXDATA<<
-			MyVertexStruct tempVertex;
-			MyBSposStruct tempBlendShape;
-			MyIndexStruct tempIndex;
-			FbxVector4* Vertices;
-
-			Vertices = mesh->GetControlPoints();
-
-			for (int i = 0; i < IndexVector.size(); i++)
-			{
-				//printf("pos %d nor %d uv %d\n", IndexVector[i].posIndex, IndexVector[i].norIndex, IndexVector[i].uvIndex);
-				normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
-				tempVertex.norX = normals[0];
-				tempVertex.norY = normals[1];
-				tempVertex.norZ = (-1)*(normals[2]);
-
-				tempVertex.x = (float)Vertices[IndexVector[i].posIndex].mData[0];
-				tempVertex.y = (float)Vertices[IndexVector[i].posIndex].mData[1];
-				tempVertex.z = -1 * ((float)Vertices[IndexVector[i].posIndex].mData[2]);
-
-
-				FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
-				tempVertex.u = UVValue.mData[0];
-				tempVertex.v = 1 - UVValue.mData[1];
-
-				//This should save the index of the control point. This will be used to get skin-weights 
-				//for skeletal animation.
-				tempVertex.controlPointIndex = IndexVector[i].posIndex;
-
-				this->modelVertexList.push_back(tempVertex);
-			}
-
-			for (int j = 0; j < bsVert.size(); j++)
-				Vertices = bsVert[j];
-			for (int i = 0; i < IndexVector.size(); i++)
-			{
-
-				//normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
-				//tempVertex.norX = normals[0];
-				//tempVertex.norY = normals[1];
-				//tempVertex.norZ = (-1)*(normals[2]);
-
-				tempBlendShape.x = (float)Vertices[IndexVector[i].posIndex].mData[0];
-				tempBlendShape.y = (float)Vertices[IndexVector[i].posIndex].mData[1];
-				tempBlendShape.z = -1 * ((float)Vertices[IndexVector[i].posIndex].mData[2]);
-
-				//FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
-				//tempVertex.u = UVValue.mData[0];
-				//tempVertex.v = 1 - UVValue.mData[1];
-
-				this->blendShapes.push_back(tempBlendShape);
-			}
-
-			this->makeIndexList();
-
-
-#pragma endregion >>ASSEMBLY OF VERTEXDATA<<
-
-			//>>>>>>>CREATING THE MAP OF CONTROL POINTS<<<<<<<<<
-			//________________________________________________
-			makeControlPointMap(mesh);//<---------------------
-			//________________________________________________
+			getMeshData(mesh, FbxChildNode);
 
 		}//for mesh
 	}//if fbxnode
 	Fbx_Importer->Destroy(); //need be destroyed at the end
 
 } //end of loader
+
+void FbxDawg::getMeshData(FbxMesh* mesh, FbxNode* FbxChildNode)
+{
+	std::vector<MyIndexStruct> IndexVector; IndexVector.resize(mesh->GetPolygonCount() * 3);
+
+	static int offsets[] = { 1, 0, 2 }; //offset made because directX is left-hand-oriented else the textures and vertices get mirrored.
+
+#pragma region >>VERTEX POSITION<<
+
+	for (int t = 0; t < mesh->GetPolygonCount(); t++)//
+	{
+		int totalVertices = mesh->GetPolygonSize(t);//
+		assert(totalVertices == 3);//
+
+		for (int v = 0; v < totalVertices; v++)//
+		{
+			int controlPointIndex = mesh->GetPolygonVertex(t, v);
+			IndexVector[(t * 3) + offsets[v]].posIndex = controlPointIndex; //adding index to a list. To create vertex later.
+
+		}
+
+	}
+#pragma endregion >>VERTEX POSITION<<
+
+#pragma region >>NORMALS<<
+	FbxVector4 normals;
+	FbxGeometryElementNormal* normalElement = mesh->GetElementNormal();
+	if (normalElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
+	{
+		FbxVector4 normals;
+		int indexByPolygonVertex = 0;
+
+		for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
+		{
+			int polygonSize = mesh->GetPolygonSize(polygonIndex);
+
+			for (int i = 0; i < polygonSize; i++) //For every vertex in triangle
+			{
+				int normalIndex = 0; //reference mode is direct, the normal index is the same as indexByPolygonVertex
+
+				if (normalElement->GetReferenceMode() == FbxGeometryElement::eDirect) {
+					normalIndex = indexByPolygonVertex;
+				}
+				if (normalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
+					normalIndex = normalElement->GetIndexArray().GetAt(indexByPolygonVertex);
+				}
+
+				normals = normalElement->GetDirectArray().GetAt(normalIndex);
+				IndexVector[polygonIndex * 3 + offsets[i]].norIndex = normalIndex;
+				indexByPolygonVertex++;
+			}
+		}
+	}
+
+
+	else if (normalElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+	{
+		FbxVector4 normals;
+		int indexByPolygonVertex = 0;
+
+
+		for (int polygonIndex = 0; polygonIndex < mesh->GetPolygonCount(); polygonIndex++) //For every triangle
+		{
+
+			int polygonSize = mesh->GetPolygonSize(polygonIndex);
+
+			for (int i = 0; i < polygonSize; i++) //For every vertex in triangle
+			{
+				int normalIndex = 0;
+				//reference mode is direct, the normal index is the same as indexByPolygonVertex
+				if (normalElement->GetReferenceMode() == FbxGeometryElement::eDirect) {
+					normalIndex = indexByPolygonVertex;
+				}
+				if (normalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) {
+					normalIndex = normalElement->GetIndexArray().GetAt(indexByPolygonVertex);
+				}
+
+				normals = normalElement->GetDirectArray().GetAt(normalIndex);
+				IndexVector[polygonIndex * 3 + offsets[i]].norIndex = normalIndex;
+				indexByPolygonVertex++;
+			}
+
+		}
+	}
+#pragma endregion >> NORMALS <<
+
+#pragma region >>UV<<
+
+
+	FbxStringList UVSetNameList;  //Gets all UV sets
+	mesh->GetUVSetNames(UVSetNameList);
+	FbxGeometryElementUV* UVElement;
+
+
+	for (int UVSetIndex = 0; UVSetIndex < UVSetNameList.GetCount(); UVSetIndex++) //Iterates through the UV sets. Meshes can have multiple textures, every texture got a different UV set
+	{
+
+		char* UVSetName = UVSetNameList.GetStringAt(UVSetIndex); //Gets name of the current UV set
+
+		UVElement = mesh->GetElementUV(UVSetName); //Gets the UV-element with the name that UVSetName holds
+
+		if (!UVElement) {
+			continue;
+		}
+
+		//Only supports these two modes.
+		if (UVElement->GetMappingMode() != FbxGeometryElement::eByPolygonVertex &&
+			UVElement->GetMappingMode() != FbxGeometryElement::eByControlPoint)
+			return;
+		bool useIndex = UVElement->GetReferenceMode() != FbxGeometryElement::eDirect;
+		int indexCount = (useIndex) ? UVElement->GetIndexArray().GetCount() : 0; //<---- what's happening here??? A questionmark? And the : 0 out of nowhere.
+
+		int polyCount = mesh->GetPolygonCount();
+
+		int polyIndexCounter = 0;
+		if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+		{
+			for (int polyIndex = 0; polyIndex < polyCount; polyIndex++)
+			{
+				//build the max index array that is needed
+				int polySize = mesh->GetPolygonSize(polyIndex);
+				for (int vertIndex = 0; vertIndex < polySize; ++vertIndex)
+				{
+					FbxVector2 UVValue;
+					//get the index of the current current vertex in the vertex array
+					int polyVertIndex = mesh->GetPolygonVertex(polyIndex, vertIndex);
+					//the UV index depends on the reference mode
+					int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyVertIndex) : polyVertIndex;//<----questionmark and : again...
+
+					UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
+					IndexVector[polyIndex*polySize + offsets[vertIndex]].uvIndex = UVIndex;
+					IndexVector[polyIndex*polySize + offsets[vertIndex]].UVSetName = UVSetName;
+					IndexVector[polyIndex*polySize + offsets[vertIndex]].UVElement = UVElement;
+					polyIndexCounter++;
+
+				}
+			}
+		}
+
+		else if (UVElement->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
+		{
+
+			for (int polyIndex = 0; polyIndex < polyCount; ++polyIndex)
+			{
+				int polySize = mesh->GetPolygonSize(polyIndex);
+				for (int vertIndex = 0; vertIndex < polySize; ++vertIndex)
+				{
+					if (polyIndexCounter < indexCount)
+					{
+						FbxVector2 UVValue;
+						int UVIndex = useIndex ? UVElement->GetIndexArray().GetAt(polyIndexCounter) : polyIndexCounter;
+
+						UVValue = UVElement->GetDirectArray().GetAt(UVIndex);
+
+						IndexVector[polyIndex*polySize + offsets[vertIndex]].uvIndex = UVIndex;
+						IndexVector[polyIndex*polySize + offsets[vertIndex]].UVSetName = UVSetName;
+						IndexVector[polyIndex*polySize + offsets[vertIndex]].UVElement = UVElement;
+						polyIndexCounter++;
+
+					}
+
+				}
+			}
+		}
+
+
+	}//uv
+
+	 //>>>>>>>>>Texture filepath<<<<<<<<<<<<<<<
+	int material_Count = mesh->GetSrcObjectCount<FbxSurfaceMaterial>();
+	int matCount = FbxChildNode->GetMaterialCount();
+	for (int m = 0; m < matCount; m++)//.. for every material attached to the mesh
+	{
+		FbxSurfaceMaterial* material = FbxChildNode->GetMaterial(m);
+		if (material)//.. if material
+		{
+			FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
+			int texture_Count = prop.GetSrcObjectCount<FbxTexture>();
+			for (int i = 0; i < texture_Count; i++)// how many texturefiles attached to the material
+			{
+				const FbxTexture* texture = FbxCast<FbxTexture>(prop.GetSrcObject<FbxTexture>(i));
+
+				wchar_t* wideName;
+				FbxUTF8ToWC(((const FbxFileTexture*)texture)->GetFileName(), wideName);
+
+				textureFilepath = wideName;
+
+				FbxFree(wideName);
+			}
+		}
+	}
+
+#pragma endregion >>UV<<
+
+#pragma region >>ASSEMBLY OF VERTEXDATA<<
+	
+	MyBSposStruct tempBlendShape;
+	MyIndexStruct tempIndex;
+	FbxVector4* Vertices;
+
+	Vertices = mesh->GetControlPoints();
+	if (mesh->GetDeformerCount(FbxDeformer::eSkin) < 1)
+	{
+		MyVertexStruct tempVertex;
+		for (int i = 0; i < IndexVector.size(); i++)
+		{
+			//printf("pos %d nor %d uv %d\n", IndexVector[i].posIndex, IndexVector[i].norIndex, IndexVector[i].uvIndex);
+			normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
+			tempVertex.norX = normals[0];
+			tempVertex.norY = normals[1];
+			tempVertex.norZ = (-1)*(normals[2]);
+
+			tempVertex.x = (float)Vertices[IndexVector[i].posIndex].mData[0];
+			tempVertex.y = (float)Vertices[IndexVector[i].posIndex].mData[1];
+			tempVertex.z = -1 * ((float)Vertices[IndexVector[i].posIndex].mData[2]);
+
+
+			FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
+			tempVertex.u = UVValue.mData[0];
+			tempVertex.v = 1 - UVValue.mData[1];
+
+			//This should save the index of the control point. This will be used to get skin-weights 
+			//for skeletal animation.
+			tempVertex.controlPointIndex = IndexVector[i].posIndex;
+
+			this->modelVertexList.push_back(tempVertex);
+		}
+	}
+	else
+	{
+		AnimVertexStruct tempVertex;
+		for (int i = 0; i < IndexVector.size(); i++)
+		{
+			//printf("pos %d nor %d uv %d\n", IndexVector[i].posIndex, IndexVector[i].norIndex, IndexVector[i].uvIndex);
+			normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
+			tempVertex.norX = normals[0];
+			tempVertex.norY = normals[1];
+			tempVertex.norZ = (-1)*(normals[2]);
+
+			tempVertex.x = (float)Vertices[IndexVector[i].posIndex].mData[0];
+			tempVertex.y = (float)Vertices[IndexVector[i].posIndex].mData[1];
+			tempVertex.z = -1 * ((float)Vertices[IndexVector[i].posIndex].mData[2]);
+
+
+			FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
+			tempVertex.u = UVValue.mData[0];
+			tempVertex.v = 1 - UVValue.mData[1];
+
+			//This should save the index of the control point. This will be used to get skin-weights 
+			//for skeletal animation.
+			tempVertex.controlPointIndex = IndexVector[i].posIndex;
+
+			dataPerControlPoint.size();
+			IndexVector.size();
+			for (int j = 0; j < 4; j++)
+			{
+				tempVertex.weights[j] = dataPerControlPoint[IndexVector[i].posIndex].weightData[j].blendingWeight;
+				tempVertex.influences[j] = dataPerControlPoint[IndexVector[i].posIndex].weightData[j].jointIndex;
+			}
+			this->animModelVertexList.push_back(tempVertex);
+		}
+	}
+
+	for (int j = 0; j < bsVert.size(); j++)
+		Vertices = bsVert[j];
+	for (int i = 0; i < IndexVector.size(); i++)
+	{
+
+		//normals = normalElement->GetDirectArray().GetAt(IndexVector[i].norIndex);
+		//tempVertex.norX = normals[0];
+		//tempVertex.norY = normals[1];
+		//tempVertex.norZ = (-1)*(normals[2]);
+
+		tempBlendShape.x = (float)Vertices[IndexVector[i].posIndex].mData[0];
+		tempBlendShape.y = (float)Vertices[IndexVector[i].posIndex].mData[1];
+		tempBlendShape.z = -1 * ((float)Vertices[IndexVector[i].posIndex].mData[2]);
+
+		//FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
+		//tempVertex.u = UVValue.mData[0];
+		//tempVertex.v = 1 - UVValue.mData[1];
+
+		this->blendShapes.push_back(tempBlendShape);
+	}
+
+	this->makeIndexList();
+}
 
 void FbxDawg::makeIndexList()
 {
@@ -369,7 +403,7 @@ void FbxDawg::makeIndexList()
 				modelVertexList[vertex].y == modelVertexList[other].y &&
 				modelVertexList[vertex].z == modelVertexList[other].z)
 			{
-				FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
+				//FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
 			}
 
 
@@ -640,6 +674,17 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 			}
 			
 			
+		}
+
+		for (int i = 0; i < dataPerControlPoint.size(); i++)
+		{
+			sBlendingIndexWeightPair mordor;
+			mordor.blendingWeight = 0;
+			mordor.jointIndex = 0;
+			while (dataPerControlPoint[i].weightData.size() < 4)
+			{
+				dataPerControlPoint[i].weightData.push_back(mordor);
+			}
 		}
 	}
 }

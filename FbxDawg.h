@@ -56,6 +56,7 @@ public:
 
 	std::wstring textureFilepath;//När denna blir tilldelad så får den en kopia istället. Så vi kan utan problem radera den variablen som var med i tilldelningen.
 	void loadModels(const char* filePath);
+	void getMeshData(FbxMesh* mesh, FbxNode* FbxChildNode);
 	void makeIndexList();
 
 	void getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene);
@@ -105,6 +106,7 @@ public:
 	//std::vector<FbxSkeleton*> skeleton;
 	std::vector<MyBSposStruct> blendShapes;
 	std::vector<MyVertexStruct> modelVertexList;
+	std::vector<AnimVertexStruct> animModelVertexList;
 	std::vector<FbxVector4 *> bsVert;
 
 };
