@@ -9,6 +9,7 @@ GModel::GModel()
 	this->objectWorldMatrix = new SimpleMath::Matrix;
 	this->objectWorldMatrix[0] = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
 	this->blendShape = false;
+	this->DCM = false;
 	noOfTextures = 1;
 }
 
@@ -63,6 +64,10 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
 	this->modelVertices = modelLoader.modelVertexList;
 	this->modelTextureFilepath = modelLoader.textureFilepath;
+	if (modelLoader.DCMmaterial->IsValid())
+	{
+		this->DCM = true;
+	}
 #pragma region VertexBuffer
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));

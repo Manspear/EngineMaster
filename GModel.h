@@ -21,6 +21,7 @@ private:
 	FbxDawg modelLoader;
 	FbxDawg BSLoader;
 	bool blendShape;
+	bool DCM;
 public:
 	SimpleMath::Matrix* objectWorldMatrix;
 	struct modelWorldStruct {
@@ -57,6 +58,7 @@ public:
 	std::wstring modelTextureFilepath; //THis holds the texture's file-path
 	int getNumberOfTextures();
 	const bool& hasBlendShape() const { return blendShape; }
+	const bool& hasDCM() const { return DCM; }
 	void setBlendWeight(float weight, ID3D11DeviceContext* gDeviceContext);
 	//struct with vertex positions held by FbxDawg
 	void load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath); //<-- Loads the model. Means that modelLoader is called.
