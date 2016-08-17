@@ -86,6 +86,33 @@ void Engine::CreateShaders()
 
 	pVSbs->Release();
 
+	//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+	//create vertex shader
+	ID3DBlob* pVS_DCM = nullptr;
+	D3DCompileFromFile(
+		L"DCM_VertexShader.hlsl", // filename
+		nullptr,		// optional macros
+		nullptr,		// optional include files
+		"VS_main",		// entry point
+		"vs_4_0",		// shader model (target)
+		0,				// shader compile options
+		0,				// effect compile options
+		&pVS_DCM,			// double pointer to ID3DBlob		
+		nullptr			// pointer for Error Blob messages.
+						// how to use the Error blob, see here
+						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+		);
+
+
+	hr = gDevice->CreateVertexShader(pVS_DCM->GetBufferPointer(), pVS_DCM->GetBufferSize(), nullptr, &gVertexShaderDCM);
+
+	D3D11_INPUT_ELEMENT_DESC inputDescDCM[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },//pos
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },//normal
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },//uv
+	};
+	hr = gDevice->CreateInputLayout(inputDescDCM, ARRAYSIZE(inputDescDCM), pVS_DCM->GetBufferPointer(), pVS_DCM->GetBufferSize(), &gVertexLayoutDCM);
+
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;
 	D3DCompileFromFile(
@@ -142,6 +169,17 @@ void Engine::CreateShaders()
 
 }
 
+void Engine::CreateDynamicCubeMap()
+{
+	dcm.Initialize(gDevice, depthStencilView, gBackbufferRTV, vp,
+		gGeometryShader, gPixelShader, gVertexShader, gVertexLayout,
+		gConstantBuffer, gVertexShaderBS, gVertexLayoutBS, gDeviceContext);
+
+	dcm.Dynamic_Cube_Map(gDevice);
+
+
+}
+
 void Engine::CreateConstantBuffer() {
 
 	D3D11_BUFFER_DESC bufferDesc;
@@ -173,9 +211,8 @@ void Engine::CreateDepthStencilBuffer() {
 	gDevice->CreateDepthStencilView(gDepthStencilBuffer, NULL, &depthStencilView);
 }
 
-void Engine::SetViewport()
+void Engine::SetViewport(D3D11_VIEWPORT &vp)
 {
-	D3D11_VIEWPORT vp;
 	vp.Width = (float)640;
 	vp.Height = (float)480;
 	vp.MinDepth = 0.0f;
@@ -226,7 +263,7 @@ void Engine::Render()
 	else
 		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor2);
 
-	
+
 
 
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -237,19 +274,19 @@ void Engine::Render()
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 	gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
-	
+
 	UINT32 vertexSize;
-	UINT32 offset = 0; 
+	UINT32 offset = 0;
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-																					   
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);					   
-																					   
-	listOfModels = modelListObject.getModelList();									   
-																					   
-																					   
-																					   
+
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
+
+	listOfModels = modelListObject.getModelList();
+
+
+
 	//bool isRoot = true;
 	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
 	//cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
@@ -263,14 +300,14 @@ void Engine::Render()
 	//		gDeviceContext->IASetInputLayout(gVertexLayout);
 	//		vertexSize = sizeof(float) * 8;
 	//	}														  	 
-																  	 
-																  	 
+
+
 	//struct frustumVert {										  	 
 	//		float x, y, z, xn, yn, zn, u, v;					  	 
 	//	};														  	 
 	//	frustumVert frustumVertices[6]; //...					  	 
-																  	 
-																	 
+
+
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
@@ -278,19 +315,40 @@ void Engine::Render()
 		//printf("%d", cullingFrustum->seenObjects.size());
 		if (cullingFrustum->seenObjects[bufferCounter]->hasBlendShape())
 		{
-			
+
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
 			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
 			vertexSize = sizeof(float) * 16;
 		}
+		else if (listOfModels[bufferCounter].hasDCM() == true)//modelLoader->DCMmaterial->IsValid()
+		{
+
+
+			printf("DCM \t ");
+			gDeviceContext->GSSetShader(nullptr, nullptr, 0);
+			gDeviceContext->VSSetShader(gVertexShaderDCM, nullptr, 0);//VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->PSSetShader(gPixelShaderDCM, nullptr, 0);
+			//gDeviceContext->PSSetShaderResources(0, 1, &DCM_ShaderResourceView);
+			gDeviceContext->PSSetConstantBuffers(0, 1, &gConstantBuffer);//
+
+																		 //DCM_ShaderResourceView
+			gDeviceContext->IASetInputLayout(gVertexLayoutDCM);
+			vertexSize = sizeof(float) * 8;
+
+
+			dcm.DCM_Render_Main(listOfModels, &modelListObject);
+			//DCM_Render(listOfModels, modelListObject);
+
+		}
+
 		else {
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
-			vertexSize = sizeof(float) * 8 + sizeof(int);
+			vertexSize = sizeof(float) * 8;
 		}
 
-			
+
 		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
@@ -526,7 +584,7 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	InitializeModels();
 
-	SetViewport();
+	SetViewport(vp);
 
 	input->initialize(hinstance, wndHandle, wWIDTH, wHEIGHT);
 

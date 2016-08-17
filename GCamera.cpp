@@ -92,18 +92,38 @@ void GCamera::setPosition(XMFLOAT4& newPosition)
 	//this->setTarget(target);
 }
 
-const XMVECTOR GCamera::getUp() //returns camera up vector
+const XMFLOAT4 GCamera::getUp() //returns camera up vector
 {
-	return cUp;
+	return VtoF(cUp);
 }
-const XMVECTOR GCamera::getLookAtTarget() //returns camera look at target vector
+
+const XMFLOAT4 GCamera::getLookAtTarget() //returns camera look at target vector
 {
-	return cTarget;
+	return VtoF(cTarget);
 }
 const XMMATRIX GCamera::getViewMatrix()
 {
 	return cView;
 }
+
+//jespers
+void GCamera::setUp(XMFLOAT4 cUp)
+{
+	this->cUp = FtoV(cUp);
+}
+
+void GCamera::setTarget(XMFLOAT4 nTarget)
+{
+	cTarget = FtoV(nTarget);
+}
+void GCamera::LookAt(XMFLOAT4 pos, XMFLOAT4 target, XMFLOAT4 worldUp)
+{
+	GCamera::setPosition(pos);
+	GCamera::setTarget(target);
+	GCamera::setUp(worldUp);
+}
+
+
 
 
 //PROJECTION
