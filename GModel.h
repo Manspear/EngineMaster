@@ -36,6 +36,7 @@ public:
 	~GModel();
 	bool isCulled = false; //This bool will serve as a tag, it is set by the GFrustum calling the QuadTreeCollision-function.
 	ID3D11Buffer* modelVertexBuffer = nullptr;
+	ID3D11Buffer* animModelVertexBuffer = nullptr;
 	ID3D11Buffer* modelIndexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
 
@@ -51,6 +52,7 @@ public:
 	XMMATRIX getPosition();
 	void renderModel();
 	std::vector<MyVertexStruct> modelVertices;
+	std::vector<AnimVertexStruct> animModelVertices;
 	std::vector<MyVertexStruct> BSmodelVertices;
 	std::vector<MyBSStruct> modelWithBSstruct;
 	std::vector<MyVertexStruct> bsVertices;//This holds the vertices.
@@ -61,7 +63,7 @@ public:
 	//struct with vertex positions held by FbxDawg
 	void load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath); //<-- Loads the model. Means that modelLoader is called.
 	void loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath);
-
+	void loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath);
 };
 
 //>>>>>>>USER MANUAL<<<<<<<<<<<

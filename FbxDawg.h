@@ -49,6 +49,7 @@ private:
 	void fillOutSkeleton(unsigned int numberOfDeformers);
 	DirectX::XMMATRIX convertFbxMatrixToXMMatrix(FbxAMatrix input);
 	void makeLH(DirectX::XMMATRIX* input);
+	bool isAnimated = false;
 
 public:
 	FbxDawg();
@@ -62,7 +63,7 @@ public:
 	void getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene);
 	void processJointHierarchy(FbxNode* inRootNode);
 	void recursiveJointHierarchyTraversal(FbxNode* inNode, int storedIndex, int inNodeParentIndex);
-
+	bool hasSkeleton();
 	int* FBXIndexArray = nullptr;
 	int sizeOfFBXIndexArray = 0;
 	void bsLoader(FbxMesh * mesh);

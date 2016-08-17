@@ -399,7 +399,7 @@ void FbxDawg::makeIndexList()
 				modelVertexList[vertex].y == modelVertexList[other].y &&
 				modelVertexList[vertex].z == modelVertexList[other].z)
 			{
-				//FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
+				FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
 			}
 
 
@@ -479,10 +479,11 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 
 	if (deformerCount > 0) {
 		makeControlPointMap(currMesh);
-		
-		
+		isAnimated = true;
 		//fillOutSkeleton(deformerCount);
-
+	}
+	else {
+		isAnimated = false;
 	}
 
 	
@@ -764,6 +765,11 @@ void FbxDawg::recursiveJointHierarchyTraversal(FbxNode * inNode, int currentInde
 		recursiveJointHierarchyTraversal(inNode->GetChild(i), skeleton.joints.size(), currentIndex); 
 	}
 	//Erm... Apparently this node ain't got no child
+}
+
+bool FbxDawg::hasSkeleton()
+{
+	return isAnimated;
 }
 
 void FbxDawg::bsLoader(FbxMesh * mesh)
