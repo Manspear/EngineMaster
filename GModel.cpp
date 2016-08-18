@@ -61,7 +61,7 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 {
 	modelLoader.loadModels(fbxFilePath);
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
-	pivotPoint = modelLoader.pivotValues;
+	pivotPoint = modelLoader.pivotValue;
 	this->modelVertices = modelLoader.modelVertexList;
 	
 	this->modelTextureFilepath = modelLoader.textureFilepath;
@@ -177,7 +177,7 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 {
 	this->blendShape = true;
 	modelLoader.loadModels(fbxFilePath);
-	pivotPoint = modelLoader.pivotValues;
+	pivotPoint = modelLoader.pivotValue;
 
 	this->modelVertices = modelLoader.modelVertexList;
 	this->modelTextureFilepath = modelLoader.textureFilepath;
@@ -329,7 +329,7 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 void GModel::loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath)
 {
 	modelLoader.loadModels(fbxFilePath);
-	pivotPoint = modelLoader.pivotValues;
+	pivotPoint = modelLoader.pivotValue;
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
 	this->animModelVertices = modelLoader.animModelVertexList;
 	

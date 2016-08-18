@@ -39,7 +39,7 @@ public:
 	ID3D11Buffer* animModelVertexBuffer = nullptr;
 	ID3D11Buffer* modelIndexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
-	DirectX::XMVECTOR pivotPoint;
+	DirectX::XMFLOAT4 pivotPoint;
 	BoundingBox modelBBox;
 	GBoundingBox bBox;
 	ID3D11Buffer* bsWBuffer = nullptr;

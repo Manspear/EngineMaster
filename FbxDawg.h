@@ -66,18 +66,31 @@ public:
 	bool hasSkeleton();
 	int* FBXIndexArray = nullptr;
 	int sizeOfFBXIndexArray = 0;
-	DirectX::XMVECTOR pivotValues;
+	DirectX::XMFLOAT4 pivotValue;
 	void bsLoader(FbxMesh * mesh);
 
 	//Core datatypes: FbxSkeleton, eRoot, eLimb, eEffector
+
+
+	struct sKeyFrame
+	{
+		DirectX::XMFLOAT4 translation;
+		DirectX::XMFLOAT4 rotation;
+		DirectX::XMFLOAT4 scale;
+		float keyTime;
+	};
+
+	struct sAnimLayer
+	{
+		std::vector<sKeyFrame> keyFrame;
+	};
+
 	struct sJoint { //s as in struct :D
 		const char* name;
 		int parentJointIndex;
 		int jointIndex;
 		DirectX::XMFLOAT4X4* globalBindPoseInverse;
-		std::vector<DirectX::XMFLOAT4X4> keyTransform;
-		std::vector<float> keyTime;
-		//FbxNode* jointNode;
+		std::vector<sAnimLayer> animLayer;
 	};
 
 	struct sSkeleton {

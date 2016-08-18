@@ -83,6 +83,12 @@ void FbxDawg::loadModels(const char* filePath)
 
 			if (mesh->GetDeformerCount(FbxDeformer::eBlendShape) > 0)
 				this->bsLoader(mesh);
+			FbxAMatrix pivotMatrix;
+			mesh->GetPivot(pivotMatrix);
+			FbxVector4 right = pivotMatrix.GetT();
+			right[2] *= -1;
+			DirectX::XMVECTOR takebro = DirectX::XMVectorSet(right[0], right[1], right[2], right[3]);
+			DirectX::XMStoreFloat4(&pivotValue, takebro);
 
 			getMeshData(mesh, FbxChildNode);
 
@@ -573,6 +579,8 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 					currLayer->Solo = false;
 				}
 
+				skeleton.joints[currentJointIndex].animLayer.resize(numAnimLayers);
+
 				for (unsigned int animLayerCounter = 0; animLayerCounter < numAnimLayers; ++animLayerCounter)
 				{
 					FbxAnimLayer* currAnimLayer = currentAnimStack->GetMember<FbxAnimLayer>(animLayerCounter);
@@ -607,7 +615,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						FbxVector4 rotationTransform = animEvaluator->GetNodeLocalRotation(currentJoint, currKey.GetTime());	
 						FbxVector4 scalingTransform = animEvaluator->GetNodeLocalScaling(currentJoint, currKey.GetTime());
 						//The RotationPivot is gotten outta the eSourcePivot context.
-						FbxVector4 rotationPivot = currentJoint->GetRotationPivot(FbxNode::EPivotSet::eSourcePivot);
+						//FbxVector4 rotationPivot = currentJoint->GetRotationPivot(FbxNode::EPivotSet::eSourcePivot);
 				
 						//converts the right-handed coordinate system of Maya to the left-handed
 						//system of DirectX. 
@@ -615,7 +623,6 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						rotationTransform[0] *= -1.0;  
 						rotationTransform[1] *= -1.0;
 						scalingTransform[2] *= -1.0;
-						rotationPivot[2] *= -1.0;
 
 						localTransform.SetTRS(translationTransform, rotationTransform, scalingTransform);
 						//FbxQuaternion quaternionThing = localTransform.GetQ(); <-- Experiment.
@@ -624,53 +631,30 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						DirectX::XMVECTOR translationValues;
 						DirectX::XMVECTOR rotationValues;
 						DirectX::XMVECTOR scalingValues;
-						
-						DirectX::XMMATRIX transformMatrix;
 
 						translationValues = DirectX::XMVectorSet(translationTransform[0], translationTransform[1], translationTransform[2], translationTransform[3]);
 						rotationValues = DirectX::XMVectorSet(rotationTransform[0], rotationTransform[1], rotationTransform[2], rotationTransform[3]);
-						scalingValues = DirectX::XMVectorSet(scalingTransform[0], scalingTransform[1], scalingTransform[2], scalingTransform[3]);
-						pivotValues = DirectX::XMVectorSet(rotationPivot[0], rotationPivot[1], rotationPivot[2], rotationPivot[3]);
+						scalingValues = DirectX::XMVectorSet(scalingTransform[0], scalingTransform[1], scalingTransform[2], scalingTransform[3]);				
 						
-						//THis function expects a quaternion vector. Hope it's satisfied anyway.
-						transformMatrix = DirectX::XMMatrixAffineTransformation(scalingValues, pivotValues, rotationValues, translationValues);
-						
-						//Changes the base to left-handed one.
-						makeLH(&transformMatrix);
-						{ //forcing convertedTransform to run out of scope...
-							DirectX::XMFLOAT4X4 convertedTransform;
-							DirectX::XMStoreFloat4x4(&convertedTransform, transformMatrix);
+						DirectX::XMFLOAT4 storeTranslate; 
+						DirectX::XMFLOAT4 storeRotate;
+						DirectX::XMFLOAT4 storeScale;
+						DirectX::XMStoreFloat4(&storeTranslate, translationValues);
+						DirectX::XMStoreFloat4(&storeRotate, translationValues);
+						DirectX::XMStoreFloat4(&storeScale, scalingValues);
 
-							//Save all of the transform-matrices into a vector held on a per-joint-basis
-							skeleton.joints[currentJointIndex].keyTransform.push_back(convertedTransform);
-
-							//Save the time of the key
-							FbxTime keyTimeTemp = currKey.GetTime();
-							float keyTime = keyTimeTemp.GetSecondDouble();
-
-							skeleton.joints[currentJointIndex].keyTime.push_back(keyTime);
-						}
-						
-						skeleton.joints[currentJointIndex];
-
-
+						FbxTime keyTimeTemp = currKey.GetTime();
+						float keyTime = keyTimeTemp.GetSecondDouble();
+						sKeyFrame tempKey;
+						tempKey.keyTime = keyTime;
+						tempKey.translation = storeTranslate;
+						tempKey.rotation = storeRotate;
+						tempKey.scale = storeScale;
+			
+						skeleton.joints[currentJointIndex].animLayer[animLayerCounter].keyFrame.push_back(tempKey);
 					}
-					
-					//Now get the animation curves that determine the rotation and translation of this joint at different times
-					//FbxAnimCurve* yolo = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve();
-
 				}
-				//THIS IS THE EASIER WAY BUT LENDS LESS CONTROL
-				
-				//"Official Way" to "Evaluate" animationdata. Which means that the right "settings" are 
-				//used to get the local or global transformationmatrices for a PyNode (of joint type)
-				
-				
-				
-				
-			}
-			
-			
+			}	
 		}
 
 		for (int i = 0; i < dataPerControlPoint.size(); i++)
