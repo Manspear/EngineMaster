@@ -81,6 +81,12 @@ void FbxDawg::loadModels(const char* filePath)
 
 			if (mesh->GetDeformerCount(FbxDeformer::eBlendShape) > 0)
 				this->bsLoader(mesh);
+			FbxAMatrix pivotMatrix;
+			mesh->GetPivot(pivotMatrix);
+			FbxVector4 right = pivotMatrix.GetT();
+			right[2] *= -1;
+			DirectX::XMVECTOR takebro = DirectX::XMVectorSet(right[0], right[1], right[2], right[3]);
+			DirectX::XMStoreFloat4(&pivotValue, takebro);
 
 			std::vector<MyIndexStruct> IndexVector; IndexVector.resize(mesh->GetPolygonCount() * 3);
 
@@ -462,6 +468,8 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 
 				int numAnimLayers = currentAnimStack->GetMemberCount<FbxAnimLayer>();
 
+				skeleton.joints[currentJointIndex].animLayer.resize(numAnimLayers);
+
 				for (unsigned int animLayerCounter = 0; animLayerCounter < numAnimLayers; ++animLayerCounter)
 				{
 					FbxAnimLayer* currAnimLayer = currentAnimStack->GetMember<FbxAnimLayer>();
@@ -492,30 +500,29 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 						FbxNode::Pivots aids = skeleton.joints[currentJointIndex]->jointNode->GetPivots();
 						//skeleton.joints[currentJointIndex]->jointNode->GetPivots;
 						FbxNode::Pivot alba;
-						
+						//FbxVector4 rotationPivot = currentJoint->GetRotationPivot(FbxNode::EPivotSet::eSourcePivot);
 
-						//FIGURE OUT HOW TO GET LOCAL TRANSFORMS FROM FbxAnimEvaluator !!!
-
-						//FbxNode::EPivotSet lol = skeleton.joints[currentJointIndex]->jointNode->GetPivots();
-
-						//animEvaluator->GetNodeLocalTransform(skeleton.joints[currentJointIndex]->jointNode, currKey->GetTime(), skeleton.joints[currentJointIndex]->jointNode->GetPivots, false, false);
+						scalingValues = DirectX::XMVectorSet(scalingTransform[0], scalingTransform[1], scalingTransform[2], scalingTransform[3]);				
+						DirectX::XMFLOAT4 storeTranslate; 
+						DirectX::XMFLOAT4 storeRotate;
+						DirectX::XMFLOAT4 storeScale;
+						DirectX::XMStoreFloat4(&storeTranslate, translationValues);
+						DirectX::XMStoreFloat4(&storeRotate, translationValues);
+						DirectX::XMStoreFloat4(&storeScale, scalingValues);
+						FbxTime keyTimeTemp = currKey.GetTime();
+						float keyTime = keyTimeTemp.GetSecondDouble();
+						sKeyFrame tempKey;
+						tempKey.keyTime = keyTime;
+						tempKey.translation = storeTranslate;
+						tempKey.rotation = storeRotate;
+						tempKey.scale = storeScale;
+			
+						skeleton.joints[currentJointIndex].animLayer[animLayerCounter].keyFrame.push_back(tempKey);
 					}
-
-					//Now get the animation curves that determine the rotation and translation of this joint at different times
-					//FbxAnimCurve* yolo = skeleton.joints[currentJointIndex]->jointNode->LclTranslation.GetCurve();
-
+						//FbxNode::EPivotSet lol = skeleton.joints[currentJointIndex]->jointNode->GetPivots();
+						//animEvaluator->GetNodeLocalTransform(skeleton.joints[currentJointIndex]->jointNode, currKey->GetTime(), skeleton.joints[currentJointIndex]->jointNode->GetPivots, false, false);
 				}
-				//THIS IS THE EASIER WAY BUT LENDS LESS CONTROL
-
-				//"Official Way" to "Evaluate" animationdata. Which means that the right "settings" are 
-				//used to get the local or global transformationmatrices for a PyNode (of joint type)
-
-
-
-
-			}
-
-
+			}	
 		}
 	}
 }

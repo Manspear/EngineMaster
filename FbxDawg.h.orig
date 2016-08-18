@@ -36,13 +36,7 @@ class FbxDawg
 private:
 	/****/
 	void makeControlPointMap(FbxMesh* currMesh); //Only call once per mesh. Makes a list with length equal to number of control points.
-<<<<<<< HEAD
-=======
-	void fillOutSkeleton(unsigned int numberOfDeformers);
-	DirectX::XMMATRIX convertFbxMatrixToXMMatrix(FbxAMatrix input);
-	void makeLH(DirectX::XMMATRIX* input);
 	bool isAnimated = false;
->>>>>>> 73377907580a810d0dd881426299115bf588d80a
 
 public:
 	FbxDawg();
@@ -58,10 +52,11 @@ public:
 	bool hasSkeleton();
 	int* FBXIndexArray = nullptr;
 	int sizeOfFBXIndexArray = 0;
-	DirectX::XMVECTOR pivotValues;
+	DirectX::XMFLOAT4 pivotValue;
 	void bsLoader(FbxMesh * mesh);
 	FbxProperty *DCMmaterial;//Material per object skickar vi. Så jobbigt annars. Eller sök upp bra exempel syntax
 
+<<<<<<< HEAD
 							 //Core datatypes: FbxSkeleton, eRoot, eLimb, eEffector
 	struct sJoint { //s as in struct :D
 		const char* name;
@@ -69,6 +64,30 @@ public:
 		FbxAMatrix* globalBindPoseInverse;
 		FbxNode* jointNode;
 
+=======
+	//Core datatypes: FbxSkeleton, eRoot, eLimb, eEffector
+
+
+	struct sKeyFrame
+	{
+		DirectX::XMFLOAT4 translation;
+		DirectX::XMFLOAT4 rotation;
+		DirectX::XMFLOAT4 scale;
+		float keyTime;
+	};
+
+	struct sAnimLayer
+	{
+		std::vector<sKeyFrame> keyFrame;
+	};
+
+	struct sJoint { //s as in struct :D
+		const char* name;
+		int parentJointIndex;
+		int jointIndex;
+		DirectX::XMFLOAT4X4* globalBindPoseInverse;
+		std::vector<sAnimLayer> animLayer;
+>>>>>>> 767a8a6480a1a8652353fe8f378dd967a122443c
 	};
 
 	struct sSkeleton {

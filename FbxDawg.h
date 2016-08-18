@@ -52,17 +52,32 @@ public:
 	bool hasSkeleton();
 	int* FBXIndexArray = nullptr;
 	int sizeOfFBXIndexArray = 0;
-	DirectX::XMVECTOR pivotValues;
+	DirectX::XMFLOAT4 pivotValue;
 	void bsLoader(FbxMesh * mesh);
 	FbxProperty *DCMmaterial;//Material per object skickar vi. Så jobbigt annars. Eller sök upp bra exempel syntax
 
 							 //Core datatypes: FbxSkeleton, eRoot, eLimb, eEffector
+
+
+	struct sKeyFrame
+	{
+		DirectX::XMFLOAT4 translation;
+		DirectX::XMFLOAT4 rotation;
+		DirectX::XMFLOAT4 scale;
+		float keyTime;
+	};
+
+	struct sAnimLayer
+	{
+		std::vector<sKeyFrame> keyFrame;
+	};
+
 	struct sJoint { //s as in struct :D
 		const char* name;
 		int parentIndex;
 		FbxAMatrix* globalBindPoseInverse;
 		FbxNode* jointNode;
-
+		std::vector<sAnimLayer> animLayer;
 	};
 
 	struct sSkeleton {
