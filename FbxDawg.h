@@ -66,6 +66,7 @@ public:
 	bool hasSkeleton();
 	int* FBXIndexArray = nullptr;
 	int sizeOfFBXIndexArray = 0;
+	DirectX::XMVECTOR pivotValues;
 	void bsLoader(FbxMesh * mesh);
 
 	//Core datatypes: FbxSkeleton, eRoot, eLimb, eEffector

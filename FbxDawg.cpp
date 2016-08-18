@@ -624,7 +624,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						DirectX::XMVECTOR translationValues;
 						DirectX::XMVECTOR rotationValues;
 						DirectX::XMVECTOR scalingValues;
-						DirectX::XMVECTOR pivotValues;
+						
 						DirectX::XMMATRIX transformMatrix;
 
 						translationValues = DirectX::XMVectorSet(translationTransform[0], translationTransform[1], translationTransform[2], translationTransform[3]);
