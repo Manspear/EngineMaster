@@ -546,7 +546,7 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 //	//Hmm... But the value held by a key might be relevant, if we've a curve for each individual XYZ curve! HMM!
 //	//This is the way to go. Oh my god so EZ!
 //}
-
+ 
 unsigned int FbxDawg::findJointIndexByName(const char* jointName)
 {
 	try

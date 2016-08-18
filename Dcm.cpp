@@ -203,12 +203,13 @@ void DCM::DCM_Render_Main(GModel* listOfModels, GModelList* modelListObject)
 {
 
 	// Generate the cube map by rendering to each cube map face.
-	gDeviceContext->RSSetViewports(1, &DCM_CubeMapViewport);//DCM_CubeMapViewport har ej. Måste ge BuildCubeFaceCamera(float x, float y, float z, float w) värden. Detta händer aldrig. Centerpoint
+	gDeviceContext->RSSetViewports(1, &DCM_CubeMapViewport);//DCM_CubeMapViewport har ej. Måste ge BuildCubeFaceCamera(float x, float y, float z, float w) värden. (Detta händer tydligen aldrig). Centerpoint
 
 															//vvvvvvvvvv	< Dynamic cube map >	vvvvvvvvvvvvv
 
 	for (int i = 0; i < 6; i++)
 	{
+		//DCM_RenderTargetView har inte blivit intitialiserad än
 		gDeviceContext->ClearRenderTargetView(DCM_RenderTargetView[i], reinterpret_cast<const float*>(&Colors::Silver));//fortsätt läsa sid 486
 		gDeviceContext->ClearDepthStencilView(DCM_DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 

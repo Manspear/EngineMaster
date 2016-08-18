@@ -113,10 +113,10 @@ void Engine::CreateShaders()
 	};
 	hr = gDevice->CreateInputLayout(inputDescDCM, ARRAYSIZE(inputDescDCM), pVS_DCM->GetBufferPointer(), pVS_DCM->GetBufferSize(), &gVertexLayoutDCM);
 
-	//create pixel shader
+	//create pixel shader 1
 	ID3DBlob* pPS = nullptr;
 	D3DCompileFromFile(
-		L"PixelShader.hlsl", // filename
+		L"PixelShader.hlsl", // filename 1
 		nullptr,		// optional macros
 		nullptr,		// optional include files
 		"PS_main",		// entry point
@@ -151,6 +151,49 @@ void Engine::CreateShaders()
 
 	hr = gDevice->CreateSamplerState(&sampDesc, &gPSTextureSampler);
 
+	//DCM START
+
+	//create pixel shader
+	ID3DBlob* pPS_DCM = nullptr;
+	D3DCompileFromFile(
+		L"DCM_PixelShader.hlsl", // filename
+		nullptr,		// optional macros
+		nullptr,		// optional include files
+		"PS_main",		// entry point
+		"ps_4_0",		// shader model (target)
+		0,				// shader compile options
+		0,				// effect compile options
+		&pPS_DCM,			// double pointer to ID3DBlob		
+		nullptr			// pointer for Error Blob messages.
+						// how to use the Error blob, see here
+						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+		);
+
+	gDevice->CreatePixelShader(pPS_DCM->GetBufferPointer(), pPS_DCM->GetBufferSize(), nullptr, &gPixelShader);
+	// we do not need anymore this COM object, so we release it.
+	pPS_DCM->Release();
+
+	//Creating a Sampler for the Pixel Shader
+	D3D11_SAMPLER_DESC sampDesc_DCM;
+	sampDesc_DCM.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc_DCM.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampDesc_DCM.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampDesc_DCM.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampDesc_DCM.MipLODBias = 0;
+	sampDesc_DCM.MaxAnisotropy = 1;
+	sampDesc_DCM.ComparisonFunc = D3D11_COMPARISON_ALWAYS; //Maybe this does something bad? Hmm... Keep an eye out.
+	sampDesc_DCM.BorderColor[0] = 1.f;
+	sampDesc_DCM.BorderColor[1] = 1.f;
+	sampDesc_DCM.BorderColor[2] = 0.f;
+	sampDesc_DCM.BorderColor[3] = 1.f; //Not sure why this RGB value's w value must be 1... Alpha maybe?
+	sampDesc_DCM.MinLOD = 0;
+	sampDesc_DCM.MaxLOD = 12;
+
+	hr = gDevice->CreateSamplerState(&sampDesc, &gPSTextureSampler);
+
+
+	//DCM END
+
 	//Creating Geometry Shader...
 	ID3DBlob* pGS = nullptr; //This may be used for error handling!
 	D3DCompileFromFile(
@@ -176,6 +219,17 @@ void Engine::CreateDynamicCubeMap()
 		gConstantBuffer, gVertexShaderBS, gVertexLayoutBS, gDeviceContext);
 
 	dcm.Dynamic_Cube_Map(gDevice);
+	// jag måste få listOfModels[bufferCounter]'s centerpivot, så att jag kan
+	// BuildCubeFaceCamera(x, y, z, w) med den.
+	
+	for (int i = 0; i < modelListObject.numberOfModels; i++)
+	{
+		if (listOfModels[i].hasDCM)
+		{
+			dcm.BuildCubeFaceCamera(listOfModels[i].centerPivot);
+		}
+	}
+
 
 
 }
@@ -280,12 +334,9 @@ void Engine::Render()
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
 	listOfModels = modelListObject.getModelList();
-
-
 
 	//bool isRoot = true;
 	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
@@ -305,26 +356,19 @@ void Engine::Render()
 	//struct frustumVert {										  	 
 	//		float x, y, z, xn, yn, zn, u, v;					  	 
 	//	};														  	 
-	//	frustumVert frustumVertices[6]; //...					  	 
-
-
+	//	frustumVert frustumVertices[6]; //...					  	
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
-
-		//printf("%d", cullingFrustum->seenObjects.size());
 		if (cullingFrustum->seenObjects[bufferCounter]->hasBlendShape())
 		{
-
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
 			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
 			vertexSize = sizeof(float) * 16;
 		}
-		else if (listOfModels[bufferCounter].hasDCM() == true)//modelLoader->DCMmaterial->IsValid()
+		else if (cullingFrustum->seenObjects[bufferCounter]->hasDCM() == true)//modelLoader->DCMmaterial->IsValid()
 		{
-
-
 			printf("DCM \t ");
 			gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 			gDeviceContext->VSSetShader(gVertexShaderDCM, nullptr, 0);//VSSetShader(gVertexShader, nullptr, 0);
@@ -336,7 +380,7 @@ void Engine::Render()
 			gDeviceContext->IASetInputLayout(gVertexLayoutDCM);
 			vertexSize = sizeof(float) * 8;
 
-
+			//rendera från cubens kamera
 			dcm.DCM_Render_Main(listOfModels, &modelListObject);
 			//DCM_Render(listOfModels, modelListObject);
 
@@ -581,7 +625,7 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	input = new GInput;
 
 	CreateDirect3DContext(wndHandle);
-
+	
 	InitializeModels();
 
 	SetViewport(vp);
@@ -600,6 +644,8 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	InitializeQuadTree();
 
 	InitializeFrustum();
+
+	CreateDynamicCubeMap();
 }
 
 void Engine::InitializeFrustum()

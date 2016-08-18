@@ -103,7 +103,8 @@ void GFrustum::updateFrustumPos(const DirectX::XMMATRIX & cameraProjection, cons
 /*bool GFrustum::isCollision(const DirectX::BoundingBox& modelBBox)
 {
 	//Now make the Frustum follow the camera. How? By creating it with the camera's Frustum!	
-	//Uhmm...What to do when a collision has actually happened? I cannot do it here, can I? No. I gotta send back a bool to main, and there handle the "model-ignoring"	
+	//Uhmm...What to do when a collision has actually happened? I cannot do it here, can I? No. I gotta send back a bool to 
+	, and there handle the "model-ignoring"	
 	//will do it by simply not sending the vertex-buffer of the object into the vertex shader. Smart. Easy. Good thinking. Proud of you.
 	bool collision = false;
 	if (frustum.Contains(modelBBox) == 0) {
