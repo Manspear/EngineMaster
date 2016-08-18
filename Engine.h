@@ -28,6 +28,8 @@
 
 #include "ParticleSystem.h"
 
+#include "DeltaTime.h"
+
 #ifndef ENGINE_H
 #define ENGINE_H
 #define XAXIS 0
@@ -107,7 +109,7 @@ public:
 	int frameCount;
 	int fps;
 	__int64 frameTimeOld;
-	double dt;
+	//double dt;
 	void renderText(std::wstring text);
 	void startTimer();
 	double getTime();

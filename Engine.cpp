@@ -284,11 +284,18 @@ void Engine::Render()
 			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
 			vertexSize = sizeof(float) * 16;
 		}
-		else {
+		else if (cullingFrustum->seenObjects[bufferCounter]->isAnimated())
+		{
+			//the frustum never registers collision with an animated mesh
+			int poop = 5;
+		}
+		else
+		{
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
 			vertexSize = sizeof(float) * 8 + sizeof(int);
 		}
+
 
 			
 		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.

@@ -9,7 +9,9 @@ GModel::GModel()
 	this->objectWorldMatrix = new SimpleMath::Matrix;
 	this->objectWorldMatrix[0] = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
 	this->blendShape = false;
+	animationTime = 0;
 	noOfTextures = 1;
+	hasSkeleton = false;
 }
 
 GModel::~GModel()
@@ -19,6 +21,10 @@ GModel::~GModel()
 	//modelTextureView[1]->Release();
 	delete objectWorldMatrix;
 
+}
+bool GModel::isAnimated()
+{
+	return hasSkeleton;
 }
 void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext)
 {
@@ -328,6 +334,7 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 }
 void GModel::loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath)
 {
+	hasSkeleton = true;
 	modelLoader.loadModels(fbxFilePath);
 	pivotPoint = modelLoader.pivotValue;
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
@@ -389,6 +396,9 @@ void GModel::loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11
 
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 #pragma endregion ConstantBuffer
+	makeJointBuffer(gDevice);
+
+
 	//Import from File
 #pragma region
 	HRESULT hr;
@@ -418,20 +428,20 @@ void GModel::loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11
 	float minY = FLT_MAX;
 	float maxZ = FLT_MIN;
 	float minZ = FLT_MAX;
-	for (int i = 0; i < modelVertices.size(); i++) {
+	for (int i = 0; i < animModelVertices.size(); i++) {
 		//get the min and max values of the model
-		if (maxX < modelVertices[i].x)
-			maxX = modelVertices[i].x;
-		if (minX > modelVertices[i].x)
-			minX = modelVertices[i].x;
-		if (maxY < modelVertices[i].y)
-			maxY = modelVertices[i].y;
-		if (minY > modelVertices[i].y)
-			minY = modelVertices[i].y;
-		if (maxZ < modelVertices[i].z)
-			maxZ = modelVertices[i].z;
-		if (minZ > modelVertices[i].z)
-			minZ = modelVertices[i].z;
+		if (maxX < animModelVertices[i].x)
+			maxX = animModelVertices[i].x;
+		if (minX > animModelVertices[i].x)
+			minX = animModelVertices[i].x;
+		if (maxY < animModelVertices[i].y)
+			maxY = animModelVertices[i].y;
+		if (minY > animModelVertices[i].y)
+			minY = animModelVertices[i].y;
+		if (maxZ < animModelVertices[i].z)
+			maxZ = animModelVertices[i].z;
+		if (minZ > animModelVertices[i].z)
+			minZ = animModelVertices[i].z;
 	}
 	//make two XMVECTORs that we will create the bbox from
 	XMVECTOR maxPos = XMVectorSet(maxX, maxY, maxZ, 1);
@@ -441,7 +451,32 @@ void GModel::loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11
 
 	//Create the bbox (my version)
 	bBox.CreateBBox(XMFLOAT3(minX, minY, minZ), XMFLOAT3(maxX, maxY, maxZ));
-};
+}
+void GModel::makeJointBuffer(ID3D11Device* gDevice)
+{
+	D3D11_BUFFER_DESC bDesc;
+	bDesc.ByteWidth = sizeof(jointStruct);
+	bDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bDesc.MiscFlags = 0;
+	bDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = &jointMatrices;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	HRESULT hr;
+	hr = gDevice->CreateBuffer(&bDesc, &InitData, &jointBuffer);
+}
+void GModel::updateAnimation(ID3D11DeviceContext * gDeviceContext)
+{
+	//First get target time
+	animationTime += dt;
+	modelLoader.skeleton.joints;
+}
+;
 
 
 int GModel::getNumberOfTextures()
