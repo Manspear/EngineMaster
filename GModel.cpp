@@ -62,7 +62,9 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 {
 	modelLoader.loadModels(fbxFilePath);
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
+	pivotPoint = modelLoader.pivotValues;
 	this->modelVertices = modelLoader.modelVertexList;
+	
 	this->modelTextureFilepath = modelLoader.textureFilepath;
 	if (modelLoader.DCMmaterial->IsValid())
 	{
@@ -180,7 +182,7 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 {
 	this->blendShape = true;
 	modelLoader.loadModels(fbxFilePath);
-
+	pivotPoint = modelLoader.pivotValues;
 
 	this->modelVertices = modelLoader.modelVertexList;
 	this->modelTextureFilepath = modelLoader.textureFilepath;
@@ -299,6 +301,122 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 
 	//Loop through the vertices to get the minimum and maximum xyz values to be used for BBox creation.
 	//This could be done in the FbxDawg-class, to spare the CPU when you're loading lots of models.
+	float maxX = FLT_MIN;
+	float minX = FLT_MAX;
+	float maxY = FLT_MIN;
+	float minY = FLT_MAX;
+	float maxZ = FLT_MIN;
+	float minZ = FLT_MAX;
+	for (int i = 0; i < modelVertices.size(); i++) {
+		//get the min and max values of the model
+		if (maxX < modelVertices[i].x)
+			maxX = modelVertices[i].x;
+		if (minX > modelVertices[i].x)
+			minX = modelVertices[i].x;
+		if (maxY < modelVertices[i].y)
+			maxY = modelVertices[i].y;
+		if (minY > modelVertices[i].y)
+			minY = modelVertices[i].y;
+		if (maxZ < modelVertices[i].z)
+			maxZ = modelVertices[i].z;
+		if (minZ > modelVertices[i].z)
+			minZ = modelVertices[i].z;
+	}
+	//make two XMVECTORs that we will create the bbox from
+	XMVECTOR maxPos = XMVectorSet(maxX, maxY, maxZ, 1);
+	XMVECTOR minPos = XMVectorSet(minX, minY, minZ, 1);
+	//modelBBox.CreateFromPoints(modelBBox, maxPos, minPos);
+	//now when I've got a bbox, I can do collision-detection with the frustum in the Frustum-class.
+
+	//Create the bbox (my version)
+	bBox.CreateBBox(XMFLOAT3(minX, minY, minZ), XMFLOAT3(maxX, maxY, maxZ));
+}
+void GModel::loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath)
+{
+	modelLoader.loadModels(fbxFilePath);
+	pivotPoint = modelLoader.pivotValues;
+	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
+	this->animModelVertices = modelLoader.animModelVertexList;
+	
+
+	this->modelTextureFilepath = modelLoader.textureFilepath;
+#pragma region VertexBuffer
+	D3D11_BUFFER_DESC bufferDesc;
+	memset(&bufferDesc, 0, sizeof(bufferDesc));
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = animModelVertices.size() * sizeof(AnimVertexStruct);//fbxobj->modelVertexList.size()*sizeof(MyVertexStruct);//250 000 verticer * byte-storleken på en vertex för att få den totala byten
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem = animModelVertices.data();
+
+	gDevice->CreateBuffer(&bufferDesc, &data, &animModelVertexBuffer);
+#pragma endregion VertexBuffer
+
+#pragma region IndexBuffer
+
+	this->IndexArray = modelLoader.FBXIndexArray; //Making it 123... for now. change will be made.
+	this->sizeOfIndexArray = modelLoader.sizeOfFBXIndexArray;
+
+
+	D3D11_BUFFER_DESC indexBufferDesc;
+	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
+
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = this->sizeOfIndexArray * sizeof(int);
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA indexInitData;
+	indexInitData.pSysMem = this->IndexArray;
+
+	gDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &this->modelIndexBuffer);
+#pragma endregion IndexBuffer
+#pragma region ConstantBuffer
+	//Creating constant buffer holding only worldmatrix
+	//D3D11_BUFFER_DESC bufferDesc;
+	memset(&bufferDesc, 0, sizeof(bufferDesc));
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.ByteWidth = sizeof(modelWorldStruct);
+	gDevice->CreateBuffer(&bufferDesc, NULL, &modelConstantBuffer);
+
+	//Giving the constant buffer data
+
+	D3D11_MAPPED_SUBRESOURCE gMappedResource;
+	modelWorldStruct* dataPtr;
+
+	gDeviceContext->Map(modelConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
+	dataPtr = (modelWorldStruct*)gMappedResource.pData;
+
+	dataPtr->worldMatrix = objectWorldMatrix[0];
+
+	gDeviceContext->Unmap(modelConstantBuffer, NULL);
+#pragma endregion ConstantBuffer
+	//Import from File
+#pragma region
+	HRESULT hr;
+
+	CoInitialize(NULL);
+	//Need to have this be part of the Render-looping-through-objects-loop. That is: not having modelList[0]
+	if (diffusePath == NULL)
+		hr = DirectX::CreateWICTextureFromFile(gDevice, modelTextureFilepath.c_str(), NULL, &modelTextureView[0]);
+	else
+		hr = DirectX::CreateWICTextureFromFile(gDevice, diffusePath, NULL, &modelTextureView[0]);
+
+	if (normalPath == NULL)
+	{
+		noOfTextures = 1;
+		hr = DirectX::CreateWICTextureFromFile(gDevice, L"finland", NULL, &modelTextureView[1]);
+	}
+	else {
+		noOfTextures = 2;
+		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]);
+	}
+#pragma endregion
+
+	//Making bbox
 	float maxX = FLT_MIN;
 	float minX = FLT_MAX;
 	float maxY = FLT_MIN;

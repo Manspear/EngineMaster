@@ -402,6 +402,10 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 	FbxMesh* currMesh = rootNode->GetMesh();
 	unsigned int deformerCount = currMesh->GetDeformerCount();
 
+		isAnimated = true;
+	}
+	else {
+		isAnimated = false;
 	for (unsigned int deformerIndex = 0; deformerIndex < deformerCount; ++deformerIndex)
 	{
 		FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(currMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
@@ -488,6 +492,7 @@ void FbxDawg::getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene)
 						FbxNode::Pivots aids = skeleton.joints[currentJointIndex]->jointNode->GetPivots();
 						//skeleton.joints[currentJointIndex]->jointNode->GetPivots;
 						FbxNode::Pivot alba;
+						
 
 						//FIGURE OUT HOW TO GET LOCAL TRANSFORMS FROM FbxAnimEvaluator !!!
 
@@ -588,6 +593,11 @@ void FbxDawg::recursiveJointHierarchyTraversal(FbxNode * inNode, int currentInde
 		//We process each and every child of this node, we search for children of AttributeType eSkeleton to add to the list of joints.
 		recursiveJointHierarchyTraversal(inNode->GetChild(i), skeleton.joints.size(), currentIndex);
 	}
+}
+
+bool FbxDawg::hasSkeleton()
+{
+	return isAnimated;
 }
 
 void FbxDawg::bsLoader(FbxMesh * mesh)

@@ -36,6 +36,7 @@ class FbxDawg
 private:
 	/****/
 	void makeControlPointMap(FbxMesh* currMesh); //Only call once per mesh. Makes a list with length equal to number of control points.
+	bool isAnimated = false;
 
 public:
 	FbxDawg();
@@ -48,9 +49,10 @@ public:
 	void getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene);
 	void processJointHierarchy(FbxNode* inRootNode);
 	void recursiveJointHierarchyTraversal(FbxNode* inNode, int storedIndex, int inNodeParentIndex);
-
+	bool hasSkeleton();
 	int* FBXIndexArray = nullptr;
 	int sizeOfFBXIndexArray = 0;
+	DirectX::XMVECTOR pivotValues;
 	void bsLoader(FbxMesh * mesh);
 	FbxProperty *DCMmaterial;//Material per object skickar vi. Så jobbigt annars. Eller sök upp bra exempel syntax
 
