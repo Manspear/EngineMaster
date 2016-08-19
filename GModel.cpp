@@ -4,6 +4,48 @@
 #include <algorithm>
 using namespace DirectX;
 
+void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D11DeviceContext * gDeviceContext)
+{
+	XMMATRIX tMatrices[NUMBEROFJOINTS];
+	std::vector<XMFLOAT4X4> finalMatrices;
+	finalMatrices.resize(modelLoader.skeleton.joints.size());
+	for (int i = 0; i < inputList.size(); i++)
+	{
+		XMMATRIX translation = XMMatrixTranslation(inputList[i].translation.x, inputList[i].translation.y, inputList[i].translation.z);
+		XMVECTOR tempRot = XMVectorSet(inputList[i].rotation.x, inputList[i].rotation.y, inputList[i].rotation.z, inputList[i].rotation.w);
+		XMMATRIX rotation = XMMatrixRotationQuaternion(tempRot);
+		XMMATRIX scaling  = XMMatrixScaling(inputList[i].scale.x, inputList[i].scale.y, inputList[i].scale.z);
+		
+		XMMATRIX TRS = translation * rotation * scaling;
+		tMatrices[i] = TRS;
+	}
+	//starts at 1 to skip the root
+	XMMATRIX worldMat = XMMatrixSet(objectWorldMatrix->_11, objectWorldMatrix->_12, objectWorldMatrix->_13, objectWorldMatrix->_14, 
+		objectWorldMatrix->_21, objectWorldMatrix->_22, objectWorldMatrix->_23, objectWorldMatrix->_24, 
+		objectWorldMatrix->_31, objectWorldMatrix->_32, objectWorldMatrix->_33, objectWorldMatrix->_34, 
+		objectWorldMatrix->_41, objectWorldMatrix->_42, objectWorldMatrix->_43, objectWorldMatrix->_44);
+	tMatrices[0] *= worldMat;
+	for (int i = 1; i < inputList.size(); i++)
+	{
+		int parentIndex = modelLoader.skeleton.joints[i].parentJointIndex;
+		tMatrices[i] = tMatrices[parentIndex] * tMatrices[i]; //if no child has an uncalculated parent, this works
+	}
+	for (int i = 0; i < inputList.size(); i++)
+	{
+		XMStoreFloat4x4(&jointMatrices.jointTransforms[i], tMatrices[i]);
+	}
+	D3D11_MAPPED_SUBRESOURCE subRez;
+	jointStruct* dataPtr;
+	gDeviceContext->Map(jointBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &subRez);
+	dataPtr = (jointStruct*)subRez.pData;
+	
+	for (int i = 0; i < NUMBEROFJOINTS; i++)
+	{
+		dataPtr->jointTransforms[i] = jointMatrices.jointTransforms[i];
+	}
+	gDeviceContext->Unmap(jointBuffer, NULL);
+}
+
 GModel::GModel()
 {
 	this->objectWorldMatrix = new SimpleMath::Matrix;
@@ -474,7 +516,25 @@ void GModel::updateAnimation(ID3D11DeviceContext * gDeviceContext)
 {
 	//First get target time
 	animationTime += dt;
-	modelLoader.skeleton.joints;
+	//first find the closest keyframe on each joint
+	//keyList is used to fill the matrixList
+	std::vector<FbxDawg::sKeyFrame> keyList;
+	keyList.resize(modelLoader.skeleton.joints.size());
+	for (int i = 0; i < modelLoader.skeleton.joints.size(); i++)
+	{
+		float timeCompare = FBXSDK_FLOAT_MAX;
+		for (int j = 0; j < modelLoader.skeleton.joints[i].animLayer[0].keyFrame.size(); j++)
+		{
+			float currKeyTime = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j].keyTime;
+			float diff = std::fmodf(currKeyTime, timeCompare);
+			if (diff < timeCompare)
+			{
+				timeCompare = diff;
+				keyList[i] = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j];
+			}	
+		}
+	}
+	updateJointMatrices(keyList, gDeviceContext);
 }
 ;
 

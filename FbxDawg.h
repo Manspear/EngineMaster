@@ -89,7 +89,7 @@ public:
 		const char* name;
 		int parentJointIndex;
 		int jointIndex;
-		DirectX::XMFLOAT4X4* globalBindPoseInverse;
+		DirectX::XMFLOAT4X4 globalBindPoseInverse;
 		std::vector<sAnimLayer> animLayer;
 	};
 

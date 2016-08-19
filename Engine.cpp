@@ -288,6 +288,7 @@ void Engine::Render()
 		{
 			//the frustum never registers collision with an animated mesh
 			int poop = 5;
+			cullingFrustum->seenObjects[bufferCounter]->updateAnimation(gDeviceContext);
 		}
 		else
 		{

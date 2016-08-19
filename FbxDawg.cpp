@@ -540,7 +540,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 			
 			//Update the information in skeleton
 
-			skeleton.joints[currentJointIndex].globalBindPoseInverse = &finalBindPoseMatrix;
+			skeleton.joints[currentJointIndex].globalBindPoseInverse = finalBindPoseMatrix;
 			currentJoint = currentCluster->GetLink();
 
 			//Associate each joint with the control points it affects
