@@ -76,7 +76,9 @@ public:
 
 	ID3D11InputLayout* gVertexLayout = nullptr;
 	ID3D11InputLayout* gVertexLayoutBS = nullptr;
+	ID3D11InputLayout* gVertexLayoutSkeletal = nullptr;
 	ID3D11VertexShader* gVertexShader = nullptr;
+	ID3D11VertexShader* gVertexShaderSkeletal = nullptr;
 	ID3D11VertexShader* gVertexShaderBS = nullptr;
 	ID3D11PixelShader* gPixelShader = nullptr;
 	ID3D11GeometryShader* gGeometryShader = nullptr;

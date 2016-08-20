@@ -53,6 +53,37 @@ void Engine::CreateShaders()
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
+
+	ID3DBlob* pSVS = nullptr;
+	D3DCompileFromFile(
+		L"SkeletalVertex.hlsl", // filename
+		nullptr,		// optional macros
+		nullptr,		// optional include files
+		"VSSkeletal_main",		// entry point
+		"vs_4_0",		// shader model (target)
+		0,				// shader compile options
+		0,				// effect compile options
+		&pSVS,			// double pointer to ID3DBlob		
+		nullptr			// pointer for Error Blob messages.
+						// how to use the Error blob, see here
+						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+	);
+
+
+	gDevice->CreateVertexShader(pSVS->GetBufferPointer(), pSVS->GetBufferSize(), nullptr, &gVertexShaderSkeletal);
+
+	//create input layout (verified using vertex shader)
+	D3D11_INPUT_ELEMENT_DESC inputDescSkeletal[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32_UINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	gDevice->CreateInputLayout(inputDescSkeletal, ARRAYSIZE(inputDescSkeletal), pSVS->GetBufferPointer(), pSVS->GetBufferSize(), &gVertexLayoutSkeletal);
+	// we do not need anymore this COM object, so we release it.
+	pSVS->Release();
+
 	//create vertex shader
 	ID3DBlob* pVSbs = nullptr;
 	D3DCompileFromFile(
@@ -226,9 +257,6 @@ void Engine::Render()
 	else
 		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor2);
 
-	
-
-
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
@@ -248,8 +276,7 @@ void Engine::Render()
 																					   
 	listOfModels = modelListObject.getModelList();									   
 																					   
-																					   
-																					   
+	listOfModels[0].animationTime;
 	//bool isRoot = true;
 	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
 	//cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);

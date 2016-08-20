@@ -24,7 +24,7 @@ void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D
 		objectWorldMatrix->_21, objectWorldMatrix->_22, objectWorldMatrix->_23, objectWorldMatrix->_24, 
 		objectWorldMatrix->_31, objectWorldMatrix->_32, objectWorldMatrix->_33, objectWorldMatrix->_34, 
 		objectWorldMatrix->_41, objectWorldMatrix->_42, objectWorldMatrix->_43, objectWorldMatrix->_44);
-	tMatrices[0] *= worldMat;
+	tMatrices[0] = worldMat * tMatrices[0];
 	for (int i = 1; i < inputList.size(); i++)
 	{
 		int parentIndex = modelLoader.skeleton.joints[i].parentJointIndex;
