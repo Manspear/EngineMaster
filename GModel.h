@@ -9,7 +9,6 @@
 #include <string>
 #include "SimpleMath.h"
 #include <stdlib.h>
-#include "DeltaTime.h"
 #include <cmath>
 
 using namespace DirectX;
@@ -81,7 +80,7 @@ public:
 	void loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath);
 	void loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath);
 	void makeJointBuffer(ID3D11Device* gDevice);
-	void updateAnimation(ID3D11DeviceContext* gDeviceContext);
+	void updateAnimation(ID3D11DeviceContext* gDeviceContext, double dt);
 	
 };
 

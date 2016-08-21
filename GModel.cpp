@@ -512,21 +512,23 @@ void GModel::makeJointBuffer(ID3D11Device* gDevice)
 	HRESULT hr;
 	hr = gDevice->CreateBuffer(&bDesc, &InitData, &jointBuffer);
 }
-void GModel::updateAnimation(ID3D11DeviceContext * gDeviceContext)
+void GModel::updateAnimation(ID3D11DeviceContext * gDeviceContext, double dt)
 {
 	//First get target time
 	animationTime += dt;
+	
 	//first find the closest keyframe on each joint
 	//keyList is used to fill the matrixList
 	std::vector<FbxDawg::sKeyFrame> keyList;
 	keyList.resize(modelLoader.skeleton.joints.size());
 	for (int i = 0; i < modelLoader.skeleton.joints.size(); i++)
 	{
+		float targetTime = abs(std::fmod(animationTime, modelLoader.skeleton.joints.back().animLayer[0].keyFrame.back().keyTime));
 		float timeCompare = FBXSDK_FLOAT_MAX;
 		for (int j = 0; j < modelLoader.skeleton.joints[i].animLayer[0].keyFrame.size(); j++)
 		{
 			float currKeyTime = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j].keyTime;
-			float diff = std::fmodf(currKeyTime, timeCompare);
+			float diff = abs(targetTime - currKeyTime);
 			if (diff < timeCompare)
 			{
 				timeCompare = diff;

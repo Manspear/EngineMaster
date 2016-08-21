@@ -14,7 +14,7 @@ Engine::Engine()
 	counterStart = 0;
 	frameCount = 0;
 	fps = 0;
-	frameTimeOld = 0;
+	frameTimeOld = 100000000000000000;
 }
 
 Engine::~Engine()
@@ -276,7 +276,6 @@ void Engine::Render()
 																					   
 	listOfModels = modelListObject.getModelList();									   
 																					   
-	listOfModels[0].animationTime;
 	//bool isRoot = true;
 	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
 	//cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
@@ -313,9 +312,11 @@ void Engine::Render()
 		}
 		else if (cullingFrustum->seenObjects[bufferCounter]->isAnimated())
 		{
-			//the frustum never registers collision with an animated mesh
-			int poop = 5;
-			cullingFrustum->seenObjects[bufferCounter]->updateAnimation(gDeviceContext);
+			gDeviceContext->VSSetShader(gVertexShaderSkeletal, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayoutSkeletal);
+			cullingFrustum->seenObjects[bufferCounter]->updateAnimation(gDeviceContext, dt);
+			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->jointBuffer);
+			vertexSize = sizeof(float) * 12 + sizeof(int) * 4;
 		}
 		else
 		{
@@ -323,14 +324,19 @@ void Engine::Render()
 			gDeviceContext->IASetInputLayout(gVertexLayout);
 			vertexSize = sizeof(float) * 8 + sizeof(int);
 		}
-
-
-			
+	
 		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
-
-		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
+		if(cullingFrustum->seenObjects[bufferCounter]->isAnimated())
+		{
+			gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->animModelVertexBuffer, &vertexSize, &offset);
+		}
+		else
+		{
+			gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
+		}
+		
 		gDeviceContext->IASetIndexBuffer(cullingFrustum->seenObjects[bufferCounter]->modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 		gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray, 0, 0);
@@ -358,8 +364,6 @@ void Engine::Render()
 
 void Engine::Update()
 {
-
-
 	frameCount++;
 	if (getTime() > 1.0f)
 	{
@@ -617,6 +621,6 @@ double Engine::getFrameTime()
 
 	if (tickCount < 0.0f)
 		tickCount = 0.0f;
-
+	float lolis = float(tickCount) / countsPerSecond;
 	return float(tickCount) / countsPerSecond;
 }

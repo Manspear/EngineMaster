@@ -610,7 +610,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 
 						FbxAnimCurveKey currKey = translationCurve_X->KeyGet(keyIndex);
 
-						FbxAMatrix localTransform;
+						//FbxAMatrix localTransform;
 						FbxVector4 translationTransform = animEvaluator->GetNodeLocalTranslation(currentJoint, currKey.GetTime());
 						FbxVector4 rotationTransform = animEvaluator->GetNodeLocalRotation(currentJoint, currKey.GetTime());	
 						FbxVector4 scalingTransform = animEvaluator->GetNodeLocalScaling(currentJoint, currKey.GetTime());
@@ -624,7 +624,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						rotationTransform[1] *= -1.0;
 						scalingTransform[2] *= -1.0;
 
-						localTransform.SetTRS(translationTransform, rotationTransform, scalingTransform);
+						//localTransform.SetTRS(translationTransform, rotationTransform, scalingTransform);
 						//FbxQuaternion quaternionThing = localTransform.GetQ(); <-- Experiment.
 						
 
@@ -640,7 +640,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						DirectX::XMFLOAT4 storeRotate;
 						DirectX::XMFLOAT4 storeScale;
 						DirectX::XMStoreFloat4(&storeTranslate, translationValues);
-						DirectX::XMStoreFloat4(&storeRotate, translationValues);
+						DirectX::XMStoreFloat4(&storeRotate, rotationValues);
 						DirectX::XMStoreFloat4(&storeScale, scalingValues);
 
 						FbxTime keyTimeTemp = currKey.GetTime();
