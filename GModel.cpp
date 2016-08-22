@@ -32,6 +32,8 @@ void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D
 	}
 	for (int i = 0; i < inputList.size(); i++)
 	{
+		/*XMMATRIX popo = XMMatrixTranspose(tMatrices[i]);
+		XMStoreFloat4x4(&jointMatrices.jointTransforms[i], popo);*/
 		XMStoreFloat4x4(&jointMatrices.jointTransforms[i], tMatrices[i]);
 	}
 	D3D11_MAPPED_SUBRESOURCE subRez;

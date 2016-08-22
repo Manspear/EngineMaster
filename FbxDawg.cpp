@@ -376,46 +376,80 @@ void FbxDawg::getMeshData(FbxMesh* mesh, FbxNode* FbxChildNode)
 
 		this->blendShapes.push_back(tempBlendShape);
 	}
-
 	this->makeIndexList();
 }
 
 void FbxDawg::makeIndexList()
 {
-	this->FBXIndexArray = new int[this->modelVertexList.size()];
-	this->sizeOfFBXIndexArray = this->modelVertexList.size();
+	if(isAnimated)
+	{ 
+		this->FBXIndexArray = new int[this->animModelVertexList.size()];
+		this->sizeOfFBXIndexArray = this->animModelVertexList.size();
 
-	for (int i = 0; i < this->sizeOfFBXIndexArray; i++)
-		FBXIndexArray[i] = i;
+		for (int i = 0; i < this->sizeOfFBXIndexArray; i++)
+			FBXIndexArray[i] = i;
 
-	for (int vertex = 0; vertex< this->modelVertexList.size(); vertex++)
-	{
-		for (int other = vertex + 1; other < modelVertexList.size(); other++)
+		for (int vertex = 0; vertex< this->animModelVertexList.size(); vertex++)
 		{
-			if (modelVertexList[vertex].norX == modelVertexList[other].norX &&
-				modelVertexList[vertex].norY == modelVertexList[other].norY &&
-				modelVertexList[vertex].norZ == modelVertexList[other].norZ
-				&&
-
-				modelVertexList[vertex].u == modelVertexList[other].u &&
-				modelVertexList[vertex].v == modelVertexList[other].v
-				&&
-
-				modelVertexList[vertex].x == modelVertexList[other].x &&
-				modelVertexList[vertex].y == modelVertexList[other].y &&
-				modelVertexList[vertex].z == modelVertexList[other].z)
+			for (int other = vertex + 1; other < animModelVertexList.size(); other++)
 			{
-				FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
-			}
+				if (animModelVertexList[vertex].norX == animModelVertexList[other].norX &&
+					animModelVertexList[vertex].norY == animModelVertexList[other].norY &&
+					animModelVertexList[vertex].norZ == animModelVertexList[other].norZ
+					&&
+					animModelVertexList[vertex].u == animModelVertexList[other].u &&
+					animModelVertexList[vertex].v == animModelVertexList[other].v
+					&&
+					animModelVertexList[vertex].x == animModelVertexList[other].x &&
+					animModelVertexList[vertex].y == animModelVertexList[other].y &&
+					animModelVertexList[vertex].z == animModelVertexList[other].z
+					&&
+					animModelVertexList[vertex].influences[0] == animModelVertexList[other].influences[0] &&
+					animModelVertexList[vertex].influences[1] == animModelVertexList[other].influences[1] &&
+					animModelVertexList[vertex].influences[2] == animModelVertexList[other].influences[2] &&
+					animModelVertexList[vertex].influences[3] == animModelVertexList[other].influences[3] 
+					&&
+					animModelVertexList[vertex].weights[0] == animModelVertexList[other].weights[0] &&
+					animModelVertexList[vertex].weights[1] == animModelVertexList[other].weights[1] &&
+					animModelVertexList[vertex].weights[2] == animModelVertexList[other].weights[2] &&
+					animModelVertexList[vertex].weights[3] == animModelVertexList[other].weights[3]
+					)
+				{
+					FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
+				}
+			}//printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
+		}//All vertexes have been compared
+	}
+	else 
+	{
+		this->FBXIndexArray = new int[this->modelVertexList.size()];
+		this->sizeOfFBXIndexArray = this->modelVertexList.size();
 
+		for (int i = 0; i < this->sizeOfFBXIndexArray; i++)
+			FBXIndexArray[i] = i;
 
-		}//printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
+		for (int vertex = 0; vertex< this->modelVertexList.size(); vertex++)
+		{
+			for (int other = vertex + 1; other < modelVertexList.size(); other++)
+			{
+				if (modelVertexList[vertex].norX == modelVertexList[other].norX &&
+					modelVertexList[vertex].norY == modelVertexList[other].norY &&
+					modelVertexList[vertex].norZ == modelVertexList[other].norZ
+					&&
 
+					modelVertexList[vertex].u == modelVertexList[other].u &&
+					modelVertexList[vertex].v == modelVertexList[other].v
+					&&
 
-
-	}//All vertexes have been compared
-
-
+					modelVertexList[vertex].x == modelVertexList[other].x &&
+					modelVertexList[vertex].y == modelVertexList[other].y &&
+					modelVertexList[vertex].z == modelVertexList[other].z)
+				{
+					FBXIndexArray[other] = FBXIndexArray[vertex]; //Remove that index and replace with earlier.
+				}
+			}//printf("%d\n", FBXIndexArray[vertex]); //Compared with all other.
+		}//All vertexes have been compared
+	}
 }
 
 void FbxDawg::makeControlPointMap(FbxMesh* currMesh)
@@ -649,6 +683,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						tempKey.keyTime = keyTime;
 						tempKey.translation = storeTranslate;
 						tempKey.rotation = storeRotate;
+
 						tempKey.scale = storeScale;
 			
 						skeleton.joints[currentJointIndex].animLayer[animLayerCounter].keyFrame.push_back(tempKey);

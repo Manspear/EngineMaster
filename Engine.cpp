@@ -330,6 +330,9 @@ void Engine::Render()
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
 		if(cullingFrustum->seenObjects[bufferCounter]->isAnimated())
 		{
+			cullingFrustum->seenObjects[bufferCounter]->animModelVertices;
+			cullingFrustum->seenObjects[bufferCounter]->jointMatrices;
+			cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray;
 			gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->animModelVertexBuffer, &vertexSize, &offset);
 		}
 		else
@@ -340,6 +343,7 @@ void Engine::Render()
 		gDeviceContext->IASetIndexBuffer(cullingFrustum->seenObjects[bufferCounter]->modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 		gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray, 0, 0);
+		//gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->animModelVertices.size(), 0);
 	}
 
 	particleSys->renderParticles();
@@ -501,26 +505,53 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 void Engine::Clean() {
 
 	gVertexLayout->Release();
+	gVertexLayoutBS->Release();
+	gVertexLayoutSkeletal->Release();
 	gVertexShader->Release();
+	gVertexShaderBS->Release();
+	gVertexShaderSkeletal->Release();
 	gPixelShader->Release();
 	gGeometryShader->Release();
-	delete particleSys;
 
 	gBackbufferRTV->Release();
 	gSwapChain->Release();
-	gDevice->Release();
 	gDeviceContext->Release();
 
 	gPSTextureSampler->Release();
 
 	depthStencilView->Release();
 	gDepthStencilBuffer->Release();
-
+	gConstantBuffer->Release();
+	for (int i = 0; i < modelListObject.numberOfModels; i++)
+	{
+		if(listOfModels[i].animModelVertexBuffer != nullptr)
+			listOfModels[i].animModelVertexBuffer->Release();
+		if(listOfModels[i].modelVertexBuffer != nullptr)
+			listOfModels[i].modelVertexBuffer->Release();
+		if (listOfModels[i].jointBuffer != nullptr)
+			listOfModels[i].jointBuffer->Release();
+		if (listOfModels[i].bsWBuffer != nullptr)
+			listOfModels[i].bsWBuffer->Release();
+		if(listOfModels[i].modelTextureView[0] != nullptr)
+			listOfModels[i].modelTextureView[0]->Release();
+		if(listOfModels[i].modelTextureView[1] != nullptr)
+			listOfModels[i].modelTextureView[1]->Release();
+		listOfModels[i].modelIndexBuffer->Release();
+		listOfModels[i].modelConstantBuffer->Release();
+	}
+	delete particleSys;
 	delete camera;
 	delete input;
 	delete cullingFrustum;
 	delete quadTreeRoot;
 	delete MousePickingObject;
+
+	ID3D11Debug* debugDevice = nullptr;
+	reinterpret_cast<void*>(debugDevice);
+	gDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debugDevice));
+	debugDevice->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	debugDevice->Release();
+	gDevice->Release();
 	//delete[] loops through the new-objects in the array, and deletes them!
 }
 void Engine::InitializeCamera()

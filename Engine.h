@@ -60,28 +60,27 @@ public:
 	Engine();
 	~Engine();
 
-	IDXGISwapChain* gSwapChain = nullptr;
-	ID3D11Device* gDevice = nullptr;
-	ID3D11DeviceContext* gDeviceContext = nullptr;
-	ID3D11RenderTargetView* gBackbufferRTV = nullptr;
+	IDXGISwapChain* gSwapChain = nullptr; //x
+	ID3D11Device* gDevice = nullptr; //x
+	ID3D11DeviceContext* gDeviceContext = nullptr; //x
+	ID3D11RenderTargetView* gBackbufferRTV = nullptr; //x
 
-	ID3D11Buffer* gVertexBuffer = nullptr;
-	ID3D11Buffer* gConstantBuffer = nullptr;
+	ID3D11Buffer* gConstantBuffer = nullptr; //x
 
-	ID3D11Texture2D* gDepthStencilBuffer = nullptr;
-	ID3D11DepthStencilView* depthStencilView = nullptr;
+	ID3D11Texture2D* gDepthStencilBuffer = nullptr; //x
+	ID3D11DepthStencilView* depthStencilView = nullptr; //x
 	//ID3D11ShaderResourceView* gTextureView[2];
 
-	ID3D11SamplerState* gPSTextureSampler = nullptr;
+	ID3D11SamplerState* gPSTextureSampler = nullptr; //x
 
-	ID3D11InputLayout* gVertexLayout = nullptr;
-	ID3D11InputLayout* gVertexLayoutBS = nullptr;
-	ID3D11InputLayout* gVertexLayoutSkeletal = nullptr;
-	ID3D11VertexShader* gVertexShader = nullptr;
-	ID3D11VertexShader* gVertexShaderSkeletal = nullptr;
-	ID3D11VertexShader* gVertexShaderBS = nullptr;
-	ID3D11PixelShader* gPixelShader = nullptr;
-	ID3D11GeometryShader* gGeometryShader = nullptr;
+	ID3D11InputLayout* gVertexLayout = nullptr; //x
+	ID3D11InputLayout* gVertexLayoutBS = nullptr; //x
+	ID3D11InputLayout* gVertexLayoutSkeletal = nullptr; //x
+	ID3D11VertexShader* gVertexShader = nullptr; //x
+	ID3D11VertexShader* gVertexShaderSkeletal = nullptr; //x
+	ID3D11VertexShader* gVertexShaderBS = nullptr; //x
+	ID3D11PixelShader* gPixelShader = nullptr; //x
+	ID3D11GeometryShader* gGeometryShader = nullptr;//x
 
 
 	struct matrixBuffer {
