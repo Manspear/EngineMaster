@@ -345,7 +345,7 @@ void FbxDawg::getMeshData(FbxMesh* mesh, FbxNode* FbxChildNode)
 			tempVertex.u = UVValue.mData[0];
 			tempVertex.v = 1 - UVValue.mData[1];
 
-			tempVertex.controlPointIndex = IndexVector[i].posIndex;
+			//tempVertex.controlPointIndex = IndexVector[i].posIndex;
 
 			for (int j = 0; j < 4; j++)
 			{
