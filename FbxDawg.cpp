@@ -313,7 +313,6 @@ void FbxDawg::getMeshData(FbxMesh* mesh, FbxNode* FbxChildNode)
 			tempVertex.y = (float)Vertices[IndexVector[i].posIndex].mData[1];
 			tempVertex.z = -1 * ((float)Vertices[IndexVector[i].posIndex].mData[2]);
 
-
 			FbxVector2 UVValue = IndexVector[i].UVElement->GetDirectArray().GetAt(IndexVector[i].uvIndex);
 			tempVertex.u = UVValue.mData[0];
 			tempVertex.v = 1 - UVValue.mData[1];
@@ -497,11 +496,16 @@ DirectX::XMMATRIX FbxDawg::convertFbxMatrixToXMMatrix(FbxAMatrix input)
 void FbxDawg::makeLH(DirectX::XMMATRIX * input)
 {
 	//Hope this works as a change of basis from RH to LH...
+	//translationTransform[2] *= -1.0;
+	//rotationTransform[0] *= -1.0;
+	//rotationTransform[1] *= -1.0;
+	//scalingTransform[2] *= -1.0;
 	DirectX::XMMATRIX newBase = DirectX::XMMatrixSet(1.0, 0.0, 0.0, 0.0,
 													 0.0, 1.0, 0.0, 0.0,
 													 0.0, 0.0, -1.0, 0.0,
 													 0.0, 0.0, 0.0, 0.0);
 	*input = DirectX::XMMatrixMultiply(*input, newBase);
+	//*input = DirectX::XMMatrixTranspose(*input);
 }
 
 void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
@@ -556,18 +560,13 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 			//Can be used to "nullify" the bindpose-transform in "parent-chain"-space.
 			GBPIM = transformLinkMatrix.Inverse() * transformMatrix;
 			//globalBindposeMatrix = transformLinkMatrix * transformMatrix;
-			
-			DirectX::XMVECTOR transformComponent;
-			DirectX::XMVECTOR rotationComponent;
-			DirectX::XMVECTOR scalingComponent;
 
 			DirectX::XMMATRIX bindPoseMatrix;
-
 			//Need to switch from right handed to left handed. Simple change of basis is performed.
 			bindPoseMatrix = convertFbxMatrixToXMMatrix(GBPIM);
 			//Also, convert the FbxMatrix to a directX matrix.
 			makeLH(&bindPoseMatrix);
-
+			//bindPoseMatrix = DirectX::XMMatrixTranspose(bindPoseMatrix);
 			//bindPoseMatrix = bindPoseMatrix * newBase; //Hope this is the right order...
 			DirectX::XMFLOAT4X4 finalBindPoseMatrix;
 			DirectX::XMStoreFloat4x4(&finalBindPoseMatrix, bindPoseMatrix);

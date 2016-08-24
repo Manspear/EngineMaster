@@ -7,6 +7,7 @@ using namespace DirectX;
 void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D11DeviceContext * gDeviceContext)
 {
 	XMMATRIX tMatrices[NUMBEROFJOINTS];
+	XMMATRIX finalTMatrices[NUMBEROFJOINTS];
 	std::vector<XMFLOAT4X4> finalMatrices;
 	finalMatrices.resize(modelLoader.skeleton.joints.size());
 	for (int i = 0; i < inputList.size(); i++)
@@ -16,25 +17,30 @@ void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D
 		XMMATRIX rotation = XMMatrixRotationQuaternion(tempRot);
 		XMMATRIX scaling  = XMMatrixScaling(inputList[i].scale.x, inputList[i].scale.y, inputList[i].scale.z);
 		
-		XMMATRIX TRS = translation * rotation * scaling;
-		tMatrices[i] = TRS;
+		XMMATRIX TRS =  rotation * scaling * translation;
+		tMatrices[i] = TRS;//XMMatrixTranspose(TRS);
+		//tMatrices[i] = TRS;
 	}
 	//starts at 1 to skip the root
-	XMMATRIX worldMat = XMMatrixSet(objectWorldMatrix->_11, objectWorldMatrix->_12, objectWorldMatrix->_13, objectWorldMatrix->_14, 
-		objectWorldMatrix->_21, objectWorldMatrix->_22, objectWorldMatrix->_23, objectWorldMatrix->_24, 
-		objectWorldMatrix->_31, objectWorldMatrix->_32, objectWorldMatrix->_33, objectWorldMatrix->_34, 
-		objectWorldMatrix->_41, objectWorldMatrix->_42, objectWorldMatrix->_43, objectWorldMatrix->_44);
+	XMMATRIX worldMat = XMMatrixTranspose(XMLoadFloat4x4(objectWorldMatrix));
 	tMatrices[0] = worldMat * tMatrices[0];
+	XMMATRIX invBPose = XMLoadFloat4x4(&modelLoader.skeleton.joints[0].globalBindPoseInverse);
+	//invBPose = XMMatrixTranspose(invBPose);
+	finalTMatrices[0] = XMMatrixMultiply(tMatrices[0], invBPose);//invBPose * tMatrices[0];
+
 	for (int i = 1; i < inputList.size(); i++)
 	{
+		//if no child ever has an uncalculated parent, this works
 		int parentIndex = modelLoader.skeleton.joints[i].parentJointIndex;
-		tMatrices[i] = tMatrices[parentIndex] * tMatrices[i]; //if no child has an uncalculated parent, this works
+		tMatrices[i] = tMatrices[parentIndex] * tMatrices[i]; 
+		XMMATRIX invBPose = XMLoadFloat4x4(&modelLoader.skeleton.joints[i].globalBindPoseInverse);
+		finalTMatrices[i] = tMatrices[i] * invBPose;
 	}
 	for (int i = 0; i < inputList.size(); i++)
 	{
 		/*XMMATRIX popo = XMMatrixTranspose(tMatrices[i]);
 		XMStoreFloat4x4(&jointMatrices.jointTransforms[i], popo);*/
-		XMStoreFloat4x4(&jointMatrices.jointTransforms[i], tMatrices[i]);
+		XMStoreFloat4x4(&jointMatrices.jointTransforms[i], finalTMatrices[i]);
 	}
 	D3D11_MAPPED_SUBRESOURCE subRez;
 	jointStruct* dataPtr;
