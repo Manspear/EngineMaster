@@ -503,7 +503,7 @@ void FbxDawg::makeLH(DirectX::XMMATRIX * input)
 	DirectX::XMMATRIX newBase = DirectX::XMMatrixSet(1.0, 0.0, 0.0, 0.0,
 													 0.0, 1.0, 0.0, 0.0,
 													 0.0, 0.0, -1.0, 0.0,
-													 0.0, 0.0, 0.0, 0.0);
+													 0.0, 0.0, 0.0, 1.0);
 	*input = DirectX::XMMatrixMultiply(*input, newBase);
 	//*input = DirectX::XMMatrixTranspose(*input);
 }
@@ -565,7 +565,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 			//Need to switch from right handed to left handed. Simple change of basis is performed.
 			bindPoseMatrix = convertFbxMatrixToXMMatrix(GBPIM);
 			//Also, convert the FbxMatrix to a directX matrix.
-			makeLH(&bindPoseMatrix);
+			//makeLH(&bindPoseMatrix);
 			//bindPoseMatrix = DirectX::XMMatrixTranspose(bindPoseMatrix);
 			//bindPoseMatrix = bindPoseMatrix * newBase; //Hope this is the right order...
 			DirectX::XMFLOAT4X4 finalBindPoseMatrix;
@@ -640,7 +640,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 					for (long keyIndex = 0; keyIndex < translationCurve_X->KeyGetCount(); ++keyIndex)
 					{
 						//FbxAnimCurveKey* currKey = &translationCurve_X->KeyGet(keyIndex);
-
+						float asRadians = DirectX::XM_PI / 180;
 						FbxAnimCurveKey currKey = translationCurve_X->KeyGet(keyIndex);
 
 						//FbxAMatrix localTransform;
@@ -652,10 +652,11 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 				
 						//converts the right-handed coordinate system of Maya to the left-handed
 						//system of DirectX. 
-						translationTransform[2] *= -1.0; 
+
+						/*translationTransform[2] *= -1.0; 
 						rotationTransform[0] *= -1.0;  
 						rotationTransform[1] *= -1.0;
-						scalingTransform[2] *= -1.0;
+						scalingTransform[2] *= -1.0;*/
 
 						//localTransform.SetTRS(translationTransform, rotationTransform, scalingTransform);
 						//FbxQuaternion quaternionThing = localTransform.GetQ(); <-- Experiment.
@@ -666,7 +667,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						DirectX::XMVECTOR scalingValues;
 
 						translationValues = DirectX::XMVectorSet(translationTransform[0], translationTransform[1], translationTransform[2], translationTransform[3]);
-						rotationValues = DirectX::XMVectorSet(rotationTransform[0], rotationTransform[1], rotationTransform[2], rotationTransform[3]);
+						rotationValues = DirectX::XMVectorSet(rotationTransform[0] * asRadians, rotationTransform[1] * asRadians, rotationTransform[2] * asRadians, rotationTransform[3]);
 						scalingValues = DirectX::XMVectorSet(scalingTransform[0], scalingTransform[1], scalingTransform[2], scalingTransform[3]);				
 						
 						DirectX::XMFLOAT4 storeTranslate; 

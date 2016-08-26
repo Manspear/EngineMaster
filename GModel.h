@@ -25,7 +25,7 @@ private:
 	bool hasSkeleton;
 
 	void updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D11DeviceContext* gDeviceContext);
-
+	void makeRotationMatrix(XMFLOAT4 in, XMMATRIX& result);
 
 public:
 	SimpleMath::Matrix* objectWorldMatrix;

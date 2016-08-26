@@ -12,9 +12,13 @@ void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D
 	finalMatrices.resize(modelLoader.skeleton.joints.size());
 	for (int i = 0; i < inputList.size(); i++)
 	{
+		/*XMVECTOR tempRot = XMVectorSet(inputList[i].rotation.x, inputList[i].rotation.y, inputList[i].rotation.z, inputList[i].rotation.w);
+		XMMATRIX rotation = XMMatrixRotationQuaternion(tempRot);*/
+
 		XMMATRIX translation = XMMatrixTranslation(inputList[i].translation.x, inputList[i].translation.y, inputList[i].translation.z);
-		XMVECTOR tempRot = XMVectorSet(inputList[i].rotation.x, inputList[i].rotation.y, inputList[i].rotation.z, inputList[i].rotation.w);
-		XMMATRIX rotation = XMMatrixRotationQuaternion(tempRot);
+		
+		XMMATRIX rotation;
+		makeRotationMatrix(inputList[i].rotation, rotation);
 		XMMATRIX scaling  = XMMatrixScaling(inputList[i].scale.x, inputList[i].scale.y, inputList[i].scale.z);
 		
 		XMMATRIX TRS =  rotation * scaling * translation;
@@ -22,19 +26,27 @@ void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D
 		//tMatrices[i] = TRS;
 	}
 	//starts at 1 to skip the root
-	XMMATRIX worldMat = XMMatrixTranspose(XMLoadFloat4x4(objectWorldMatrix));
-	tMatrices[0] = worldMat * tMatrices[0];
+	//XMMATRIX worldMat = XMMatrixTranspose(XMLoadFloat4x4(objectWorldMatrix));
+
+	//XMMATRIX worldMat = XMMatrixIdentity();
+	//tMatrices[0] = worldMat * tMatrices[0];
+	XMMATRIX invertZ = XMMatrixScaling(1, 1, -1);
+	
+	
 	XMMATRIX invBPose = XMLoadFloat4x4(&modelLoader.skeleton.joints[0].globalBindPoseInverse);
 	//invBPose = XMMatrixTranspose(invBPose);
 	finalTMatrices[0] = XMMatrixMultiply(tMatrices[0], invBPose);//invBPose * tMatrices[0];
+	//tMatrices[0] = XMMatrixMultiply(tMatrices[0], invBPose);
+																 //finalTMatrices[0] = tMatrices[0];
 
 	for (int i = 1; i < inputList.size(); i++)
 	{
 		//if no child ever has an uncalculated parent, this works
 		int parentIndex = modelLoader.skeleton.joints[i].parentJointIndex;
-		tMatrices[i] = tMatrices[parentIndex] * tMatrices[i]; 
+		tMatrices[i] =  tMatrices[i] * tMatrices[parentIndex];
 		XMMATRIX invBPose = XMLoadFloat4x4(&modelLoader.skeleton.joints[i].globalBindPoseInverse);
-		finalTMatrices[i] = tMatrices[i] * invBPose;
+		finalTMatrices[i] =  tMatrices[i] * invBPose;
+		//finalTMatrices[i] = finalTMatrices[i] * invertZ;
 	}
 	for (int i = 0; i < inputList.size(); i++)
 	{
@@ -52,6 +64,33 @@ void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D
 		dataPtr->jointTransforms[i] = jointMatrices.jointTransforms[i];
 	}
 	gDeviceContext->Unmap(jointBuffer, NULL);
+}
+
+void GModel::makeRotationMatrix(XMFLOAT4 in, XMMATRIX & result)
+{
+	XMMATRIX rotX =
+	XMMatrixSet(
+		1.f,			0.f,					0.f,				0.f,
+		0.f,		    cosf(in.x),	    sinf(in.x),	0.f,
+		0.f,		    -sinf(in.x),     cosf(in.x),  0.f,
+		0.f,			0.f,					0.f,				1.f
+	);
+	XMMATRIX rotY =
+	XMMatrixSet(
+		cosf(in.y),	0.f,			-sinf(in.y),		0.f,
+		0.f,				1.f,			0.f,					0.f,
+		sinf(in.y),  0.f,			cosf(in.y),		0.f,
+		0.f,				0.f,			0.f,					1.f
+	);
+	XMMATRIX rotZ =
+	XMMatrixSet(
+		cosf(in.z),	sinf(in.z),		0.f,				0.f,
+		-sinf(in.z), cosf(in.z),		0.f,				0.f,
+		0.f,				0.f,					1.f,				0.f,
+		0.f,				0.f,					0.f,				1.f
+	);
+	XMMATRIX resultMat = rotX * rotY * rotZ;
+	result = resultMat;
 }
 
 GModel::GModel()
