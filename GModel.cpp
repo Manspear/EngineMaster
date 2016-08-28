@@ -89,8 +89,44 @@ void GModel::makeRotationMatrix(XMFLOAT4 in, XMMATRIX & result)
 		0.f,				0.f,					1.f,				0.f,
 		0.f,				0.f,					0.f,				1.f
 	);
-	XMMATRIX resultMat = rotX * rotY * rotZ;
-	result = resultMat;
+	XMMATRIX resultMat = rotX  * rotY * rotZ;
+	//I think this si right. THis seems to "mirror" the rotation.
+	result = XMMatrixTranspose(resultMat);
+}
+
+FbxDawg::sKeyFrame GModel::interpolateKeys(FbxDawg::sKeyFrame keyOver, FbxDawg::sKeyFrame keyUnder, float targetTime)
+{
+	float diffKeys = keyOver.keyTime - keyUnder.keyTime;
+	if (diffKeys == 0)
+	{
+		return keyOver;
+	}
+	float diffUnderTime = abs(targetTime - keyUnder.keyTime);
+	float underAffect = diffUnderTime / diffKeys;
+	XMVECTOR overTrans;
+	XMVECTOR underTrans;
+	XMVECTOR overRot;
+	XMVECTOR underRot;
+	XMVECTOR overScale;
+	XMVECTOR underScale;
+	overTrans = XMLoadFloat4(&keyOver.translation);
+	underTrans = XMLoadFloat4(&keyUnder.translation);
+	overRot = XMLoadFloat4(&keyOver.rotation);
+	underRot = XMLoadFloat4(&keyUnder.rotation);
+	overScale = XMLoadFloat4(&keyOver.scale);
+	underScale = XMLoadFloat4(&keyUnder.scale);
+	XMVECTOR resTrans = XMVectorLerp(underTrans, overTrans, underAffect);
+	XMVECTOR resRot = XMVectorLerp(underRot, overRot, underAffect);
+	XMVECTOR resScale = XMVectorLerp(underScale, overScale, underAffect);
+	float resTime = (keyUnder.keyTime * (1 - underAffect)) + (keyOver.keyTime * underAffect);
+	
+	FbxDawg::sKeyFrame interpolatedKey;
+	XMStoreFloat4(&interpolatedKey.translation, resTrans);
+	XMStoreFloat4(&interpolatedKey.rotation, resRot);
+	XMStoreFloat4(&interpolatedKey.scale, resScale);
+	interpolatedKey.keyTime = resTime;
+
+	return interpolatedKey;
 }
 
 GModel::GModel()
@@ -566,23 +602,66 @@ void GModel::updateAnimation(ID3D11DeviceContext * gDeviceContext, double dt)
 	
 	//first find the closest keyframe on each joint
 	//keyList is used to fill the matrixList
+
+	//std::vector<FbxDawg::sKeyFrame> keyList;
+
+	//keyList.resize(modelLoader.skeleton.joints.size());
+	//for (int i = 0; i < modelLoader.skeleton.joints.size(); i++)
+	//{
+	//	float targetTime = abs(std::fmod(animationTime, modelLoader.skeleton.joints[i].animLayer[0].keyFrame.back().keyTime));
+	//	float timeCompare = FBXSDK_FLOAT_MAX;
+	//	for (int j = 0; j < modelLoader.skeleton.joints[i].animLayer[0].keyFrame.size(); j++)
+	//	{
+	//		float currKeyTime = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j].keyTime;
+	//		float diff = abs(targetTime - currKeyTime);
+	//		if (diff < timeCompare)
+	//		{
+	//			timeCompare = diff;
+	//			keyList[i] = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j];
+	//		}	
+	//	}
+	//}
+
 	std::vector<FbxDawg::sKeyFrame> keyList;
 	keyList.resize(modelLoader.skeleton.joints.size());
+
 	for (int i = 0; i < modelLoader.skeleton.joints.size(); i++)
 	{
-		float targetTime = abs(std::fmod(animationTime, modelLoader.skeleton.joints.back().animLayer[0].keyFrame.back().keyTime));
-		float timeCompare = FBXSDK_FLOAT_MAX;
-		for (int j = 0; j < modelLoader.skeleton.joints[i].animLayer[0].keyFrame.size(); j++)
+		float jointMaxTime = modelLoader.skeleton.joints[i].animLayer[0].keyFrame.back().keyTime;
+		float targetTime = abs(std::fmod(animationTime, jointMaxTime));
+		float timeOverCompare = FBXSDK_FLOAT_MAX;
+		float timeUnderCompare = -FBXSDK_FLOAT_MAX;
+		FbxDawg::sKeyFrame keyOver;
+		FbxDawg::sKeyFrame keyUnder;
+		const int numberOfKeys = modelLoader.skeleton.joints[i].animLayer[0].keyFrame.size();
+		for (int j = 0; j < numberOfKeys; j++)
 		{
+			//när animationen precis tar slut, beräknas keyframes fel
 			float currKeyTime = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j].keyTime;
-			float diff = abs(targetTime - currKeyTime);
-			if (diff < timeCompare)
+			float diff = targetTime - currKeyTime;
+			
+			if (timeOverCompare == FBXSDK_FLOAT_MAX && timeUnderCompare == -FBXSDK_FLOAT_MAX)
 			{
-				timeCompare = diff;
-				keyList[i] = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j];
-			}	
+				keyOver = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j];
+				keyUnder = keyOver;
+				timeOverCompare = diff;
+			}
+			//if the keyTime is larger that the targetTime
+			if (diff > 0 && diff < timeOverCompare)
+			{
+				keyUnder = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j];
+				timeOverCompare = diff;
+			}
+			//if the keytime is less than the targetTime
+			else if (diff < 0 && diff > timeUnderCompare)
+			{
+				keyOver = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j];
+				timeUnderCompare = diff;
+			}
 		}
+		keyList[i] = interpolateKeys(keyOver, keyUnder, targetTime);
 	}
+
 	updateJointMatrices(keyList, gDeviceContext);
 }
 ;

@@ -653,7 +653,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						//converts the right-handed coordinate system of Maya to the left-handed
 						//system of DirectX. 
 
-						/*translationTransform[2] *= -1.0; 
+					/*	translationTransform[2] *= -1.0; 
 						rotationTransform[0] *= -1.0;  
 						rotationTransform[1] *= -1.0;
 						scalingTransform[2] *= -1.0;*/
@@ -702,6 +702,9 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 				dataPerControlPoint[i].weightData.push_back(mordor);
 			}
 		}
+		int harvard = 0;
+		skeleton;
+
 	}
 }
 

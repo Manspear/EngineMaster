@@ -26,6 +26,7 @@ private:
 
 	void updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D11DeviceContext* gDeviceContext);
 	void makeRotationMatrix(XMFLOAT4 in, XMMATRIX& result);
+	FbxDawg::sKeyFrame interpolateKeys(FbxDawg::sKeyFrame keyOver, FbxDawg::sKeyFrame keyUnder, float targetTime);
 
 public:
 	SimpleMath::Matrix* objectWorldMatrix;
