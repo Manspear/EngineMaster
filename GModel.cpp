@@ -21,9 +21,8 @@ void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D
 		makeRotationMatrix(inputList[i].rotation, rotation);
 		XMMATRIX scaling  = XMMatrixScaling(inputList[i].scale.x, inputList[i].scale.y, inputList[i].scale.z);
 		
-		XMMATRIX TRS =  rotation * scaling * translation;
-		tMatrices[i] = TRS;//XMMatrixTranspose(TRS);
-		//tMatrices[i] = TRS;
+		XMMATRIX SRT = scaling * rotation * translation;
+		tMatrices[i] = SRT;//XMMatrixTranspose(TRS);
 	}
 	//starts at 1 to skip the root
 	//XMMATRIX worldMat = XMMatrixTranspose(XMLoadFloat4x4(objectWorldMatrix));
@@ -45,7 +44,7 @@ void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D
 		int parentIndex = modelLoader.skeleton.joints[i].parentJointIndex;
 		tMatrices[i] =  tMatrices[i] * tMatrices[parentIndex];
 		XMMATRIX invBPose = XMLoadFloat4x4(&modelLoader.skeleton.joints[i].globalBindPoseInverse);
-		finalTMatrices[i] =  tMatrices[i] * invBPose;
+		finalTMatrices[i] = invBPose * tMatrices[i];
 		//finalTMatrices[i] = finalTMatrices[i] * invertZ;
 	}
 	for (int i = 0; i < inputList.size(); i++)
@@ -89,9 +88,20 @@ void GModel::makeRotationMatrix(XMFLOAT4 in, XMMATRIX & result)
 		0.f,				0.f,					1.f,				0.f,
 		0.f,				0.f,					0.f,				1.f
 	);
-	XMMATRIX resultMat = rotX  * rotY * rotZ;
+	//XMMATRIX resultMat = rotX  * rotY * rotZ;
+	/*rotX = XMMatrixRotationX(in.x);
+	rotY = XMMatrixRotationY(in.y);
+	rotZ = XMMatrixRotationZ(in.z);*/
+
+	XMMATRIX resultMat = rotX * rotY * rotZ;
+	//XMMATRIX resultMat = rotZ * rotY * rotX;
+	//XMMATRIX resultMat = rotY * rotX * rotZ;
+	//XMMATRIX resultMat = rotY * rotZ * rotX;
+	//XMMATRIX resultMat = rotX * rotZ * rotY;
+	//XMMATRIX resultMat = rotZ * rotX * rotY;
 	//I think this si right. THis seems to "mirror" the rotation.
-	result = XMMatrixTranspose(resultMat);
+	result = resultMat;
+	//result = XMMatrixTranspose(resultMat);
 }
 
 FbxDawg::sKeyFrame GModel::interpolateKeys(FbxDawg::sKeyFrame keyOver, FbxDawg::sKeyFrame keyUnder, float targetTime)
@@ -598,7 +608,7 @@ void GModel::makeJointBuffer(ID3D11Device* gDevice)
 void GModel::updateAnimation(ID3D11DeviceContext * gDeviceContext, double dt)
 {
 	//First get target time
-	animationTime += dt;
+	animationTime += dt * 0.3;
 	
 	//first find the closest keyframe on each joint
 	//keyList is used to fill the matrixList

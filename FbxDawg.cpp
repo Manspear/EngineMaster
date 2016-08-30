@@ -625,7 +625,7 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 					//get the Translation and Rotation XYZ component curves. Also the scaling curve to "normalize" the scale.
 					FbxAnimCurve* translationCurve_X = currentJoint->LclTranslation.GetCurve(currAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
 
-					FbxAnimEvaluator* animEvaluator = Fbx_Scene->GetAnimationEvaluator();
+					FbxAnimEvaluator* animEvaluator = currentJoint->GetAnimationEvaluator();
 
 					FbxString animStackName = currentAnimStack->GetName();
 					FbxString temp = animStackName.Buffer();
@@ -653,10 +653,10 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 						//converts the right-handed coordinate system of Maya to the left-handed
 						//system of DirectX. 
 
-					/*	translationTransform[2] *= -1.0; 
+						translationTransform[2] *= -1.0; 
 						rotationTransform[0] *= -1.0;  
 						rotationTransform[1] *= -1.0;
-						scalingTransform[2] *= -1.0;*/
+						//scalingTransform[2] *= -1.0;
 
 						//localTransform.SetTRS(translationTransform, rotationTransform, scalingTransform);
 						//FbxQuaternion quaternionThing = localTransform.GetQ(); <-- Experiment.
