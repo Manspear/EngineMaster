@@ -52,6 +52,7 @@ public:
 	bool getCursorPosition(POINT& MousePosSavedHere);
 	bool calculateCurrentRay();
 	float checkRayIntersectionAgainstObject(std::vector<MyVertexStruct> modelVertices, int* IndexArray, int IndexArraySize, SimpleMath::Matrix worldMatrix); //std::vector<MyVertexStruct> modelVertices,
+	float checkRayIntersectionAgainstObject(std::vector<AnimVertexStruct> modelVertices, int* IndexArray, int IndexArraySize, SimpleMath::Matrix worldMatrix);
 	bool PointInTriangle(SimpleMath::Vector4& triV1, SimpleMath::Vector4& triV2, SimpleMath::Vector4& triV3, SimpleMath::Vector4& point);
 
 };
