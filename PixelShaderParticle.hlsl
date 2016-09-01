@@ -5,8 +5,6 @@ struct PS_IN
     float4 Color : COLOR;
     float2 UV : TEXCOORD;
     float4 pixelPosition : WORLDSPACE;
-    
-
 };
 
 float4 PS_main(PS_IN input) : SV_Target
