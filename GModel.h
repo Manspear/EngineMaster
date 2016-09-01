@@ -9,9 +9,10 @@
 #include <string>
 #include "SimpleMath.h"
 #include <stdlib.h>
+#include <cmath>
 
 using namespace DirectX;
-
+#define NUMBEROFJOINTS 36
 
 class GModel
 {
@@ -21,29 +22,45 @@ private:
 	FbxDawg modelLoader;
 	FbxDawg BSLoader;
 	bool blendShape;
+	bool hasSkeleton;
+
+	void updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D11DeviceContext* gDeviceContext);
+	void makeRotationMatrix(XMFLOAT4 in, XMMATRIX& result);
+	FbxDawg::sKeyFrame interpolateKeys(FbxDawg::sKeyFrame keyOver, FbxDawg::sKeyFrame keyUnder, float targetTime);
+
 public:
 	SimpleMath::Matrix* objectWorldMatrix;
 	struct modelWorldStruct {
 		XMMATRIX worldMatrix;
 	};
+
 	struct bsWeight {
 		float weight;
 		float padding0;
 		float padding1;
 		float padding2;
 	};
+	struct jointStruct
+	{
+		XMFLOAT4X4 jointTransforms[NUMBEROFJOINTS];
+	};
 	GModel();
 	~GModel();
 	bool isCulled = false; //This bool will serve as a tag, it is set by the GFrustum calling the QuadTreeCollision-function.
+	bool isAnimated();
 	ID3D11Buffer* modelVertexBuffer = nullptr;
+	ID3D11Buffer* animModelVertexBuffer = nullptr;
 	ID3D11Buffer* modelIndexBuffer = nullptr;
 	ID3D11Buffer* modelConstantBuffer = nullptr;
-
+	ID3D11Buffer* jointBuffer = nullptr;
+	jointStruct jointMatrices;
+	DirectX::XMFLOAT4 pivotPoint;
 	BoundingBox modelBBox;
 	GBoundingBox bBox;
 	ID3D11Buffer* bsWBuffer = nullptr;
 	int* IndexArray = nullptr;
 	int sizeOfIndexArray = 0;
+	float animationTime;
 
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture then normal map
 												   //share projection and view, but have different world-view.
@@ -51,6 +68,7 @@ public:
 	XMMATRIX getPosition();
 	void renderModel();
 	std::vector<MyVertexStruct> modelVertices;
+	std::vector<AnimVertexStruct> animModelVertices;
 	std::vector<MyVertexStruct> BSmodelVertices;
 	std::vector<MyBSStruct> modelWithBSstruct;
 	std::vector<MyVertexStruct> bsVertices;//This holds the vertices.
@@ -61,7 +79,10 @@ public:
 	//struct with vertex positions held by FbxDawg
 	void load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath); //<-- Loads the model. Means that modelLoader is called.
 	void loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath);
-
+	void loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath);
+	void makeJointBuffer(ID3D11Device* gDevice);
+	void updateAnimation(ID3D11DeviceContext* gDeviceContext, double dt);
+	
 };
 
 //>>>>>>>USER MANUAL<<<<<<<<<<<

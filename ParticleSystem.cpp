@@ -24,7 +24,8 @@ ParticleSystem::~ParticleSystem()
 	gPixelShaderParticle->Release();
 	gVertexLayoutParticle->Release();
 	gVertexShaderParticle->Release();
-
+	particleConstantBuffer->Release();
+	particleVertexBuffer->Release();
 	delete[] particleList;
 	delete[] partyDataList;
 }

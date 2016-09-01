@@ -14,7 +14,7 @@ Engine::Engine()
 	counterStart = 0;
 	frameCount = 0;
 	fps = 0;
-	frameTimeOld = 0;
+	frameTimeOld = 100000000000000000;
 }
 
 Engine::~Engine()
@@ -53,20 +53,51 @@ void Engine::CreateShaders()
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
+
+	ID3DBlob* pSVS = nullptr;
+	D3DCompileFromFile(
+		L"SkeletalVertex.hlsl", // filename
+		nullptr,		// optional macros
+		nullptr,		// optional include files
+		"VSSkeletal_main",		// entry point
+		"vs_4_0",		// shader model (target)
+		0,				// shader compile options
+		0,				// effect compile options
+		&pSVS,			// double pointer to ID3DBlob		
+		nullptr			// pointer for Error Blob messages.
+						// how to use the Error blob, see here
+						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+	);
+
+
+	gDevice->CreateVertexShader(pSVS->GetBufferPointer(), pSVS->GetBufferSize(), nullptr, &gVertexShaderSkeletal);
+
+	//create input layout (verified using vertex shader)
+	D3D11_INPUT_ELEMENT_DESC inputDescSkeletal[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	gDevice->CreateInputLayout(inputDescSkeletal, ARRAYSIZE(inputDescSkeletal), pSVS->GetBufferPointer(), pSVS->GetBufferSize(), &gVertexLayoutSkeletal);
+	// we do not need anymore this COM object, so we release it.
+	pSVS->Release();
+
 	//create vertex shader
 	ID3DBlob* pVSbs = nullptr;
 	D3DCompileFromFile(
 		L"VertexShaderBS.hlsl", // filename
-		nullptr,		// optional macros
-		nullptr,		// optional include files
-		"VS_main",		// entry point
-		"vs_4_0",		// shader model (target)
-		0,				// shader compile options
-		0,				// effect compile options
-		&pVSbs,			// double pointer to ID3DBlob		
-		nullptr			// pointer for Error Blob messages.
-						// how to use the Error blob, see here
-						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+		nullptr,				// optional macros
+		nullptr,				// optional include files
+		"VS_main",				// entry point
+		"vs_4_0",				// shader model (target)
+		0,						// shader compile options
+		0,						// effect compile options
+		&pVSbs,					// double pointer to ID3DBlob		
+		nullptr					// pointer for Error Blob messages.
+								// how to use the Error blob, see here
+								// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
 		);
 
 
@@ -226,9 +257,6 @@ void Engine::Render()
 	else
 		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor2);
 
-	
-
-
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
@@ -247,8 +275,6 @@ void Engine::Render()
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);					   
 																					   
 	listOfModels = modelListObject.getModelList();									   
-																					   
-																					   
 																					   
 	//bool isRoot = true;
 	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
@@ -284,21 +310,40 @@ void Engine::Render()
 			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
 			vertexSize = sizeof(float) * 16;
 		}
-		else {
+		else if (cullingFrustum->seenObjects[bufferCounter]->isAnimated())
+		{
+			gDeviceContext->VSSetShader(gVertexShaderSkeletal, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayoutSkeletal);
+			cullingFrustum->seenObjects[bufferCounter]->updateAnimation(gDeviceContext, dt);
+			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->jointBuffer);
+			vertexSize = sizeof(float) * 12 + sizeof(int) * 4;
+		}
+		else
+		{
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
-			vertexSize = sizeof(float) * 8;
+			vertexSize = sizeof(float) * 8 + sizeof(int);
 		}
-
-			
+	
 		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
-
-		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
+		if(cullingFrustum->seenObjects[bufferCounter]->isAnimated())
+		{
+			cullingFrustum->seenObjects[bufferCounter]->animModelVertices;
+			cullingFrustum->seenObjects[bufferCounter]->jointMatrices;
+			cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray;
+			gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->animModelVertexBuffer, &vertexSize, &offset);
+		}
+		else
+		{
+			gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
+		}
+		
 		gDeviceContext->IASetIndexBuffer(cullingFrustum->seenObjects[bufferCounter]->modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 		gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray, 0, 0);
+		//gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->animModelVertices.size(), 0);
 	}
 
 	particleSys->renderParticles();
@@ -323,8 +368,6 @@ void Engine::Render()
 
 void Engine::Update()
 {
-
-
 	frameCount++;
 	if (getTime() > 1.0f)
 	{
@@ -462,26 +505,53 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 void Engine::Clean() {
 
 	gVertexLayout->Release();
+	gVertexLayoutBS->Release();
+	gVertexLayoutSkeletal->Release();
 	gVertexShader->Release();
+	gVertexShaderBS->Release();
+	gVertexShaderSkeletal->Release();
 	gPixelShader->Release();
 	gGeometryShader->Release();
-	delete particleSys;
 
 	gBackbufferRTV->Release();
 	gSwapChain->Release();
-	gDevice->Release();
 	gDeviceContext->Release();
 
 	gPSTextureSampler->Release();
 
 	depthStencilView->Release();
 	gDepthStencilBuffer->Release();
-
+	gConstantBuffer->Release();
+	for (int i = 0; i < modelListObject.numberOfModels; i++)
+	{
+		if(listOfModels[i].animModelVertexBuffer != nullptr)
+			listOfModels[i].animModelVertexBuffer->Release();
+		if(listOfModels[i].modelVertexBuffer != nullptr)
+			listOfModels[i].modelVertexBuffer->Release();
+		if (listOfModels[i].jointBuffer != nullptr)
+			listOfModels[i].jointBuffer->Release();
+		if (listOfModels[i].bsWBuffer != nullptr)
+			listOfModels[i].bsWBuffer->Release();
+		if(listOfModels[i].modelTextureView[0] != nullptr)
+			listOfModels[i].modelTextureView[0]->Release();
+		if(listOfModels[i].modelTextureView[1] != nullptr)
+			listOfModels[i].modelTextureView[1]->Release();
+		listOfModels[i].modelIndexBuffer->Release();
+		listOfModels[i].modelConstantBuffer->Release();
+	}
+	delete particleSys;
 	delete camera;
 	delete input;
 	delete cullingFrustum;
 	delete quadTreeRoot;
 	delete MousePickingObject;
+
+	ID3D11Debug* debugDevice = nullptr;
+	reinterpret_cast<void*>(debugDevice);
+	gDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debugDevice));
+	debugDevice->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	debugDevice->Release();
+	gDevice->Release();
 	//delete[] loops through the new-objects in the array, and deletes them!
 }
 void Engine::InitializeCamera()
@@ -582,6 +652,6 @@ double Engine::getFrameTime()
 
 	if (tickCount < 0.0f)
 		tickCount = 0.0f;
-
+	float lolis = float(tickCount) / countsPerSecond;
 	return float(tickCount) / countsPerSecond;
 }

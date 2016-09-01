@@ -4,12 +4,22 @@
 #include <assert.h>
 #include <vector>
 #include <fbxsdk.h>
+#include <DirectXMath.h>
 
 #pragma region structs
 
 struct MyVertexStruct
 {
 	float x, y, z, norX, norY, norZ, u, v;
+	int controlPointIndex;
+};
+
+struct AnimVertexStruct
+{
+	float x, y, z, norX, norY, norZ, u, v;
+	//int controlPointIndex;
+	int influences[4];
+	float weights[4];
 };
 
 struct MyBSposStruct
@@ -36,6 +46,10 @@ class FbxDawg
 private:
 	/****/
 	void makeControlPointMap(FbxMesh* currMesh); //Only call once per mesh. Makes a list with length equal to number of control points.
+	void fillOutSkeleton(unsigned int numberOfDeformers);
+	DirectX::XMMATRIX convertFbxMatrixToXMMatrix(FbxAMatrix input);
+	void makeLH(DirectX::XMMATRIX* input);
+	bool isAnimated = false;
 
 public:
 	FbxDawg();
@@ -43,43 +57,61 @@ public:
 
 	std::wstring textureFilepath;//När denna blir tilldelad så får den en kopia istället. Så vi kan utan problem radera den variablen som var med i tilldelningen.
 	void loadModels(const char* filePath);
+	void getMeshData(FbxMesh* mesh, FbxNode* FbxChildNode);
 	void makeIndexList();
 
-	void getJointData(FbxNode* rootNode, FbxScene* Fbx_Scene);
+	void getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene);
 	void processJointHierarchy(FbxNode* inRootNode);
 	void recursiveJointHierarchyTraversal(FbxNode* inNode, int storedIndex, int inNodeParentIndex);
-
+	bool hasSkeleton();
 	int* FBXIndexArray = nullptr;
 	int sizeOfFBXIndexArray = 0;
+	DirectX::XMFLOAT4 pivotValue;
 	void bsLoader(FbxMesh * mesh);
 
 	//Core datatypes: FbxSkeleton, eRoot, eLimb, eEffector
+
+
+	struct sKeyFrame
+	{
+		DirectX::XMFLOAT4 translation;
+		DirectX::XMFLOAT4 rotation;
+		DirectX::XMFLOAT4 scale;
+		float keyTime;
+	};
+
+	struct sAnimLayer
+	{
+		std::vector<sKeyFrame> keyFrame;
+	};
+
 	struct sJoint { //s as in struct :D
 		const char* name;
-		int parentIndex;
-		FbxAMatrix* globalBindPoseInverse;
-		FbxNode* jointNode;
-		
+		int parentJointIndex;
+		int jointIndex;
+		DirectX::XMFLOAT4X4 globalBindPoseInverse;
+		std::vector<sAnimLayer> animLayer;
 	};
 
 	struct sSkeleton {
-		std::vector<sJoint*> joints;
+		std::vector<sJoint> joints;
 		//more things... Hmm
 	};
 
 	struct sBlendingIndexWeightPair {
-		int affectedJointIndex;
+		int jointIndex;
 		double blendingWeight; //Used to blend the animation of two animation layers. An example is transition between walk and run.
 	};
 
-	struct sAnimationData {
-		std::vector<sBlendingIndexWeightPair*> weightData;
+	struct sAnimWeightData {
+		std::vector<sBlendingIndexWeightPair> weightData;
 	};
 
-	std::vector<FbxString*> animationName;
-	std::vector<long> animationLength;
+	std::vector<FbxString*> animationName; //One for each stack, i.e one for each joint
+	
+	std::vector<long> animationLength; //One for each stack, i.e one for each joint
 
-	std::vector<sAnimationData*> dataPerControlPoint;
+	std::vector<sAnimWeightData> dataPerControlPoint; //One for each Control point.
 	
 
 	unsigned int findJointIndexByName(const char* jointName);
@@ -89,6 +121,7 @@ public:
 	//std::vector<FbxSkeleton*> skeleton;
 	std::vector<MyBSposStruct> blendShapes;
 	std::vector<MyVertexStruct> modelVertexList;
+	std::vector<AnimVertexStruct> animModelVertexList;
 	std::vector<FbxVector4 *> bsVert;
 
 };
