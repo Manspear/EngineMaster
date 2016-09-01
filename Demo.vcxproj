@@ -81,6 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Dcm.cpp" />
+    <ClCompile Include="DCM_Render_Handler.cpp" />
     <ClCompile Include="Engine.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -176,6 +177,8 @@
   <ItemGroup>
     <ClInclude Include="bth_image.h" />
     <ClInclude Include="Dcm.h" />
+    <ClInclude Include="DCM_Render_Handler.h" />
+    <ClInclude Include="DeltaTime.h" />
     <ClInclude Include="Engine.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>

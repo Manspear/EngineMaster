@@ -4,13 +4,57 @@
 #include <algorithm>
 using namespace DirectX;
 
+void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D11DeviceContext * gDeviceContext)
+{
+	XMMATRIX tMatrices[NUMBEROFJOINTS];
+	std::vector<XMFLOAT4X4> finalMatrices;
+	finalMatrices.resize(modelLoader.skeleton.joints.size());
+	for (int i = 0; i < inputList.size(); i++)
+	{
+		XMMATRIX translation = XMMatrixTranslation(inputList[i].translation.x, inputList[i].translation.y, inputList[i].translation.z);
+		XMVECTOR tempRot = XMVectorSet(inputList[i].rotation.x, inputList[i].rotation.y, inputList[i].rotation.z, inputList[i].rotation.w);
+		XMMATRIX rotation = XMMatrixRotationQuaternion(tempRot);
+		XMMATRIX scaling = XMMatrixScaling(inputList[i].scale.x, inputList[i].scale.y, inputList[i].scale.z);
+
+		XMMATRIX TRS = translation * rotation * scaling;
+		tMatrices[i] = TRS;
+	}
+	//starts at 1 to skip the root
+	XMMATRIX worldMat = XMMatrixSet(objectWorldMatrix->_11, objectWorldMatrix->_12, objectWorldMatrix->_13, objectWorldMatrix->_14,
+		objectWorldMatrix->_21, objectWorldMatrix->_22, objectWorldMatrix->_23, objectWorldMatrix->_24,
+		objectWorldMatrix->_31, objectWorldMatrix->_32, objectWorldMatrix->_33, objectWorldMatrix->_34,
+		objectWorldMatrix->_41, objectWorldMatrix->_42, objectWorldMatrix->_43, objectWorldMatrix->_44);
+	tMatrices[0] *= worldMat;
+	for (int i = 1; i < inputList.size(); i++)
+	{
+		int parentIndex = modelLoader.skeleton.joints[i].parentJointIndex;
+		tMatrices[i] = tMatrices[parentIndex] * tMatrices[i]; //if no child has an uncalculated parent, this works
+	}
+	for (int i = 0; i < inputList.size(); i++)
+	{
+		XMStoreFloat4x4(&jointMatrices.jointTransforms[i], tMatrices[i]);
+	}
+	D3D11_MAPPED_SUBRESOURCE subRez;
+	jointStruct* dataPtr;
+	gDeviceContext->Map(jointBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &subRez);
+	dataPtr = (jointStruct*)subRez.pData;
+
+	for (int i = 0; i < NUMBEROFJOINTS; i++)
+	{
+		dataPtr->jointTransforms[i] = jointMatrices.jointTransforms[i];
+	}
+	gDeviceContext->Unmap(jointBuffer, NULL);
+}
+
 GModel::GModel()
 {
 	this->objectWorldMatrix = new SimpleMath::Matrix;
 	this->objectWorldMatrix[0] = XMMatrixTranspose(DirectX::XMMatrixIdentity()); //DirectX need transposed matrices
 	this->blendShape = false;
-	this->DCM = false;
+	animationTime = 0;
 	noOfTextures = 1;
+	hasSkeleton = false;
+	DCMcheck = false;
 }
 
 GModel::~GModel()
@@ -20,6 +64,10 @@ GModel::~GModel()
 	//modelTextureView[1]->Release();
 	delete objectWorldMatrix;
 
+}
+bool GModel::isAnimated()
+{
+	return hasSkeleton;
 }
 void GModel::setPosition(DirectX::XMFLOAT4 position, ID3D11DeviceContext* gDeviceContext)
 {
@@ -64,11 +112,11 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
 	pivotPoint = modelLoader.pivotValue;
 	this->modelVertices = modelLoader.modelVertexList;
-	
+
 	this->modelTextureFilepath = modelLoader.textureFilepath;
 	if (modelLoader.DCMmaterial->IsValid())
 	{
-		this->DCM = true;
+		this->DCMcheck = true;
 	}
 #pragma region VertexBuffer
 	D3D11_BUFFER_DESC bufferDesc;
@@ -186,6 +234,10 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 
 	this->modelVertices = modelLoader.modelVertexList;
 	this->modelTextureFilepath = modelLoader.textureFilepath;
+	if (modelLoader.DCMmaterial->IsValid())
+	{
+		this->DCMcheck = true;
+	}
 	for (int i = 0; i < this->modelVertices.size(); i++)
 	{
 		MyBSStruct temp;
@@ -333,13 +385,18 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 }
 void GModel::loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceContext* gDeviceContext, const wchar_t* diffusePath, const wchar_t* normalPath)
 {
+	hasSkeleton = true;
 	modelLoader.loadModels(fbxFilePath);
 	pivotPoint = modelLoader.pivotValue;
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
 	this->animModelVertices = modelLoader.animModelVertexList;
-	
+
 
 	this->modelTextureFilepath = modelLoader.textureFilepath;
+	if (modelLoader.DCMmaterial->IsValid())
+	{
+		this->DCMcheck = true;
+	}
 #pragma region VertexBuffer
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
@@ -394,6 +451,9 @@ void GModel::loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11
 
 	gDeviceContext->Unmap(modelConstantBuffer, NULL);
 #pragma endregion ConstantBuffer
+	makeJointBuffer(gDevice);
+
+
 	//Import from File
 #pragma region
 	HRESULT hr;
@@ -423,20 +483,20 @@ void GModel::loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11
 	float minY = FLT_MAX;
 	float maxZ = FLT_MIN;
 	float minZ = FLT_MAX;
-	for (int i = 0; i < modelVertices.size(); i++) {
+	for (int i = 0; i < animModelVertices.size(); i++) {
 		//get the min and max values of the model
-		if (maxX < modelVertices[i].x)
-			maxX = modelVertices[i].x;
-		if (minX > modelVertices[i].x)
-			minX = modelVertices[i].x;
-		if (maxY < modelVertices[i].y)
-			maxY = modelVertices[i].y;
-		if (minY > modelVertices[i].y)
-			minY = modelVertices[i].y;
-		if (maxZ < modelVertices[i].z)
-			maxZ = modelVertices[i].z;
-		if (minZ > modelVertices[i].z)
-			minZ = modelVertices[i].z;
+		if (maxX < animModelVertices[i].x)
+			maxX = animModelVertices[i].x;
+		if (minX > animModelVertices[i].x)
+			minX = animModelVertices[i].x;
+		if (maxY < animModelVertices[i].y)
+			maxY = animModelVertices[i].y;
+		if (minY > animModelVertices[i].y)
+			minY = animModelVertices[i].y;
+		if (maxZ < animModelVertices[i].z)
+			maxZ = animModelVertices[i].z;
+		if (minZ > animModelVertices[i].z)
+			minZ = animModelVertices[i].z;
 	}
 	//make two XMVECTORs that we will create the bbox from
 	XMVECTOR maxPos = XMVectorSet(maxX, maxY, maxZ, 1);
@@ -446,7 +506,50 @@ void GModel::loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11
 
 	//Create the bbox (my version)
 	bBox.CreateBBox(XMFLOAT3(minX, minY, minZ), XMFLOAT3(maxX, maxY, maxZ));
-};
+}
+void GModel::makeJointBuffer(ID3D11Device* gDevice)
+{
+	D3D11_BUFFER_DESC bDesc;
+	bDesc.ByteWidth = sizeof(jointStruct);
+	bDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bDesc.MiscFlags = 0;
+	bDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = &jointMatrices;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	HRESULT hr;
+	hr = gDevice->CreateBuffer(&bDesc, &InitData, &jointBuffer);
+}
+void GModel::updateAnimation(ID3D11DeviceContext * gDeviceContext)
+{
+	//First get target time
+	animationTime += dt;
+	//first find the closest keyframe on each joint
+	//keyList is used to fill the matrixList
+	std::vector<FbxDawg::sKeyFrame> keyList;
+	keyList.resize(modelLoader.skeleton.joints.size());
+	for (int i = 0; i < modelLoader.skeleton.joints.size(); i++)
+	{
+		float timeCompare = FBXSDK_FLOAT_MAX;
+		for (int j = 0; j < modelLoader.skeleton.joints[i].animLayer[0].keyFrame.size(); j++)
+		{
+			float currKeyTime = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j].keyTime;
+			float diff = std::fmodf(currKeyTime, timeCompare);
+			if (diff < timeCompare)
+			{
+				timeCompare = diff;
+				keyList[i] = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j];
+			}
+		}
+	}
+	updateJointMatrices(keyList, gDeviceContext);
+}
+;
 
 
 int GModel::getNumberOfTextures()

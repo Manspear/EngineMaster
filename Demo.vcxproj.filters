@@ -84,6 +84,9 @@
     <ClCompile Include="Dcm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DCM_Render_Handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -164,6 +167,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Dcm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DeltaTime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DCM_Render_Handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

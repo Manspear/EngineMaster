@@ -30,6 +30,10 @@
 
 #include "DCM.h"
 
+#include "DCM_Render_Handler.h"
+
+#include "DeltaTime.h"
+
 #ifndef ENGINE_H
 #define ENGINE_H
 #define XAXIS 0
@@ -47,6 +51,7 @@ class Engine
 private:
 	GModel* listOfModels;
 	bool mousePickEffectOnClearColor = false;
+	DCM_Render_Handler DCM_handler;
 
 
 public:
@@ -84,8 +89,6 @@ public:
 	ID3D11PixelShader* gPixelShaderDCM = nullptr;//DCM
 	ID3D11GeometryShader* gGeometryShader = nullptr;
 
-
-
 	struct matrixBuffer {
 		XMMATRIX viewMatrix;
 		XMMATRIX projectionMatrix;
@@ -104,8 +107,7 @@ public:
 	ParticleSystem * particleSys;
 
 	D3D11_VIEWPORT vp; //flyttade den hit
-	DCM dcm;
-
+	
 	int wHEIGHT = 480;
 	int wWIDTH = 640;//was 640
 	byte * keys;

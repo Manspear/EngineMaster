@@ -214,24 +214,22 @@ void Engine::CreateShaders()
 
 void Engine::CreateDynamicCubeMap()
 {
-	dcm.Initialize(gDevice, depthStencilView, gBackbufferRTV, vp,
+	// jag måste få listOfModels[bufferCounter]'s centerpivot, så att jag kan
+	// BuildCubeFaceCamera(x, y, z, w) med den.
+	DCM_handler.Initialize(gDevice, depthStencilView, gBackbufferRTV, vp,
 		gGeometryShader, gPixelShader, gVertexShader, gVertexLayout,
 		gConstantBuffer, gVertexShaderBS, gVertexLayoutBS, gDeviceContext);
 
-	dcm.Dynamic_Cube_Map(gDevice);
-	// jag måste få listOfModels[bufferCounter]'s centerpivot, så att jag kan
-	// BuildCubeFaceCamera(x, y, z, w) med den.
-	
+	listOfModels = modelListObject.getModelList();
+
 	for (int i = 0; i < modelListObject.numberOfModels; i++)
 	{
-		if (listOfModels[i].hasDCM)
+		if (listOfModels[i].hasDCM())
 		{
-			dcm.BuildCubeFaceCamera(listOfModels[i].centerPivot);
+			listOfModels[i].dcm.Dynamic_Cube_Map(gDevice);
+			listOfModels[i].dcm.BuildCubeFaceCamera(listOfModels[i].pivotPoint.x, listOfModels[i].pivotPoint.y, listOfModels[i].pivotPoint.z, listOfModels[i].pivotPoint.w);
 		}
 	}
-
-
-
 }
 
 void Engine::CreateConstantBuffer() {
@@ -278,36 +276,6 @@ void Engine::SetViewport(D3D11_VIEWPORT &vp)
 
 void Engine::Render()
 {
-#pragma region //EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM
-	//>>>EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM<<<
-	//The depth buffer clears itself with a value between 0 and 1. If it clears to 1
-	//it has a depth-value corresponding to the Far Plane of the view-frustum. 
-	//If it clears to 0, it has a depth-value corresponding to the Near-Plane  
-	//of the view-frustum.
-	//You want to clear the depth-buffer to 1, because you use the depth value 
-	//that you've cleared to as comparison to the depth-value of objects. 
-	//The check goes like this:
-	//if(storedDepth > objectDepth){ storedDepth = objectDepth } (it compares objects in the order they are processed)
-	//So the cleared-to-value is used as a basis. Usually getting replaced pretty quickly
-	//with the object-depth.
-	//
-	//So now to the not-so-intuitive part:
-	//You should think that when the depth-value is 0.5 that it's situated halfway 
-	//between the view-frustum's nearplane and farplane, but it's not. The reasoning
-	//here is that we are more concerned about object-flickering that occurs close
-	//to the camera, since it's more noticeable to the viewer.
-	//So the depth-values are therefore distributed more generously near the Near-Plane, than the far-plane.
-	//The exact distribution I am unaware of though.
-
-	//>>>SMALL EXPLANATIN OF STENCIL BUFFER INC<<<
-	//Stencil buffer is used when doing shadow volumes. It stores values used to determine is something is inside of a shadow volume.
-	//The values it holds are both positive and negative, where negative values represent 
-	//the shadow volume that is behind the last object that it hits, and positive values 
-	//represent the shadow-volume before it hits it's "object-that-will-get-shadow-on-it".
-#pragma endregion
-	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
-	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
-
 	float clearColor[] = { 1, 0, 0.5, 1 };
 	float clearColor2[] = { 1,0.5,0,1 };
 
@@ -316,9 +284,6 @@ void Engine::Render()
 
 	else
 		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor2);
-
-
-
 
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
@@ -336,27 +301,7 @@ void Engine::Render()
 
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
-	listOfModels = modelListObject.getModelList();
-
-	//bool isRoot = true;
-	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
-	//cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
-	////rootBox has 2 modelChildren, but the bbox-children of rootBox have no modelchildren. Odd that.
-	//		gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
-	//		gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
-	//		gDeviceContext->IASetInputLayout(gVertexLayoutBS);
-	//		vertexSize = sizeof(float) * 16;
-	//	}else{
-	//		gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-	//		gDeviceContext->IASetInputLayout(gVertexLayout);
-	//		vertexSize = sizeof(float) * 8;
-	//	}														  	 
-
-
-	//struct frustumVert {										  	 
-	//		float x, y, z, xn, yn, zn, u, v;					  	 
-	//	};														  	 
-	//	frustumVert frustumVertices[6]; //...					  	
+	listOfModels = modelListObject.getModelList();				  	
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
@@ -367,22 +312,18 @@ void Engine::Render()
 			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
 			vertexSize = sizeof(float) * 16;
 		}
-		else if (cullingFrustum->seenObjects[bufferCounter]->hasDCM() == true)//modelLoader->DCMmaterial->IsValid()
+		else if (cullingFrustum->seenObjects[bufferCounter]->hasDCM() == true)
 		{
-			printf("DCM \t ");
 			gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 			gDeviceContext->VSSetShader(gVertexShaderDCM, nullptr, 0);//VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->PSSetShader(gPixelShaderDCM, nullptr, 0);
 			//gDeviceContext->PSSetShaderResources(0, 1, &DCM_ShaderResourceView);
-			gDeviceContext->PSSetConstantBuffers(0, 1, &gConstantBuffer);//
-
-																		 //DCM_ShaderResourceView
+			gDeviceContext->PSSetConstantBuffers(0, 1, &gConstantBuffer);// DCM_ShaderResourceView, vad gör den här kommentaren här?															 
 			gDeviceContext->IASetInputLayout(gVertexLayoutDCM);
 			vertexSize = sizeof(float) * 8;
-
+			
 			//rendera från cubens kamera
-			dcm.DCM_Render_Main(listOfModels, &modelListObject);
-			//DCM_Render(listOfModels, modelListObject);
+			DCM_handler.DCM_Render(cullingFrustum->seenObjects[bufferCounter], &cullingFrustum->seenObjects[bufferCounter]->dcm);
 
 		}
 
@@ -391,7 +332,6 @@ void Engine::Render()
 			gDeviceContext->IASetInputLayout(gVertexLayout);
 			vertexSize = sizeof(float) * 8;
 		}
-
 
 		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 
@@ -404,21 +344,6 @@ void Engine::Render()
 	}
 
 	particleSys->renderParticles();
-
-	//{
-	//	//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
-	//	//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
-	//	if (!cullingFrustum->hasCollided(listOfModels[bufferCounter].bBox))
-	//		continue;
-	//	gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
-
-	//	//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
-	//	gDeviceContext->PSSetShaderResources(0, 2, listOfModels[bufferCounter].modelTextureView);
-
-	//	gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
-
-	//	gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
-	//}
 }
 
 
