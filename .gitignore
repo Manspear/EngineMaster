@@ -280,3 +280,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 Demo.vcxproj
+D3DDemo.VC.db
