@@ -114,10 +114,10 @@ void GModel::load(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11DeviceCo
 	this->modelVertices = modelLoader.modelVertexList;
 
 	this->modelTextureFilepath = modelLoader.textureFilepath;
-	if (modelLoader.DCMmaterial->IsValid())
-	{
-		this->DCMcheck = true;
-	}
+	//if (modelLoader.DCMmaterial->IsValid())
+	//{
+	//	this->DCMcheck = true;
+	//}
 #pragma region VertexBuffer
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));

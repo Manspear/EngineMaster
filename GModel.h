@@ -27,7 +27,6 @@ private:
 	
 	bool blendShape;
 	bool hasSkeleton;
-	bool DCMcheck;
 	void updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D11DeviceContext* gDeviceContext);
 
 
@@ -65,6 +64,7 @@ public:
 	int* IndexArray = nullptr;
 	int sizeOfIndexArray = 0;
 	float animationTime;
+	bool DCMcheck;
 
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture then normal map
 												   //share projection and view, but have different world-view.

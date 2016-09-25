@@ -87,7 +87,8 @@ void DCM_Render_Handler::Render_Enviroment(GModel* model)
 			gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[i].bsWBuffer);
 			vertexSize = sizeof(float) * 16;
 		}
-		else {
+		else if (!listOfModels[i].hasDCM())
+		{
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
 			vertexSize = sizeof(float) * 8;
