@@ -228,8 +228,8 @@ void Engine::CreateDynamicCubeMap()
 	{
 		if (listOfModels[i].hasDCM())
 		{
-			listOfModels[i].dcm.Dynamic_Cube_Map(gDevice);
-			listOfModels[i].dcm.BuildCubeFaceCamera(listOfModels[i].pivotPoint.x, listOfModels[i].pivotPoint.y, listOfModels[i].pivotPoint.z, listOfModels[i].pivotPoint.w);
+			listOfModels[i].dcm->Dynamic_Cube_Map(gDevice);
+			listOfModels[i].dcm->BuildCubeFaceCamera(listOfModels[i].pivotPoint.x, listOfModels[i].pivotPoint.y, listOfModels[i].pivotPoint.z, listOfModels[i].pivotPoint.w);
 		}
 	}
 }
@@ -319,14 +319,15 @@ void Engine::Render()
 			gDeviceContext->GSSetShader(nullptr, nullptr, 0);
 			gDeviceContext->VSSetShader(gVertexShaderDCM, nullptr, 0);//VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->PSSetShader(gPixelShaderDCM, nullptr, 0);
-			//gDeviceContext->PSSetShaderResources(0, 1, &DCM_ShaderResourceView);
+			//gDeviceContext->PSSetShaderResources(0, 1, &cullingFrustum->seenObjects[bufferCounter]->dcm->getShaderResourceView());
 			gDeviceContext->PSSetConstantBuffers(0, 1, &gConstantBuffer);// DCM_ShaderResourceView, vad gör den här kommentaren här?															 
 			gDeviceContext->IASetInputLayout(gVertexLayoutDCM);
 			vertexSize = sizeof(float) * 8;
 			
 			//rendera från cubens kamera
-			DCM_handler.DCM_Render(cullingFrustum->seenObjects[bufferCounter], &cullingFrustum->seenObjects[bufferCounter]->dcm);
+			DCM_handler.DCM_Render(cullingFrustum->seenObjects[bufferCounter], cullingFrustum->seenObjects[bufferCounter]->dcm);
 
+			//cullingFrustum->seenObjects[bufferCounter]->modelTextureView = cullingFrustum->seenObjects[bufferCounter]->dcm->getShaderResourceView();
 		}
 
 		else {
@@ -337,7 +338,11 @@ void Engine::Render()
 
 		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 
-		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
+
+		if (cullingFrustum->seenObjects[bufferCounter]->hasDCM())
+			gDeviceContext->PSSetShaderResources(0, 1, &cullingFrustum->seenObjects[bufferCounter]->dcm->DCM_ShaderResourceView);
+		else
+			gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
 
 		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
 		gDeviceContext->IASetIndexBuffer(cullingFrustum->seenObjects[bufferCounter]->modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);

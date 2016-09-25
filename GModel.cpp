@@ -55,6 +55,7 @@ GModel::GModel()
 	noOfTextures = 1;
 	hasSkeleton = false;
 	DCMcheck = false;
+	dcm = new DCM;
 }
 
 GModel::~GModel()
@@ -63,6 +64,7 @@ GModel::~GModel()
 	//modelTextureView[0]->Release();
 	//modelTextureView[1]->Release();
 	delete objectWorldMatrix;
+	delete dcm;
 
 }
 bool GModel::isAnimated()

@@ -50,7 +50,7 @@ public:
 	~GModel();
 	bool isCulled = false; //This bool will serve as a tag, it is set by the GFrustum calling the QuadTreeCollision-function.
 	bool isAnimated();
-	DCM dcm;
+	DCM * dcm;
 	ID3D11Buffer* modelVertexBuffer = nullptr;
 	ID3D11Buffer* animModelVertexBuffer = nullptr;
 	ID3D11Buffer* modelIndexBuffer = nullptr;

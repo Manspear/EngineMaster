@@ -33,7 +33,7 @@ void DCM_Render_Handler::Initialize(ID3D11Device * gDevice, ID3D11DepthStencilVi
 void DCM_Render_Handler::DCM_Render(GModel* model, DCM *dcm)
 {
 	// Generate the cube map by rendering to each cube map face.
-	gDeviceContext->RSSetViewports(1, &model->dcm.getDCM_CubeMapViewport());// listOfModels->dcm.getDCM_CubeMapViewport
+	gDeviceContext->RSSetViewports(1, &model->dcm->getDCM_CubeMapViewport());// listOfModels->dcm.getDCM_CubeMapViewport
 	for (int i = 0; i < 6; i++)
 	{
 		// Clear cube map face Render Target View and Depth Buffer.
@@ -41,8 +41,9 @@ void DCM_Render_Handler::DCM_Render(GModel* model, DCM *dcm)
 		gDeviceContext->ClearDepthStencilView(dcm->getDCM_DepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 		// Bind cube map face as render target.
-		ID3D11RenderTargetView* DCM_RenderTargetView2 = dcm->getDCM_RenderTargetView(i);
-		gDeviceContext->OMSetRenderTargets(1, &DCM_RenderTargetView2, dcm->getDCM_DepthStencilView());
+		ID3D11RenderTargetView* DCM_RenderTargetView2[6];
+		DCM_RenderTargetView2[i] = dcm->getDCM_RenderTargetView(i);
+		gDeviceContext->OMSetRenderTargets(1, &DCM_RenderTargetView2[i], dcm->getDCM_DepthStencilView());
 
 		//Draw the scene with exception of the center sphere, to this cube map face
 		Render_Enviroment(model);//		med DCM vertex // pixelshader?

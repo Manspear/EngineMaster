@@ -78,5 +78,5 @@ float4 PS_main(PS_IN input) : SV_Target
 
 										   //^^^^^^^^^^^^^^^^^^^^^^^^
 
-	return gCubeMap.Sample(DCM_TriLinearSample, lightPos);
+	return float4(0.0, 0.0, 1.0, 1.0);//gCubeMap.Sample(DCM_TriLinearSample, lightPos);
 };
