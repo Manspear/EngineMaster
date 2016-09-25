@@ -50,6 +50,8 @@ void Engine::CreateShaders()
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
+
+
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
@@ -169,27 +171,27 @@ void Engine::CreateShaders()
 						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
 		);
 
-	gDevice->CreatePixelShader(pPS_DCM->GetBufferPointer(), pPS_DCM->GetBufferSize(), nullptr, &gPixelShader);
+	gDevice->CreatePixelShader(pPS_DCM->GetBufferPointer(), pPS_DCM->GetBufferSize(), nullptr, &gPixelShaderDCM);
 	// we do not need anymore this COM object, so we release it.
 	pPS_DCM->Release();
 
-	//Creating a Sampler for the Pixel Shader
-	D3D11_SAMPLER_DESC sampDesc_DCM;
-	sampDesc_DCM.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	sampDesc_DCM.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-	sampDesc_DCM.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-	sampDesc_DCM.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-	sampDesc_DCM.MipLODBias = 0;
-	sampDesc_DCM.MaxAnisotropy = 1;
-	sampDesc_DCM.ComparisonFunc = D3D11_COMPARISON_ALWAYS; //Maybe this does something bad? Hmm... Keep an eye out.
-	sampDesc_DCM.BorderColor[0] = 1.f;
-	sampDesc_DCM.BorderColor[1] = 1.f;
-	sampDesc_DCM.BorderColor[2] = 0.f;
-	sampDesc_DCM.BorderColor[3] = 1.f; //Not sure why this RGB value's w value must be 1... Alpha maybe?
-	sampDesc_DCM.MinLOD = 0;
-	sampDesc_DCM.MaxLOD = 12;
+	////Creating a Sampler for the Pixel Shader
+	//D3D11_SAMPLER_DESC sampDesc_DCM;
+	//sampDesc_DCM.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	//sampDesc_DCM.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	//sampDesc_DCM.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	//sampDesc_DCM.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	//sampDesc_DCM.MipLODBias = 0;
+	//sampDesc_DCM.MaxAnisotropy = 1;
+	//sampDesc_DCM.ComparisonFunc = D3D11_COMPARISON_ALWAYS; //Maybe this does something bad? Hmm... Keep an eye out.
+	//sampDesc_DCM.BorderColor[0] = 1.f;
+	//sampDesc_DCM.BorderColor[1] = 1.f;
+	//sampDesc_DCM.BorderColor[2] = 0.f;
+	//sampDesc_DCM.BorderColor[3] = 1.f; //Not sure why this RGB value's w value must be 1... Alpha maybe?
+	//sampDesc_DCM.MinLOD = 0;
+	//sampDesc_DCM.MaxLOD = 12;
 
-	hr = gDevice->CreateSamplerState(&sampDesc, &gPSTextureSampler);
+	//hr = gDevice->CreateSamplerState(&sampDesc, &gPSTextureSampler);
 
 
 	//DCM END
@@ -330,7 +332,7 @@ void Engine::Render()
 		else {
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
-			vertexSize = sizeof(float) * 8;
+			vertexSize = sizeof(float) * 8 + sizeof(int);
 		}
 
 		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
@@ -514,6 +516,7 @@ void Engine::Clean() {
 void Engine::InitializeCamera()
 {
 	camera = new GCamera;//										vv far plane	dessa är 400 gånger ifrån varandra. Det är okej att ha runt 10 000 - 20 000
+	camera->setPosition(XMFLOAT4(0.0, 0.0, -7.0, 0.0));
 	camera->InitProjMatrix(XM_PI * 0.5, wHEIGHT, wWIDTH, 0.1, 20);
 	//													  ^^ near plane  förut var det 0.5 här
 	//pi * 0.45, wHEIGHT, wWiDTH, 0.05, 20

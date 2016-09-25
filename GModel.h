@@ -64,7 +64,7 @@ public:
 	int* IndexArray = nullptr;
 	int sizeOfIndexArray = 0;
 	float animationTime;
-	bool DCMcheck;
+	bool DCMcheck = false;
 
 	ID3D11ShaderResourceView* modelTextureView[2]; //texture then normal map
 												   //share projection and view, but have different world-view.
