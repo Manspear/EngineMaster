@@ -184,6 +184,19 @@ void Engine::CreateConstantBuffer() {
 	gDevice->CreateBuffer(&bufferDesc, NULL, &gConstantBuffer);
 }
 
+
+
+void Engine::CreateShadowBuffer()
+{
+	D3D11_BUFFER_DESC bufferDesc;
+	memset(&bufferDesc, 0, sizeof(bufferDesc));
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.ByteWidth = sizeof(ShadowMatrixBuffer);
+	gDevice->CreateBuffer(&bufferDesc, NULL, &gShadowBuffer);
+}
+
 void Engine::CreateDepthStencilBuffer() {
 
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
@@ -272,7 +285,8 @@ void Engine::Render()
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 																					   
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);					   
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
+
 																					   
 	listOfModels = modelListObject.getModelList();									   
 																					   

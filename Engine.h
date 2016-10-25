@@ -66,6 +66,7 @@ public:
 	ID3D11RenderTargetView* gBackbufferRTV = nullptr; //x
 
 	ID3D11Buffer* gConstantBuffer = nullptr; //x
+	ID3D11Buffer* gShadowBuffer = nullptr; //x
 
 	ID3D11Texture2D* gDepthStencilBuffer = nullptr; //x
 	ID3D11DepthStencilView* depthStencilView = nullptr; //x
@@ -83,13 +84,23 @@ public:
 	ID3D11GeometryShader* gGeometryShader = nullptr;//x
 
 
-	struct matrixBuffer {
+	struct matrixBuffer 
+	{
 		XMMATRIX viewMatrix;
 		XMMATRIX projectionMatrix;
-
 		XMFLOAT4 camPos;
 		XMFLOAT4 camDir;
 	};
+
+	struct  ShadowMatrixBuffer
+	{
+		//XMMATRIX worldMatrix;
+		XMMATRIX viewMatrix;
+		XMMATRIX projectionMatrix;
+		XMMATRIX lightViewMatrix;
+		XMMATRIX lightProjectionMatrix;
+	};
+
 
 	GModelList modelListObject; //This will be used in GQuadTreeBoundingBox::splitBox()
 	GCamera * camera = nullptr;
@@ -120,6 +131,7 @@ public:
 	void CreateShaders();
 	//void CreateTexture(int modelCounter);
 	void CreateConstantBuffer();
+	void CreateShadowBuffer();
 	void CreateDepthStencilBuffer();
 	void SetViewport();
 	void Render();
