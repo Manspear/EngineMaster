@@ -118,7 +118,7 @@ void Engine::CreateShaders()
 #pragma region SHADOW
 
 	//create vertex shader
-	ID3DBlob* pVS = nullptr;
+	ID3DBlob* pVSS = nullptr;
 	D3DCompileFromFile(
 		L"ShadowVertex.hlsl", // filename
 		nullptr,		// optional macros
@@ -127,30 +127,30 @@ void Engine::CreateShaders()
 		"vs_4_0",		// shader model (target)
 		0,				// shader compile options
 		0,				// effect compile options
-		&pVS,			// double pointer to ID3DBlob		
+		&pVSS,			// double pointer to ID3DBlob		
 		nullptr			// pointer for Error Blob messages.
 						// how to use the Error blob, see here
 						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
 	);
 
 
-	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShaderS);
+	gDevice->CreateVertexShader(pVSS->GetBufferPointer(), pVSS->GetBufferSize(), nullptr, &gVertexShaderS);
 
 	//create input layout (verified using vertex shader)
-	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
+	D3D11_INPUT_ELEMENT_DESC inputDescSM[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
+	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVSS->GetBufferPointer(), pVSS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
-	pVS->Release();
+	pVSS->Release();
 
 
 
 
 	//create pixel shader
-	ID3DBlob* pPS = nullptr;
+	ID3DBlob* pPSS = nullptr;
 	D3DCompileFromFile(
 		L"ShadowPixel.hlsl", // filename
 		nullptr,		// optional macros
@@ -159,15 +159,15 @@ void Engine::CreateShaders()
 		"ps_4_0",		// shader model (target)
 		0,				// shader compile options
 		0,				// effect compile options
-		&pPS,			// double pointer to ID3DBlob		
+		&pPSS,			// double pointer to ID3DBlob		
 		nullptr			// pointer for Error Blob messages.
 						// how to use the Error blob, see here
 						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
 	);
 
-	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShaderS);
+	gDevice->CreatePixelShader(pPSS->GetBufferPointer(), pPSS->GetBufferSize(), nullptr, &gPixelShaderS);
 	// we do not need anymore this COM object, so we release it.
-	pPS->Release();
+	pPSS->Release();
 
 
 #pragma endregion

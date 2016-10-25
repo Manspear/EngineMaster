@@ -14,7 +14,7 @@ struct PS_IN
 {
 	float4 position : SV_POSITION;
 	float2 tex : TEXCOORD0;
-	float3 normal : NORMAL;
+	float3 normal : TEXCOORD3;
 	float4 lightViewPosition : TEXCOORD1;
 	float3 lightPos : TEXCOORD2;
 };
@@ -30,7 +30,7 @@ float4 PS_main(PS_IN input) : SV_Target
 	float4 textureColor;
 
 	float4 ambientColor = float4(0.3f, 0.3f, 0.3f, 0.0f);
-	float4 diffuseColor = float4(1.0f, 1.0f, 1.0f, 1.0f)
+	float4 diffuseColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	bias = 0.001f;
 

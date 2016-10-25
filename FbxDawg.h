@@ -3,7 +3,7 @@
 
 #include <assert.h>
 #include <vector>
-#include <fbxsdk.h>
+#include "fbxsdk.h"
 #include <DirectXMath.h>
 
 #pragma region structs
