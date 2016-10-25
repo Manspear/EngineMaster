@@ -31,10 +31,10 @@ struct PS_IN
 float4 PS_main(PS_IN input) : SV_Target
 {
 	//Light Inits
-	float3 lightPos = float3 (4, 3, -3);
+	float3 lightPoint = float3 (4, 3, -3);
 
 	//Why is the lightposition a vector pointing at the light position? It's weird. 
-	float3 lightPos = normalize(lightPos - input.pixelPosition); //Vector from pixelPosition to camera(is correct)
+	float3 lightPos = normalize(lightPoint - input.pixelPosition); //Vector from pixelPosition to camera(is correct)
 	float4 ambientLightColor = { 0.3, 0.3, 0.3, 0 };
 	float4 diffuseColor = float4(1, 1, 1, 1);
 	float specShadow = 1.0;
