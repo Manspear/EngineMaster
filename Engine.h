@@ -101,6 +101,13 @@ public:
 		XMMATRIX lightProjectionMatrix;
 	};
 
+	struct LightBuffer
+	{
+		XMFLOAT3 lightPosition;
+		float padding;
+	};
+
+
 
 	GModelList modelListObject; //This will be used in GQuadTreeBoundingBox::splitBox()
 	GCamera * camera = nullptr;

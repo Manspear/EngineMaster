@@ -285,30 +285,10 @@ void Engine::Render()
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 																					   
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer); //Here we are
 
 																					   
-	listOfModels = modelListObject.getModelList();									   
-																					   
-	//bool isRoot = true;
-	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
-	//cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
-	////rootBox has 2 modelChildren, but the bbox-children of rootBox have no modelchildren. Odd that.
-	//		gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
-	//		gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
-	//		gDeviceContext->IASetInputLayout(gVertexLayoutBS);
-	//		vertexSize = sizeof(float) * 16;
-	//	}else{
-	//		gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-	//		gDeviceContext->IASetInputLayout(gVertexLayout);
-	//		vertexSize = sizeof(float) * 8;
-	//	}														  	 
-																  	 
-																  	 
-	//struct frustumVert {										  	 
-	//		float x, y, z, xn, yn, zn, u, v;					  	 
-	//	};														  	 
-	//	frustumVert frustumVertices[6]; //...					  	 
+	listOfModels = modelListObject.getModelList();									   																				   	 
 																  	 
 																	 
 
@@ -334,6 +314,8 @@ void Engine::Render()
 		}
 		else
 		{
+			
+
 			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayout);
 			vertexSize = sizeof(float) * 8 + sizeof(int);
