@@ -24,7 +24,7 @@ class ShadowMap
 {
 public:
 	/*Same dimensions as the viewport renderer*/
-	void createDepthBuffer(ID3D11DeviceContext* deviceContext);
+	void createDepthBuffer(ID3D11DeviceContext* deviceContext, ID3D11Device* device);
 	ShadowMap();
 	/*Remember that XMMATRIX cannot be sent between functions of classes. Use XMFLOAT4X4 instead*/
 
@@ -36,6 +36,7 @@ public:
 		ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, XMMATRIX lightPosition,
 		XMMATRIX ambientColor, XMMATRIX diffuseColor);
 
+	ID3D11Texture2D* getDepthTexture();
 
 private:
 	bool InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename);
@@ -45,6 +46,8 @@ private:
 		XMMATRIX ambientColor, XMMATRIX diffuseColor);
 	void RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
 
+	/*This is the depth-buffer saved from the light-pass*/
+	ID3D11Texture2D* pDepthStencil;
 
 	ID3D11VertexShader* m_vertexShader;
 	ID3D11PixelShader* m_pixelShader;
