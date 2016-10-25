@@ -113,9 +113,9 @@ void Engine::CreateShaders()
 	};
 	HRESULT hr = gDevice->CreateInputLayout(inputDescBS, ARRAYSIZE(inputDescBS), pVSbs->GetBufferPointer(), pVSbs->GetBufferSize(), &gVertexLayoutBS);
 	// we do not need anymore this COM object, so we release it.
-
-
 	pVSbs->Release();
+
+#pragma region SHADOW
 
 	//create vertex shader
 	ID3DBlob* pVS = nullptr;
@@ -146,6 +146,9 @@ void Engine::CreateShaders()
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
 
+
+
+
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;
 	D3DCompileFromFile(
@@ -162,9 +165,13 @@ void Engine::CreateShaders()
 						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
 	);
 
-	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShader);
+	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShaderS);
 	// we do not need anymore this COM object, so we release it.
 	pPS->Release();
+
+
+#pragma endregion
+
 
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;

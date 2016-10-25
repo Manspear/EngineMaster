@@ -34,9 +34,6 @@
     <Filter Include="Source Files\Quad Tree and BBoxes">
       <UniqueIdentifier>{66900ecb-808e-4e80-97de-2179e827acf3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Shadow">
-      <UniqueIdentifier>{26e89702-9907-4d98-a60c-97248844fcd7}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -84,9 +81,6 @@
     <ClCompile Include="ParticleSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowMap.cpp">
-      <Filter>Source Files\Shadow</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
@@ -117,10 +111,10 @@
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="ShadowPixel.hlsl">
-      <Filter>Source Files\Shadow</Filter>
+      <Filter>Source Files\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="ShadowVertex.hlsl">
-      <Filter>Source Files\Shadow</Filter>
+      <Filter>Source Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
@@ -173,7 +167,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ShadowMap.h">
-      <Filter>Source Files\Shadow</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
