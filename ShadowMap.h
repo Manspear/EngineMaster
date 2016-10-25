@@ -9,32 +9,24 @@
 #include <directXMath.h>
 
 using namespace DirectX;
+
+/*
+MISSION OF THIS CLASS:
+
+Have a render function, that returns/creates a depth buffer saved in a texture
+to be used by other functions.
+
+What this class holds:
+Information about the light's WVP matrix
+
+*/
 class ShadowMap
 {
 public:
+	/*Same dimensions as the viewport renderer*/
+	void createDepthBuffer(ID3D11DeviceContext* deviceContext);
 	ShadowMap();
 	/*Remember that XMMATRIX cannot be sent between functions of classes. Use XMFLOAT4X4 instead*/
-	struct MatrixBufferType
-	{
-		
-		XMMATRIX world;
-		XMMATRIX view;
-		XMMATRIX projection;
-		XMMATRIX lightView;
-		XMMATRIX lightProjection;
-	};
-
-	struct LightBufferType
-	{
-		XMMATRIX ambientColor;
-		XMMATRIX diffuseColor;
-	};
-
-	struct LightBufferType2
-	{
-		XMMATRIX lightPosition;
-		float padding;
-	};
 
 	bool initialize(ID3D11Device* device, HWND handle);
 	void uninitialize();
@@ -44,11 +36,9 @@ public:
 		ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, XMMATRIX lightPosition,
 		XMMATRIX ambientColor, XMMATRIX diffuseColor);
 
-	void shutDown();
 
 private:
 	bool InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename);
-	void ShutdownShader();
 	bool SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix,
 		XMMATRIX projectionMatrix, XMMATRIX lightViewMatrix, XMMATRIX lightProjectionMatrix,
 		ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, XMMATRIX lightPosition,
