@@ -105,6 +105,7 @@
     <ClCompile Include="MousePicking.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>

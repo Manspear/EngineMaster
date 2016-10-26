@@ -49,7 +49,7 @@ public:
 	ID3D11Texture2D* getDepthTexture();
 
 private:
-	bool InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename);
+	bool InitializeShader(ID3D11Device* device);
 	/*bool SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix,
 		XMMATRIX projectionMatrix, XMMATRIX lightViewMatrix, XMMATRIX lightProjectionMatrix,
 		ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, XMMATRIX lightPosition,
@@ -82,10 +82,13 @@ private:
 	*/
 	ID3D11DepthStencilView* pDepthStencilView = nullptr;
 
-	//This shader calculates the depth buffer used for the depth-compare
-	ID3D11VertexShader* firstPassShader = nullptr;
+	//these shaders makes the lighting texture out of the shadowmap depth buffer
+	ID3D11VertexShader* vertexShaderShadow = nullptr;
+	ID3D11PixelShader* pixelShaderShadow = nullptr;
+
+
 	//Holds the "vanilla" geometry, no skeletal or BS stuff
-	ID3D11InputLayout* firstPassVertexLayout = nullptr; 
+	ID3D11InputLayout* VertexlayoutShadow = nullptr; 
 
 	//D3D11_VIEWPORT lightViewport;
 };

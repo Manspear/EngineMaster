@@ -117,57 +117,7 @@ void Engine::CreateShaders()
 
 #pragma region SHADOW
 
-	//create vertex shader
-	ID3DBlob* pVSS = nullptr;
-	D3DCompileFromFile(
-		L"ShadowVertex.hlsl", // filename
-		nullptr,		// optional macros
-		nullptr,		// optional include files
-		"VS_main",		// entry point
-		"vs_4_0",		// shader model (target)
-		0,				// shader compile options
-		0,				// effect compile options
-		&pVSS,			// double pointer to ID3DBlob		
-		nullptr			// pointer for Error Blob messages.
-						// how to use the Error blob, see here
-						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
-	);
-
-
-	gDevice->CreateVertexShader(pVSS->GetBufferPointer(), pVSS->GetBufferSize(), nullptr, &gVertexShaderS);
-
-	//create input layout (verified using vertex shader)
-	D3D11_INPUT_ELEMENT_DESC inputDescSM[] = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVSS->GetBufferPointer(), pVSS->GetBufferSize(), &gVertexLayout);
-	// we do not need anymore this COM object, so we release it.
-	pVSS->Release();
-
-
-
-
-	//create pixel shader
-	ID3DBlob* pPSS = nullptr;
-	D3DCompileFromFile(
-		L"ShadowPixel.hlsl", // filename
-		nullptr,		// optional macros
-		nullptr,		// optional include files
-		"PS_main",		// entry point
-		"ps_4_0",		// shader model (target)
-		0,				// shader compile options
-		0,				// effect compile options
-		&pPSS,			// double pointer to ID3DBlob		
-		nullptr			// pointer for Error Blob messages.
-						// how to use the Error blob, see here
-						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
-	);
-
-	gDevice->CreatePixelShader(pPSS->GetBufferPointer(), pPSS->GetBufferSize(), nullptr, &gPixelShaderS);
-	// we do not need anymore this COM object, so we release it.
-	pPSS->Release();
+	
 
 
 #pragma endregion
