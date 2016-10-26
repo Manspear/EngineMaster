@@ -45,7 +45,12 @@ public:
 	pDepthStencilBuffer-variable. This depth buffer should be
 	incorporated into shadowmap-versions of our existing shaders.
 	*/
-	bool RenderShadowed(ID3D11DeviceContext* deviceContext, ID3D11Buffer* vertexBuffer, ShaderType shadTp, UINT32 vertexSize);
+	bool RenderShadowed(
+		ID3D11DeviceContext* deviceContext, 
+		ID3D11Buffer* vertexBuffer, //vertexBuffer: The vertices to be rendered shadowed
+		ID3D11RenderTargetView* RTV, //RTV: The non-light render target view... i.e the "normal" one
+		ShaderType shadTp, //shadTp: vanilla, bs, skeletal (an enum)
+		UINT32 vertexSize); //vertexSize: Send in the byte-size per-vertex. 
 
 	ID3D11Texture2D* getDepthTexture();
 
@@ -81,7 +86,7 @@ private:
 
 	during the fist render pass we have void pixel shader, and a null render target.
 	*/
-	ID3D11DepthStencilView* pDepthStencilView = nullptr;
+	ID3D11DepthStencilView* pShadowDSV = nullptr;
 
 	//these shaders makes the lighting texture out of the shadowmap depth buffer
 	ID3D11VertexShader* vertexShaderShadow = nullptr;
