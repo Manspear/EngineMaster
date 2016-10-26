@@ -30,6 +30,8 @@
 
 #include "DeltaTime.h"
 
+#include "ShadowMap.h"
+
 #ifndef ENGINE_H
 #define ENGINE_H
 #define XAXIS 0
@@ -101,6 +103,8 @@ public:
 		XMFLOAT4 camPos;
 		XMFLOAT4 camDir;
 	};
+
+	ShadowMap shadow;
 
 	GModelList modelListObject; //This will be used in GQuadTreeBoundingBox::splitBox()
 	GCamera * camera = nullptr;

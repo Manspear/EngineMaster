@@ -4,7 +4,7 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 {
 	InitializeShader(device);
 	createCbuffers(device);
-	initializeMatrix();
+	initializeMatrix(device);
 	
 
 
@@ -93,10 +93,18 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 		{
 			deviceContext->IASetVertexBuffers(0, 1, &model[i].modelVertexBuffer, &testVertexSize, 0);
 			deviceContext->IASetInputLayout(VertexlayoutShadow);
+
+			deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
+			deviceContext->VSSetConstantBuffers(1, 1, &model[i].modelConstantBuffer);
+
+			deviceContext->IASetIndexBuffer(model[i].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			deviceContext->DrawIndexed(model[i].sizeOfIndexArray, 0, 0);
 		}
 	}
 	//Sets the render target and depth buffer back to it's initial state
 	deviceContext->OMSetRenderTargets(1, &RTV, DSV);
+
+	
 
 	return pShadowSRV;
 }
@@ -219,18 +227,38 @@ void ShadowMap::createCbuffers(ID3D11Device* device)
 	device->CreateBuffer(&matrixDesc, NULL, &matrixBuffer);
 }
 
-void ShadowMap::initializeMatrix()
+void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * deviceContext)
 {
 	XMVECTOR lPosition = XMVectorSet(4.0f, 3.0f, -3.0f, 1.0f);
-	XMVECTOR lTarget = XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR lDirection = XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f);
 	XMVECTOR lUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-
+	XMVECTOR lTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 
 	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(640, 480, 0.1, 1000);
 
 
 	XMStoreFloat4x4(&matrix_cbuffer.lightViewMatrix, XMMatrixLookToLH(lPosition, lTarget, lUp));
+
+	//XMStoreFloat4x4(&matrix_cbuffer.lightViewMatrix, XMMatrixLookToLH(lPosition, lDirection, lUp));
 	XMStoreFloat4x4(&matrix_cbuffer.lightProjectionMatrix, orthoProjectionMat);
+
+	//If error, try transposing the matrices.
+
+	D3D11_BUFFER_DESC bufferDesc;
+	memset(&bufferDesc, 0, sizeof(bufferDesc));
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.ByteWidth = sizeof(matrixBuffer);
+	device->CreateBuffer(&bufferDesc, NULL, &matrixBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE mapThing;
+	matrixCbuff* dataPtr;
+	deviceContext->Map(matrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapThing);
+	dataPtr = (matrixCbuff*)mapThing.pData;
+	dataPtr = &matrix_cbuffer;
+	deviceContext->Unmap(matrixBuffer, NULL);
+
 }
 
 void ShadowMap::RenderShader(ID3D11DeviceContext * deviceContext, int indexCount)

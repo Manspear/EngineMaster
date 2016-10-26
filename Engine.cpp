@@ -283,6 +283,8 @@ void Engine::Render()
 																					   
 	listOfModels = modelListObject.getModelList();			
 
+	
+
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
 		if (cullingFrustum->seenObjects[bufferCounter]->hasBlendShape())

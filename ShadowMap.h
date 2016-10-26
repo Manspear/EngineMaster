@@ -66,7 +66,7 @@ private:
 		XMMATRIX ambientColor, XMMATRIX diffuseColor);*/
 	void RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
 	void createCbuffers(ID3D11Device* device);
-	void initializeMatrix();
+	void initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * deviceContext);
 	/*
 	This is the depth-buffer saved from the light-pass
 	In the second pass, send this as a shader resource
