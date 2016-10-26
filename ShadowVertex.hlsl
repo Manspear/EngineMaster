@@ -13,9 +13,6 @@ struct VS_OUT //Output. Must match input of pixel shader.
 
 
 cbuffer matrixBuffer:register(b0) {
-	matrix viewMatrix;
-	matrix projectionMatrix;
-
 	matrix lightViewMatrix;
 	matrix lightProjectionMatrix;
 };
@@ -29,7 +26,7 @@ VS_OUT VS_main(VS_IN input)
 {
 	VS_OUT output = (VS_OUT)0;
 
-	output.Pos = mul(input.Pos, mul(worldMatrix, mul(lightViewMatrix, lightProjectionMatrix)));
+	output.Pos = mul(float4(input.Pos, 1.0f), mul(worldMatrix, mul(lightViewMatrix, lightProjectionMatrix)));
 
 	return output;
 }
