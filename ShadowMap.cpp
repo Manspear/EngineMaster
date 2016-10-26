@@ -6,100 +6,7 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	createCbuffers(device);
 	initializeMatrix(device, deviceContext);
 	
-
-
-
-
-	/*Create the shadow-buffer's texture*/
 	HRESULT hr;
-	//D3D11_TEXTURE2D_DESC depthTexDesc;
-	//depthTexDesc.Width = (float)640;
-	//depthTexDesc.Height = (float)480;
-	//depthTexDesc.MipLevels = 1;
-	//depthTexDesc.ArraySize = 1;
-	//depthTexDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-	////Changed this from 1 to 4
-	//depthTexDesc.SampleDesc.Count = 4;
-	//depthTexDesc.SampleDesc.Quality = 0;
-	//depthTexDesc.Usage = D3D11_USAGE_DEFAULT;
-	//depthTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	//depthTexDesc.CPUAccessFlags = 0;
-	//depthTexDesc.MiscFlags = 0;
-
-	////Create the depth stencil view desc
-	//D3D11_DEPTH_STENCIL_VIEW_DESC DSVdesc;
-	////DSVdesc.Format = depthTexDesc.Format; //<-- tutorial says this
-	//DSVdesc.Format = DXGI_FORMAT_D32_FLOAT; //<-- comment says this
-	//DSVdesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	//DSVdesc.Texture2D.MipSlice = 0;
-	////Improv
-	//DSVdesc.Flags = 0;
-
-	////Create the shader resource view desc
-	//D3D11_SHADER_RESOURCE_VIEW_DESC SRVdesc;
-	////SRVdesc.Format = DXGI_FORMAT_R32_FLOAT; //<-- tutorial says this
-	//SRVdesc.Format = DXGI_FORMAT_R32_FLOAT; //<-- comment says this
-	//SRVdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	//SRVdesc.Texture2D.MipLevels = depthTexDesc.MipLevels;
-	//SRVdesc.Texture2D.MostDetailedMip = 0;
-	//
-	//hr = device->CreateTexture2D(&depthTexDesc, NULL, &pShadowMap);
-	////Borked!
-	//hr = device->CreateDepthStencilView(pShadowMap, &DSVdesc, &pShadowDSV);
-
-	//hr = device->CreateShaderResourceView(pShadowMap, &SRVdesc, &pShadowSRV);
-
-
-
-
-	//D3D11_TEXTURE2D_DESC depthStencilDesc;
-
-	//depthStencilDesc.Width = (float)640;
-	//depthStencilDesc.Height = (float)480;
-	//depthStencilDesc.MipLevels = 1;
-	//depthStencilDesc.ArraySize = 1;
-	//depthStencilDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-	//depthStencilDesc.SampleDesc.Count = 4;
-	//depthStencilDesc.SampleDesc.Quality = 0;
-	//depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-	//depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;// <-- This makes it "invalid"
-	//depthStencilDesc.CPUAccessFlags = 0;
-	//depthStencilDesc.MiscFlags = 0;
-
-	//// Create the depth stencil view desc
-	////D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
-	////descDSV.Format = depthStencilDesc.Format;
-	////descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	////descDSV.Texture2D.MipSlice = 0;
-
-	////descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	////descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	////descDSV.Texture2D.MipSlice = 0;
-
-	//D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
-	//dsvDesc.Format = depthStencilDesc.Format;
-	//dsvDesc.Flags = 0;
-	//dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	//dsvDesc.Texture2D.MipSlice = 0;
-
-
-
-	////create shader resource view desc
-	//D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	//srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-	//srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	//srvDesc.Texture2D.MipLevels = depthStencilDesc.MipLevels;
-	//srvDesc.Texture2D.MostDetailedMip = 0;
-
-
-
-	//hr = device->CreateTexture2D(&depthStencilDesc, NULL, &pShadowMap);
-	////Borked!
-	//hr = device->CreateDepthStencilView(pShadowMap, NULL, &pShadowDSV);
-	////hr = device->CreateDepthStencilView(pShadowMap, NULL, &pShadowDSV);
-	//hr = device->CreateShaderResourceView(pShadowMap, &srvDesc, &pShadowSRV);
-
-
 
 	D3D11_TEXTURE2D_DESC textDesc;
 	textDesc.Width = (float)640;
@@ -131,6 +38,31 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	hr = device->CreateDepthStencilView(pShadowMap, &depthDesc, &pShadowDSV);
 	hr = device->CreateShaderResourceView(pShadowMap, &shadDesc, &pShadowSRV);
 
+	D3D11_TEXTURE2D_DESC textureDesc;
+	// Initialize the render target texture description.
+	ZeroMemory(&textureDesc, sizeof(textureDesc));
+	// Setup the render target texture description.
+	textureDesc.Width = (float)640;
+	textureDesc.Height = (float)480;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+	// Create the render target texture.
+	hr = device->CreateTexture2D(&textureDesc, NULL, &pRTVTex);
+
+	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+	// Setup the description of the render target view.
+	renderTargetViewDesc.Format = textureDesc.Format;
+	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.Texture2D.MipSlice = 0;
+
+	// Create the render target view.
+	hr = device->CreateRenderTargetView(pRTVTex, &renderTargetViewDesc, &pShadowRTV);
 }
 
 ShadowMap::ShadowMap()
@@ -159,11 +91,11 @@ void ShadowMap::uninitialize()
 //(the ones that are static & basic if possible), 
 //loop through them, and calculate the depth for
 //the 1st pass
-ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext* deviceContext, GModelList &modelList,
+ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext* deviceContext, GModelList& modelList,
 	ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV)
 {
 	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
-	deviceContext->OMSetRenderTargets(0, 0, pShadowDSV);
+	deviceContext->OMSetRenderTargets(1, &pShadowRTV, pShadowDSV);
 	//Clear the depth stencil view since last "run". Since we render our scene "one model at a time"
 	//we should maybe move this to another function. We will see.
 	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -178,6 +110,10 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 		if (!model[i].isAnimated() && !model[i].hasBlendShape())
 		{
 			deviceContext->IASetInputLayout(VertexlayoutShadow);
+			model[i].modelVertices;
+			model[i].IndexArray;
+			model[i].sizeOfIndexArray;
+		
 			deviceContext->IASetVertexBuffers(0, 1, &model[i].modelVertexBuffer, &testVertexSize, &offset);
 
 			deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);

@@ -50,6 +50,8 @@ public:
 	Put this in a loop looping through all objects in the scene.
 	After the loop is done, set the rendertarget to the old one.
 	*/
+	
+
 	ID3D11ShaderResourceView* RenderFirstPassShadowed(
 		ID3D11DeviceContext* deviceContext, GModelList &modelList,
 		ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV
@@ -94,7 +96,8 @@ private:
 	ID3D11VertexShader* vertexShaderShadow = nullptr;
 	ID3D11PixelShader* pixelShaderShadow = nullptr;
 
-
+	ID3D11RenderTargetView* pShadowRTV = nullptr;
+	ID3D11Texture2D* pRTVTex = nullptr;
 	//Holds the "vanilla" geometry, no skeletal or BS stuff
 	ID3D11InputLayout* VertexlayoutShadow = nullptr; 
 
