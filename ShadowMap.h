@@ -9,7 +9,8 @@
 #include <directXMath.h>
 
 using namespace DirectX;
-
+#define LIGHT_POS (4, 3, -3)
+#define LIGHT_DIR (0, 1, 1)
 /*
 MISSION OF THIS CLASS:
 
@@ -55,7 +56,7 @@ private:
 		ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, XMMATRIX lightPosition,
 		XMMATRIX ambientColor, XMMATRIX diffuseColor);*/
 	void RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
-
+	void createCbuffers(ID3D11Device* device);
 	/*
 	This is the depth-buffer saved from the light-pass
 	In the second pass, send this as a shader resource
@@ -89,6 +90,31 @@ private:
 
 	//Holds the "vanilla" geometry, no skeletal or BS stuff
 	ID3D11InputLayout* VertexlayoutShadow = nullptr; 
+
+	//samplers
+	ID3D11SamplerState* sampleStateWrap;
+	ID3D11SamplerState* sampleStateClamp;
+
+	//cbuffers
+	ID3D11Buffer* matrixBuffer;
+	ID3D11Buffer* wMatBuffer;
+	ID3D11Buffer* lightBuffer;  //hardcode instead
+	ID3D11Buffer* lightBuffer2; //hardcode instead
+
+	//cbufferStructs
+	struct matrixCbuff
+	{
+		XMMATRIX viewMatrix;
+		XMMATRIX projectionMatrix;
+
+		XMMATRIX lightViewMatrix;
+		XMMATRIX lightProjectionMatrix;
+	};
+	struct worldMatCbuff
+	{
+		XMMATRIX worldMatrix;
+	};
+
 
 	//D3D11_VIEWPORT lightViewport;
 };

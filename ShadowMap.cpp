@@ -2,6 +2,7 @@
 
 void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11Device* device)
 {
+	createCbuffers(device);
 	/*Create the shadow-buffer's texture*/
 	HRESULT hr;
 	pDepthStencilBuffer = NULL;
@@ -122,6 +123,36 @@ bool ShadowMap::InitializeShader(ID3D11Device* device)
 	// we do not need anymore this COM object, so we release it.
 	pPSS->Release();
 
+
+	//create samplers
+	D3D11_SAMPLER_DESC samplerDesc;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	device->CreateSamplerState(&samplerDesc, &sampleStateWrap);
+
+
+	// create the clamp texture
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+
+	device->CreateSamplerState(&samplerDesc, &sampleStateClamp);
+
+
+
+
 	return true;
 }
 
@@ -130,6 +161,31 @@ bool ShadowMap::InitializeShader(ID3D11Device* device)
 //{
 //	return false;
 //}
+
+void ShadowMap::createCbuffers(ID3D11Device* device)
+{
+	D3D11_BUFFER_DESC matrixDesc;
+	D3D11_BUFFER_DESC worldDesc;
+	D3D11_BUFFER_DESC lightDesc;
+
+	matrixDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixDesc.ByteWidth = sizeof(matrixCbuff);
+	matrixDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixDesc.MiscFlags = 0;
+	matrixDesc.StructureByteStride = 0;
+
+	device->CreateBuffer(&matrixDesc, NULL, &matrixBuffer);
+
+	worldDesc.Usage = D3D11_USAGE_DYNAMIC;
+	worldDesc.ByteWidth = sizeof(matrixCbuff);
+	worldDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	worldDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	worldDesc.MiscFlags = 0;
+	worldDesc.StructureByteStride = 0;
+
+	device->CreateBuffer(&matrixDesc, NULL, &matrixBuffer);
+}
 
 void ShadowMap::RenderShader(ID3D11DeviceContext * deviceContext, int indexCount)
 {
