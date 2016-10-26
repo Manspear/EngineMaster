@@ -287,23 +287,23 @@ void ShadowMap::createCbuffers(ID3D11Device* device)
 
 void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * deviceContext)
 {
-	XMVECTOR lPosition = XMVectorSet(0.0f, 20.0f, -2.0f, 1.0f);
+	XMVECTOR lPosition = XMVectorSet(4.0f, 3.0f, -3.0f, 1.0f);
 	//XMVECTOR lDirection = XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f);
 	XMVECTOR lUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-	XMVECTOR lTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	XMVECTOR lTarget = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f);
 
-	XMMATRIX ProjectionMat = XMMatrixPerspectiveFovLH(XM_PI * 0.5, 640/480, 0.5, 200.0f);
+	XMMATRIX ProjectionMat = XMMatrixPerspectiveFovLH(XM_PI * 0.5, 640/480, 0.1, 20.0f);
 	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(640, 480, 0.1, 1000);
 
-	XMMATRIX viewMat = XMMatrixTranspose(XMMatrixLookAtLH(lPosition, lTarget, lUp));
+	XMMATRIX viewMat = (XMMatrixLookAtLH(lPosition, lTarget, lUp));
 
-	XMMATRIX viewProj = XMMatrixMultiply(viewMat, ProjectionMat);
+	XMMATRIX viewProj = XMMatrixTranspose(XMMatrixMultiply(viewMat, ProjectionMat));
 
 	matrix_cbuffer.lightViewProjection = viewProj;
 
 	//matrix_cbuffer.lightViewMatrix = XMMatrixLookToLH(lPosition, lDirection, lUp);
 
-	XMMATRIX neger = XMMatrixTranspose((XMMatrixMultiply(camera->getViewMatrix(), camera->getProjMatrix())));
+	//XMMATRIX neger = XMMatrixTranspose((XMMatrixMultiply(camera->getViewMatrix(), camera->getProjMatrix())));
 	//If error, try transposing the matrices.
 
 	//D3D11_BUFFER_DESC bufferDesc;
@@ -323,7 +323,7 @@ void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * dev
 
 
 	dataPtr = (matrixCbuff*)mapThing.pData;
-	dataPtr->lightViewProjection = neger;
+	dataPtr->lightViewProjection = viewProj;
 	
 	deviceContext->Unmap(matrixBuffer, NULL);
 
