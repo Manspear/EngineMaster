@@ -36,7 +36,7 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	SRVdesc.Texture2D.MostDetailedMip = 0;
 	
 	hr = device->CreateTexture2D(&depthTexDesc, NULL, &pShadowMap);
-	hr = device->CreateDepthStencilView(pShadowMap, &DSVdesc, &pDepthStencilView);
+	hr = device->CreateDepthStencilView(pShadowMap, &DSVdesc, &pShadowDSV);
 	hr = device->CreateShaderResourceView(pShadowMap, &SRVdesc, &pShadowResource);
 }
 
@@ -62,14 +62,19 @@ void ShadowMap::uninitialize()
 {
 }
 
-bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, ID3D11Buffer* vertexBuffer, ShaderType shadTp, UINT32 vertexSize)
+bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, ID3D11Buffer* vertexBuffer, ID3D11RenderTargetView* RTV, ShaderType shadTp, UINT32 vertexSize)
 {
+	//Set render targets for the first pass
+	deviceContext->OMSetRenderTargets(0, 0, pShadowDSV);
+	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
 	if (shadTp == ShaderType::vanilla)
 	{
 		//Set vertexSize somewhere!
 		UINT32 vertexSize = 0;
 		int offset = 0;
 		//The firstPassShader obviously needs a HLSL file tied to it.
+		
 		deviceContext->VSSetShader(vertexShaderShadow, nullptr, 0);
 		deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexSize, 0);
 	}
