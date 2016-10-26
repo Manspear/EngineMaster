@@ -251,8 +251,8 @@ void ShadowMap::createCbuffers(ID3D11Device* device)
 
 void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * deviceContext)
 {
-	XMVECTOR lPosition = XMVectorSet(4.0f, 3.0f, -3.0f, 1.0f);
-	XMVECTOR lDirection = XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR lPosition = XMVectorSet(0.0f, 9.0f, 0.0f, 1.0f);
+	//XMVECTOR lDirection = XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f);
 	XMVECTOR lUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 	XMVECTOR lTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -261,7 +261,7 @@ void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * dev
 
 	matrix_cbuffer.lightViewMatrix = XMMatrixLookAtLH(lPosition, lTarget, lUp);
 
-	//XMStoreFloat4x4(&matrix_cbuffer.lightViewMatrix, XMMatrixLookToLH(lPosition, lDirection, lUp));
+	//matrix_cbuffer.lightViewMatrix = XMMatrixLookToLH(lPosition, lDirection, lUp);
 	matrix_cbuffer.lightProjectionMatrix = orthoProjectionMat;
 
 	//If error, try transposing the matrices.
