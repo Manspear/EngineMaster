@@ -584,7 +584,7 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	CreateShaders();
 
 	CreateConstantBuffer();
-
+	
 	InitializeCamera();
 
 	initializeMousePicking(wndHandle);

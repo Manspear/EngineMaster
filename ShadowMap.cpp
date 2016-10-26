@@ -159,7 +159,7 @@ void ShadowMap::uninitialize()
 //(the ones that are static & basic if possible), 
 //loop through them, and calculate the depth for
 //the 1st pass
-ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext* deviceContext, GModelList modelList,
+ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext* deviceContext, GModelList &modelList,
 	ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV)
 {
 	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
@@ -169,7 +169,7 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	UINT32 testVertexSize = 8 * sizeof(float) + sizeof(int);
-	int offset = 0;
+	UINT32 offset = 0;
 	GModel* model = modelList.getModelList();
 
 	deviceContext->VSSetShader(vertexShaderShadow, nullptr, 0);
@@ -177,8 +177,8 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 	{
 		if (!model[i].isAnimated() && !model[i].hasBlendShape())
 		{
-			deviceContext->IASetVertexBuffers(0, 1, &model[i].modelVertexBuffer, &testVertexSize, 0);
 			deviceContext->IASetInputLayout(VertexlayoutShadow);
+			deviceContext->IASetVertexBuffers(0, 1, &model[i].modelVertexBuffer, &testVertexSize, &offset);
 
 			deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
 			deviceContext->VSSetConstantBuffers(1, 1, &model[i].modelConstantBuffer);
