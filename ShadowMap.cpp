@@ -4,7 +4,7 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 {
 	InitializeShader(device);
 	createCbuffers(device);
-	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(480, 640, 0.1, 1000);
+	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(640, 480, 0.1, 1000);
 
 	matrixCbuff matrix_cbuffer;
 	matrix_cbuffer.projectionMatrix = orthoProjectionMat;
@@ -71,13 +71,16 @@ void ShadowMap::uninitialize()
 //(the ones that are static & basic if possible), 
 //loop through them, and calculate the depth for
 //the 1st pass
-bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, GModelList modelList,ID3D11Buffer* vertexBuffer, ID3D11RenderTargetView* RTV, ShaderType shadTp, UINT32 vertexSize)
+ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext* deviceContext, GModelList modelList,
+	ID3D11Buffer* vertexBuffer, ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV, 
+	ShaderType shadTp, UINT32 vertexSize)
 {
 	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
 	deviceContext->OMSetRenderTargets(0, 0, pShadowDSV);
 	//Clear the depth stencil view since last "run". Since we render our scene "one model at a time"
 	//we should maybe move this to another function. We will see.
 	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
 	UINT32 testVertexSize = 8 * sizeof(float) + sizeof(int);
 	int offset = 0;
 	GModel* model = modelList.getModelList();
@@ -91,11 +94,10 @@ bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, GModelList mo
 			deviceContext->IASetInputLayout(VertexlayoutShadow);
 		}
 	}
+	//Sets the render target and depth buffer back to it's initial state
+	deviceContext->OMSetRenderTargets(1, &RTV, DSV);
 
-	//deviceContext->PSSetShaderResources(0, 1, &model[i].modelTextureView[0]);
-	//deviceContext->PSSetShaderResources(1, 1, );
-
-	return false;
+	return pShadowSRV;
 }
 
 
@@ -123,7 +125,6 @@ bool ShadowMap::InitializeShader(ID3D11Device* device)
 						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
 	);
 
-
 	device->CreateVertexShader(pVSS->GetBufferPointer(), pVSS->GetBufferSize(), nullptr, &vertexShaderShadow);
 
 	//create input layout (verified using vertex shader)
@@ -135,9 +136,6 @@ bool ShadowMap::InitializeShader(ID3D11Device* device)
 	device->CreateInputLayout(inputDescSM, ARRAYSIZE(inputDescSM), pVSS->GetBufferPointer(), pVSS->GetBufferSize(), &VertexlayoutShadow);
 	// we do not need anymore this COM object, so we release it.
 	pVSS->Release();
-
-
-
 
 	//create pixel shader
 	ID3DBlob* pPSS = nullptr;
