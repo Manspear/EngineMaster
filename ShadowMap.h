@@ -31,7 +31,7 @@ public:
 	};
 
 	/*Same dimensions as the viewport renderer*/
-	void createDepthBuffer(ID3D11DeviceContext* deviceContext, ID3D11Device* device);
+	void initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11Device* device);
 	ShadowMap();
 	/*Remember that XMMATRIX cannot be sent between functions of classes. Use XMFLOAT4X4 instead*/
 
@@ -44,7 +44,7 @@ public:
 	pDepthStencilBuffer-variable. This depth buffer should be
 	incorporated into shadowmap-versions of our existing shaders.
 	*/
-	bool RenderShadowed(ID3D11DeviceContext* deviceContext, D3D11_VIEWPORT& cameraViewport,ID3D11Buffer* vertexBuffer, ShaderType shadTp, UINT32 vertexSize);
+	bool RenderShadowed(ID3D11DeviceContext* deviceContext, ID3D11Buffer* vertexBuffer, ShaderType shadTp, UINT32 vertexSize);
 
 	ID3D11Texture2D* getDepthTexture();
 
@@ -69,6 +69,16 @@ private:
 	You use a viewport(s) to shit on god. You use a viewport(s) to
 	render from the camera's perspective. I.E: You have to temporarily change your viewport 
 	before rendering shadow mapping.
+
+	//From the tutorial:
+	"points lights are problematic for shadow mapping so for now just assume light sources are either directional lights or spotlights"
+	So make a directional light.
+
+	"To render the scene from the viewpoint of the light, we need to create a view-matrix for the light."
+	"The second matrix needed is a projection matrix that represents the view volume, or the "light volume"
+	emitted by the light. The projection matrix is orthographic for directional lights" 
+
+	during the fist render pass we have void pixel shader, and a null render target.
 	*/
 	ID3D11DepthStencilView* pDepthStencilView = nullptr;
 
@@ -77,5 +87,5 @@ private:
 	//Holds the "vanilla" geometry, no skeletal or BS stuff
 	ID3D11InputLayout* firstPassVertexLayout = nullptr; 
 
-	D3D11_VIEWPORT lightViewport;
+	//D3D11_VIEWPORT lightViewport;
 };
