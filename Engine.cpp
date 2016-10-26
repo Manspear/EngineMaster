@@ -256,7 +256,10 @@ void Engine::Render()
 #pragma endregion
 	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
 	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
-	shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView);
+
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView, mainViewPort);
 
 	float clearColor[] = { 1, 0, 0.5, 1 };
 	float clearColor2[] = { 1, 0.5, 0, 1 };
@@ -278,7 +281,7 @@ void Engine::Render()
 	UINT32 vertexSize;
 	UINT32 offset = 0; 
 
-	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	
 																					   
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);					   
 																					   
