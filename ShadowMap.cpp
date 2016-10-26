@@ -2,26 +2,43 @@
 
 void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11Device* device)
 {
+	InitializeShader(device);
 	createCbuffers(device);
+
 	/*Create the shadow-buffer's texture*/
 	HRESULT hr;
-	pDepthStencilBuffer = NULL;
-	D3D11_TEXTURE2D_DESC descDepth;
-	descDepth.Width = (float)640;
-	descDepth.Height = (float)480;
-	descDepth.MipLevels = 1;
-	descDepth.ArraySize = 1;
-	descDepth.Format = DXGI_FORMAT_D16_UNORM;
-	descDepth.SampleDesc.Count = 1;
-	descDepth.SampleDesc.Quality = 0;
-	descDepth.Usage = D3D11_USAGE_DEFAULT;
-	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	descDepth.CPUAccessFlags = 0;
-	descDepth.MiscFlags = 0;
-	hr = device->CreateTexture2D(&descDepth, NULL, &pDepthStencilBuffer);
-	hr = device->CreateDepthStencilView(pDepthStencilBuffer, NULL, &pDepthStencilView);
+	pShadowMap = NULL;
+	D3D11_TEXTURE2D_DESC depthTexDesc;
+	depthTexDesc.Width = (float)640;
+	depthTexDesc.Height = (float)480;
+	depthTexDesc.MipLevels = 1;
+	depthTexDesc.ArraySize = 1;
+	depthTexDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	depthTexDesc.SampleDesc.Count = 1;
+	depthTexDesc.SampleDesc.Quality = 0;
+	depthTexDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	depthTexDesc.CPUAccessFlags = 0;
+	depthTexDesc.MiscFlags = 0;
 
-	InitializeShader(device);
+	//Create the depth stencil view desc
+	D3D11_DEPTH_STENCIL_VIEW_DESC DSVdesc;
+	//DSVdesc.Format = depthTexDesc.Format; //<-- tutorial says this
+	DSVdesc.Format = DXGI_FORMAT_D32_FLOAT; //<-- comment says this
+	DSVdesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	DSVdesc.Texture2D.MipSlice = 0;
+
+	//Create the shader resource view desc
+	D3D11_SHADER_RESOURCE_VIEW_DESC SRVdesc;
+	//SRVdesc.Format = DXGI_FORMAT_R32_FLOAT; //<-- tutorial says this
+	SRVdesc.Format = DXGI_FORMAT_R32_FLOAT; //<-- comment says this
+	SRVdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	SRVdesc.Texture2D.MipLevels = depthTexDesc.MipLevels;
+	SRVdesc.Texture2D.MostDetailedMip = 0;
+	
+	hr = device->CreateTexture2D(&depthTexDesc, NULL, &pShadowMap);
+	hr = device->CreateDepthStencilView(pShadowMap, &DSVdesc, &pDepthStencilView);
+	hr = device->CreateShaderResourceView(pShadowMap, &SRVdesc, &pShadowResource);
 }
 
 ShadowMap::ShadowMap()
@@ -66,7 +83,7 @@ bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, ID3D11Buffer*
 
 ID3D11Texture2D * ShadowMap::getDepthTexture()
 {
-	return pDepthStencilBuffer;
+	return pShadowMap;
 }
 
 bool ShadowMap::InitializeShader(ID3D11Device* device)
