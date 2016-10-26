@@ -60,7 +60,7 @@ private:
 	This is the depth-buffer saved from the light-pass
 	In the second pass, send this as a shader resource
 	*/
-	ID3D11Texture2D* pDepthStencilBuffer = nullptr;
+	ID3D11Texture2D* pShadowMap = nullptr;
 	//This is the depthstencilview used for something...
 	/*
 	You never want to get to the pixelshader-stage during the first pass. Stay at the vertexShader.
@@ -86,6 +86,8 @@ private:
 	ID3D11VertexShader* firstPassShader = nullptr;
 	//Holds the "vanilla" geometry, no skeletal or BS stuff
 	ID3D11InputLayout* firstPassVertexLayout = nullptr; 
+
+	ID3D11ShaderResourceView* pShadowResource;
 
 	//D3D11_VIEWPORT lightViewport;
 };
