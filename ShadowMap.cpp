@@ -1,6 +1,6 @@
 #include "ShadowMap.h"
 
-void ShadowMap::createDepthBuffer(ID3D11DeviceContext* deviceContext, ID3D11Device* device)
+void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11Device* device)
 {
 	/*Create the shadow-buffer's texture*/
 	HRESULT hr;
@@ -23,12 +23,12 @@ void ShadowMap::createDepthBuffer(ID3D11DeviceContext* deviceContext, ID3D11Devi
 
 ShadowMap::ShadowMap()
 {
-	lightViewport.Width = (float)640;
+	/*lightViewport.Width = (float)640;
 	lightViewport.Height = (float)480;
 	lightViewport.MinDepth = 0.0f;
 	lightViewport.MaxDepth = 1.0f;
 	lightViewport.TopLeftX = 0;
-	lightViewport.TopLeftY = 0;
+	lightViewport.TopLeftY = 0;*/
 }
 
 bool ShadowMap::initialize(ID3D11Device * device, HWND handle)
@@ -43,11 +43,8 @@ void ShadowMap::uninitialize()
 {
 }
 
-bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, D3D11_VIEWPORT& cameraViewport, ID3D11Buffer* vertexBuffer, ShaderType shadTp, UINT32 vertexSize)
+bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, ID3D11Buffer* vertexBuffer, ShaderType shadTp, UINT32 vertexSize)
 {
-	//Change the viewport to that of the camera!
-	deviceContext->RSSetViewports(1, &lightViewport);
-
 	if (shadTp == ShaderType::vanilla)
 	{
 		//Set vertexSize somewhere!
@@ -57,9 +54,7 @@ bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, D3D11_VIEWPOR
 		deviceContext->VSSetShader(firstPassShader, nullptr, 0);
 		deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexSize, 0);
 	}
-
-	//When this renderpass is done, reset the viewport to the camera viewport
-	deviceContext->RSSetViewports(1, &cameraViewport);
+	
 
 	return false;
 }
