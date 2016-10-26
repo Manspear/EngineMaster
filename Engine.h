@@ -104,7 +104,7 @@ public:
 		XMFLOAT4 camDir;
 	};
 
-	ShadowMap shadow;
+	//ShadowMap shadow;
 
 	GModelList modelListObject; //This will be used in GQuadTreeBoundingBox::splitBox()
 	GCamera * camera = nullptr;

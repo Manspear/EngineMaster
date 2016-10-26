@@ -283,7 +283,7 @@ void Engine::Render()
 																					   
 	listOfModels = modelListObject.getModelList();			
 
-	
+	//shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView);
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
@@ -593,6 +593,8 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	InitializeQuadTree();
 
 	InitializeFrustum();
+
+	//shadow.initializeShadowMap(gDeviceContext, gDevice);
 }
 
 void Engine::InitializeFrustum()

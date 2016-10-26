@@ -52,8 +52,7 @@ public:
 	*/
 	ID3D11ShaderResourceView* RenderFirstPassShadowed(
 		ID3D11DeviceContext* deviceContext, GModelList modelList,
-		ID3D11Buffer* vertexBuffer, ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV,
-		ShaderType shadTp, UINT32 vertexSize //vertexSize: Send in the byte-size per-vertex.
+		ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV
 		);  
 
 	ID3D11Texture2D* getDepthTexture();
