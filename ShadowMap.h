@@ -44,6 +44,9 @@ public:
 	where the depth of the z-buffer is stored in the private
 	pDepthStencilBuffer-variable. This depth buffer should be
 	incorporated into shadowmap-versions of our existing shaders.
+
+	Put this in a loop looping through all objects in the scene.
+	After the loop is done, set the rendertarget to the old one.
 	*/
 	bool RenderShadowed(
 		ID3D11DeviceContext* deviceContext, 
@@ -96,6 +99,7 @@ private:
 	//Holds the "vanilla" geometry, no skeletal or BS stuff
 	ID3D11InputLayout* VertexlayoutShadow = nullptr; 
 
+	//Set this as resource l8er
 	ID3D11ShaderResourceView* pShadowResource;
 	//samplers
 	ID3D11SamplerState* sampleStateWrap;

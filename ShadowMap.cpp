@@ -67,19 +67,20 @@ bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, ID3D11Buffer*
 {
 	//Set render targets for the first pass
 	deviceContext->OMSetRenderTargets(0, 0, pShadowDSV);
+	//Clear the depth stencil view since last "run". Since we render our scene "one model at a time"
+	//we should maybe move this to another function. We will see.
 	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	if (shadTp == ShaderType::vanilla)
 	{
 		//Set vertexSize somewhere!
-		UINT32 vertexSize = 0;
+		UINT32 vertexSize = 8*sizeof(float);
 		int offset = 0;
+
 		//The firstPassShader obviously needs a HLSL file tied to it.
-		
 		deviceContext->VSSetShader(vertexShaderShadow, nullptr, 0);
 		deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexSize, 0);
 	}
-	
 
 	return false;
 }

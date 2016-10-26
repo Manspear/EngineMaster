@@ -258,11 +258,10 @@ void Engine::Render()
 	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
 
 	float clearColor[] = { 1, 0, 0.5, 1 };
-	float clearColor2[] = { 1,0.5,0,1 };
+	float clearColor2[] = { 1, 0.5, 0, 1 };
 
 	if (this->mousePickEffectOnClearColor == true)
 		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
-
 	else
 		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor2);
 
@@ -283,29 +282,7 @@ void Engine::Render()
 																					   
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);					   
 																					   
-	listOfModels = modelListObject.getModelList();									   
-																					   
-	//bool isRoot = true;
-	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
-	//cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
-	////rootBox has 2 modelChildren, but the bbox-children of rootBox have no modelchildren. Odd that.
-	//		gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
-	//		gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
-	//		gDeviceContext->IASetInputLayout(gVertexLayoutBS);
-	//		vertexSize = sizeof(float) * 16;
-	//	}else{
-	//		gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-	//		gDeviceContext->IASetInputLayout(gVertexLayout);
-	//		vertexSize = sizeof(float) * 8;
-	//	}														  	 
-																  	 
-																  	 
-	//struct frustumVert {										  	 
-	//		float x, y, z, xn, yn, zn, u, v;					  	 
-	//	};														  	 
-	//	frustumVert frustumVertices[6]; //...					  	 
-																  	 
-																	 
+	listOfModels = modelListObject.getModelList();									   																					  															 
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
