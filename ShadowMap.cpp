@@ -12,39 +12,125 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 
 	/*Create the shadow-buffer's texture*/
 	HRESULT hr;
-	D3D11_TEXTURE2D_DESC depthTexDesc;
-	depthTexDesc.Width = (float)640;
-	depthTexDesc.Height = (float)480;
-	depthTexDesc.MipLevels = 1;
-	depthTexDesc.ArraySize = 1;
-	depthTexDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-	depthTexDesc.SampleDesc.Count = 1;
-	depthTexDesc.SampleDesc.Quality = 0;
-	depthTexDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	depthTexDesc.CPUAccessFlags = 0;
-	depthTexDesc.MiscFlags = 0;
+	//D3D11_TEXTURE2D_DESC depthTexDesc;
+	//depthTexDesc.Width = (float)640;
+	//depthTexDesc.Height = (float)480;
+	//depthTexDesc.MipLevels = 1;
+	//depthTexDesc.ArraySize = 1;
+	//depthTexDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	////Changed this from 1 to 4
+	//depthTexDesc.SampleDesc.Count = 4;
+	//depthTexDesc.SampleDesc.Quality = 0;
+	//depthTexDesc.Usage = D3D11_USAGE_DEFAULT;
+	//depthTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	//depthTexDesc.CPUAccessFlags = 0;
+	//depthTexDesc.MiscFlags = 0;
 
-	//Create the depth stencil view desc
-	D3D11_DEPTH_STENCIL_VIEW_DESC DSVdesc;
-	//DSVdesc.Format = depthTexDesc.Format; //<-- tutorial says this
-	DSVdesc.Format = DXGI_FORMAT_D32_FLOAT; //<-- comment says this
-	DSVdesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	DSVdesc.Texture2D.MipSlice = 0;
+	////Create the depth stencil view desc
+	//D3D11_DEPTH_STENCIL_VIEW_DESC DSVdesc;
+	////DSVdesc.Format = depthTexDesc.Format; //<-- tutorial says this
+	//DSVdesc.Format = DXGI_FORMAT_D32_FLOAT; //<-- comment says this
+	//DSVdesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	//DSVdesc.Texture2D.MipSlice = 0;
+	////Improv
+	//DSVdesc.Flags = 0;
 
-	//Create the shader resource view desc
-	D3D11_SHADER_RESOURCE_VIEW_DESC SRVdesc;
-	//SRVdesc.Format = DXGI_FORMAT_R32_FLOAT; //<-- tutorial says this
-	SRVdesc.Format = DXGI_FORMAT_R32_FLOAT; //<-- comment says this
-	SRVdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	SRVdesc.Texture2D.MipLevels = depthTexDesc.MipLevels;
-	SRVdesc.Texture2D.MostDetailedMip = 0;
+	////Create the shader resource view desc
+	//D3D11_SHADER_RESOURCE_VIEW_DESC SRVdesc;
+	////SRVdesc.Format = DXGI_FORMAT_R32_FLOAT; //<-- tutorial says this
+	//SRVdesc.Format = DXGI_FORMAT_R32_FLOAT; //<-- comment says this
+	//SRVdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	//SRVdesc.Texture2D.MipLevels = depthTexDesc.MipLevels;
+	//SRVdesc.Texture2D.MostDetailedMip = 0;
+	//
+	//hr = device->CreateTexture2D(&depthTexDesc, NULL, &pShadowMap);
+	////Borked!
+	//hr = device->CreateDepthStencilView(pShadowMap, &DSVdesc, &pShadowDSV);
+
+	//hr = device->CreateShaderResourceView(pShadowMap, &SRVdesc, &pShadowSRV);
+
+
+
+
+	//D3D11_TEXTURE2D_DESC depthStencilDesc;
+
+	//depthStencilDesc.Width = (float)640;
+	//depthStencilDesc.Height = (float)480;
+	//depthStencilDesc.MipLevels = 1;
+	//depthStencilDesc.ArraySize = 1;
+	//depthStencilDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	//depthStencilDesc.SampleDesc.Count = 4;
+	//depthStencilDesc.SampleDesc.Quality = 0;
+	//depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+	//depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;// <-- This makes it "invalid"
+	//depthStencilDesc.CPUAccessFlags = 0;
+	//depthStencilDesc.MiscFlags = 0;
+
+	//// Create the depth stencil view desc
+	////D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+	////descDSV.Format = depthStencilDesc.Format;
+	////descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	////descDSV.Texture2D.MipSlice = 0;
+
+	////descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	////descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	////descDSV.Texture2D.MipSlice = 0;
+
+	//D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+	//dsvDesc.Format = depthStencilDesc.Format;
+	//dsvDesc.Flags = 0;
+	//dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	//dsvDesc.Texture2D.MipSlice = 0;
+
+
+
+	////create shader resource view desc
+	//D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	//srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	//srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	//srvDesc.Texture2D.MipLevels = depthStencilDesc.MipLevels;
+	//srvDesc.Texture2D.MostDetailedMip = 0;
+
+
+
+	//hr = device->CreateTexture2D(&depthStencilDesc, NULL, &pShadowMap);
+	////Borked!
+	//hr = device->CreateDepthStencilView(pShadowMap, NULL, &pShadowDSV);
+	////hr = device->CreateDepthStencilView(pShadowMap, NULL, &pShadowDSV);
+	//hr = device->CreateShaderResourceView(pShadowMap, &srvDesc, &pShadowSRV);
+
+
+
+	D3D11_TEXTURE2D_DESC textDesc;
+	textDesc.Width = (float)640;
+	textDesc.Height = (float)480;
+	textDesc.MipLevels = 1;
+	textDesc.ArraySize = 1;
+	textDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	textDesc.SampleDesc.Count = 1;
+	textDesc.SampleDesc.Quality = 0;
+	textDesc.Usage = D3D11_USAGE_DEFAULT;
+	textDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	textDesc.CPUAccessFlags = 0;
+	textDesc.MiscFlags = 0;
 	
-	hr = device->CreateTexture2D(&depthTexDesc, NULL, &pShadowMap);
-	//Borked!
-	hr = device->CreateDepthStencilView(pShadowMap, &DSVdesc, &pShadowDSV);
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthDesc;
+	ZeroMemory(&depthDesc, sizeof(depthDesc));
+	depthDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	depthDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthDesc.Flags = 0;
+	depthDesc.Texture2D.MipSlice = 0;
 
-	hr = device->CreateShaderResourceView(pShadowMap, &SRVdesc, &pShadowSRV);
+	D3D11_SHADER_RESOURCE_VIEW_DESC shadDesc;
+	shadDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	shadDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shadDesc.Texture2D.MostDetailedMip = 0;
+	shadDesc.Texture2D.MipLevels = 1;
+
+	hr = device->CreateTexture2D(&textDesc, NULL, &pShadowMap);
+	hr = device->CreateDepthStencilView(pShadowMap, &depthDesc, &pShadowDSV);
+	hr = device->CreateShaderResourceView(pShadowMap, &shadDesc, &pShadowSRV);
+
 }
 
 ShadowMap::ShadowMap()
