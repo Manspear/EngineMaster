@@ -9,8 +9,8 @@ struct VS_IN //Input to vertex shader. Must match struct of vertex buffer.
 struct VS_OUT //Output. Must match input of pixel shader. 
 {
 	float4 Pos : SV_POSITION;
-	float3 normal : NORMAL;
 	float2 uv : TEXCOORD;
+	float3 normal : TEXCOORD3;
 
 	float4 lightViewPos: TEXCOORD1;
 	float3 lightPos : TEXCOORD2;
@@ -38,11 +38,11 @@ VS_OUT VS_main(VS_IN input)
 	float4 worldPos;
 	float4 input4 = float4(input.Pos, 1.0f);
 
-	output.Pos = mul(input4.Pos, worldMatrix);
+	output.Pos = mul(input4, worldMatrix);
 	output.Pos = mul(output.Pos, viewMatrix);
 	output.Pos = mul(output.Pos, projectionMatrix);
 
-	output.lightViewPos = mul(input4.Pos, worldMatrix);
+	output.lightViewPos = mul(input4, worldMatrix);
 	output.lightViewPos = mul(output.lightViewPos, lightViewMatrix);
 	output.lightViewPos = mul(output.lightViewPos, lightProjectionMatrix);
 
@@ -53,11 +53,11 @@ VS_OUT VS_main(VS_IN input)
 	output.normal = normalize(output.normal);
 
 	//calc vertex world pos
-	worldPos = mul(input.position, worldMatrix);
+	worldPos = mul(input4, worldMatrix);
 	
 	//make vector between light and vertex pos
-	output.lightPos = lightpos.xyz - worldPosition.xyz;
-	output.lightPos = normalize(outPut.lightPos);
+	output.lightPos = lightPos.xyz - worldPos.xyz;
+	output.lightPos = normalize(output.lightPos);
 
 
 	return output;

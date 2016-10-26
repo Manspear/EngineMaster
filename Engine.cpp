@@ -24,7 +24,6 @@ Engine::~Engine()
 
 void Engine::CreateShaders()
 {
-
 	//create vertex shader
 	ID3DBlob* pVS = nullptr;
 	D3DCompileFromFile(
@@ -114,8 +113,15 @@ void Engine::CreateShaders()
 	};
 	HRESULT hr = gDevice->CreateInputLayout(inputDescBS, ARRAYSIZE(inputDescBS), pVSbs->GetBufferPointer(), pVSbs->GetBufferSize(), &gVertexLayoutBS);
 	// we do not need anymore this COM object, so we release it.
-
 	pVSbs->Release();
+
+#pragma region SHADOW
+
+	
+
+
+#pragma endregion
+
 
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;

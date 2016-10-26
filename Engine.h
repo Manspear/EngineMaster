@@ -89,6 +89,8 @@ public:
 	ID3D11VertexShader* gVertexShaderBS = nullptr; //x
 	ID3D11PixelShader* gPixelShader = nullptr; //x
 	ID3D11GeometryShader* gGeometryShader = nullptr;//x
+	ID3D11VertexShader* gVertexShaderS = nullptr; //x
+	ID3D11PixelShader* gPixelShaderS = nullptr; //x
 
 	D3D11_VIEWPORT mainViewPort;
 
