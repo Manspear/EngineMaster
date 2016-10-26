@@ -256,6 +256,7 @@ void Engine::Render()
 #pragma endregion
 	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
 	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
+	shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView);
 
 	float clearColor[] = { 1, 0, 0.5, 1 };
 	float clearColor2[] = { 1, 0.5, 0, 1 };
@@ -283,7 +284,6 @@ void Engine::Render()
 																					   
 	listOfModels = modelListObject.getModelList();			
 
-	//shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView);
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
@@ -594,7 +594,7 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	InitializeFrustum();
 
-	//shadow.initializeShadowMap(gDeviceContext, gDevice);
+	shadow.initializeShadowMap(gDeviceContext, gDevice);
 }
 
 void Engine::InitializeFrustum()

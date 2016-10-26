@@ -59,10 +59,6 @@ public:
 
 private:
 	bool InitializeShader(ID3D11Device* device);
-	/*bool SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix,
-		XMMATRIX projectionMatrix, XMMATRIX lightViewMatrix, XMMATRIX lightProjectionMatrix,
-		ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, XMMATRIX lightPosition,
-		XMMATRIX ambientColor, XMMATRIX diffuseColor);*/
 	void RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
 	void createCbuffers(ID3D11Device* device);
 	void initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * deviceContext);
@@ -117,8 +113,8 @@ private:
 	//cbufferStructs
 	struct matrixCbuff
 	{
-		XMFLOAT4X4 lightViewMatrix;
-		XMFLOAT4X4 lightProjectionMatrix;
+		XMMATRIX lightViewMatrix;
+		XMMATRIX lightProjectionMatrix;
 	};
 
 	matrixCbuff matrix_cbuffer;
