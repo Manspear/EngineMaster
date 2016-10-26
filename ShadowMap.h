@@ -69,6 +69,7 @@ private:
 		XMMATRIX ambientColor, XMMATRIX diffuseColor);*/
 	void RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
 	void createCbuffers(ID3D11Device* device);
+	void initializeMatrix();
 	/*
 	This is the depth-buffer saved from the light-pass
 	In the second pass, send this as a shader resource
@@ -120,17 +121,11 @@ private:
 	//cbufferStructs
 	struct matrixCbuff
 	{
-		XMMATRIX viewMatrix;
-		XMMATRIX projectionMatrix;
-
-		XMMATRIX lightViewMatrix;
-		XMMATRIX lightProjectionMatrix;
-	};
-	struct worldMatCbuff
-	{
-		XMMATRIX worldMatrix;
+		XMFLOAT4X4 lightViewMatrix;
+		XMFLOAT4X4 lightProjectionMatrix;
 	};
 
+	matrixCbuff matrix_cbuffer;
 
 	//D3D11_VIEWPORT lightViewport;
 };

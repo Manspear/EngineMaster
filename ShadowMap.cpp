@@ -4,10 +4,10 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 {
 	InitializeShader(device);
 	createCbuffers(device);
-	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(480, 640, 0.1, 1000);
+	
 
-	matrixCbuff matrix_cbuffer;
-	matrix_cbuffer.projectionMatrix = orthoProjectionMat;
+
+
 
 	/*Create the shadow-buffer's texture*/
 	HRESULT hr;
@@ -78,7 +78,7 @@ bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, GModelList mo
 	//Clear the depth stencil view since last "run". Since we render our scene "one model at a time"
 	//we should maybe move this to another function. We will see.
 	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	UINT32 testVertexSize = 8 * sizeof(float) + sizeof(int);
+	UINT32 testVertexSize = 3 * sizeof(float) + sizeof(int);
 	int offset = 0;
 	GModel* model = modelList.getModelList();
 
@@ -218,6 +218,20 @@ void ShadowMap::createCbuffers(ID3D11Device* device)
 	worldDesc.StructureByteStride = 0;
 
 	device->CreateBuffer(&matrixDesc, NULL, &matrixBuffer);
+}
+
+void ShadowMap::initializeMatrix()
+{
+	XMVECTOR lPosition = XMVectorSet(4.0f, 3.0f, -3.0f, 1.0f);
+	XMVECTOR lTarget = XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR lUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+
+
+	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(480, 640, 0.1, 1000);
+
+
+	XMStoreFloat4x4(&matrix_cbuffer.lightViewMatrix, XMMatrixLookToLH(lPosition, lTarget, lUp));
+	XMStoreFloat4x4(&matrix_cbuffer.lightProjectionMatrix, orthoProjectionMat);
 }
 
 void ShadowMap::RenderShader(ID3D11DeviceContext * deviceContext, int indexCount)

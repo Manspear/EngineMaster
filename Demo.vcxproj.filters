@@ -113,10 +113,10 @@
     <FxCompile Include="SkeletalVertex.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="ShadowPixel.hlsl">
+    <FxCompile Include="ShadowVertex.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="ShadowVertex.hlsl">
+    <FxCompile Include="ShadowPixel.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
