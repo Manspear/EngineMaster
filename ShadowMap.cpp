@@ -116,30 +116,39 @@ void ShadowMap::uninitialize()
 //(the ones that are static & basic if possible), 
 //loop through them, and calculate the depth for
 //the 1st pass
-ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext* deviceContext, GModelList& modelList,
-	ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV)
+ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext* deviceContext, GModelList &modelList,
+	ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV,
+	D3D11_VIEWPORT& cameraViewport)
 {
-	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
-	deviceContext->OMSetRenderTargets(1, &pShadowRTV, pShadowDSV);
-
 
 
 	deviceContext->RSSetViewports(1, &shadowViewPort);
+	
+	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	deviceContext->VSSetShader(vertexShaderShadow, nullptr, 0);
+	deviceContext->HSSetShader(nullptr, nullptr, 0);
+	deviceContext->DSSetShader(nullptr, nullptr, 0);
+	deviceContext->GSSetShader(nullptr, nullptr, 0);
+	deviceContext->PSSetShader(nullptr, nullptr, 0);
 
 	UINT32 testVertexSize = 8 * sizeof(float) + sizeof(int);
 	UINT32 offset = 0;
 	GModel* model = modelList.getModelList();
 
-	deviceContext->VSSetShader(vertexShaderShadow, nullptr, 0);
+	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
+	deviceContext->OMSetRenderTargets(0, NULL, pShadowDSV);
+	//deviceContext->OMSetRenderTargets(1, &pShadowRTV, pShadowDSV);
+
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 	for (int i = 0; i < modelList.numberOfModels; i++)
 	{
 		if (!model[i].isAnimated() && !model[i].hasBlendShape())
 		{
-			deviceContext->IASetInputLayout(VertexlayoutShadow);
-		
 			deviceContext->IASetVertexBuffers(0, 1, &model[i].modelVertexBuffer, &testVertexSize, &offset);
+
+			deviceContext->IASetInputLayout(VertexlayoutShadow);
 
 			deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
 			deviceContext->VSSetConstantBuffers(1, 1, &model[i].modelConstantBuffer);
@@ -150,6 +159,8 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 	}
 	//Sets the render target and depth buffer back to it's initial state
 	deviceContext->OMSetRenderTargets(1, &RTV, DSV);
+
+	deviceContext->RSSetViewports(1, &cameraViewport);
 
 	return pShadowSRV;
 }

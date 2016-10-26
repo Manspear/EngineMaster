@@ -51,10 +51,10 @@ public:
 	After the loop is done, set the rendertarget to the old one.
 	*/
 	
-
 	ID3D11ShaderResourceView* RenderFirstPassShadowed(
 		ID3D11DeviceContext* deviceContext, GModelList &modelList,
-		ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV
+		ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV, 
+		D3D11_VIEWPORT& cameraViewport
 		);  
 
 	ID3D11Texture2D* getDepthTexture();
