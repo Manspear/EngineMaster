@@ -14,17 +14,16 @@ Engine::Engine()
 	counterStart = 0;
 	frameCount = 0;
 	fps = 0;
-	frameTimeOld = 0;
+	frameTimeOld = 100000000000000000;
 }
 
 Engine::~Engine()
 {
-
+	shadow.uninitialize();
 }
 
 void Engine::CreateShaders()
 {
-
 	//create vertex shader
 	ID3DBlob* pVS = nullptr;
 	D3DCompileFromFile(
@@ -53,20 +52,51 @@ void Engine::CreateShaders()
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
 	// we do not need anymore this COM object, so we release it.
 	pVS->Release();
+
+	ID3DBlob* pSVS = nullptr;
+	D3DCompileFromFile(
+		L"SkeletalVertex.hlsl", // filename
+		nullptr,		// optional macros
+		nullptr,		// optional include files
+		"VSSkeletal_main",		// entry point
+		"vs_4_0",		// shader model (target)
+		0,				// shader compile options
+		0,				// effect compile options
+		&pSVS,			// double pointer to ID3DBlob		
+		nullptr			// pointer for Error Blob messages.
+						// how to use the Error blob, see here
+						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+	);
+
+
+	gDevice->CreateVertexShader(pSVS->GetBufferPointer(), pSVS->GetBufferSize(), nullptr, &gVertexShaderSkeletal);
+
+	//create input layout (verified using vertex shader)
+	D3D11_INPUT_ELEMENT_DESC inputDescSkeletal[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	gDevice->CreateInputLayout(inputDescSkeletal, ARRAYSIZE(inputDescSkeletal), pSVS->GetBufferPointer(), pSVS->GetBufferSize(), &gVertexLayoutSkeletal);
+	// we do not need anymore this COM object, so we release it.
+	pSVS->Release();
+
 	//create vertex shader
 	ID3DBlob* pVSbs = nullptr;
 	D3DCompileFromFile(
 		L"VertexShaderBS.hlsl", // filename
-		nullptr,		// optional macros
-		nullptr,		// optional include files
-		"VS_main",		// entry point
-		"vs_4_0",		// shader model (target)
-		0,				// shader compile options
-		0,				// effect compile options
-		&pVSbs,			// double pointer to ID3DBlob		
-		nullptr			// pointer for Error Blob messages.
-						// how to use the Error blob, see here
-						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+		nullptr,				// optional macros
+		nullptr,				// optional include files
+		"VS_main",				// entry point
+		"vs_4_0",				// shader model (target)
+		0,						// shader compile options
+		0,						// effect compile options
+		&pVSbs,					// double pointer to ID3DBlob		
+		nullptr					// pointer for Error Blob messages.
+								// how to use the Error blob, see here
+								// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
 		);
 
 
@@ -83,8 +113,15 @@ void Engine::CreateShaders()
 	};
 	HRESULT hr = gDevice->CreateInputLayout(inputDescBS, ARRAYSIZE(inputDescBS), pVSbs->GetBufferPointer(), pVSbs->GetBufferSize(), &gVertexLayoutBS);
 	// we do not need anymore this COM object, so we release it.
-
 	pVSbs->Release();
+
+#pragma region SHADOW
+
+	
+
+
+#pragma endregion
+
 
 	//create pixel shader
 	ID3DBlob* pPS = nullptr;
@@ -173,16 +210,19 @@ void Engine::CreateDepthStencilBuffer() {
 	gDevice->CreateDepthStencilView(gDepthStencilBuffer, NULL, &depthStencilView);
 }
 
-void Engine::SetViewport()
+void Engine::SetCameraViewportAsViewport()
 {
-	D3D11_VIEWPORT vp;
-	vp.Width = (float)640;
-	vp.Height = (float)480;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	gDeviceContext->RSSetViewports(1, &vp);
+	gDeviceContext->RSSetViewports(1, &mainViewPort);
+}
+void Engine::InitializeViewPort()
+{
+	mainViewPort.Width = (float)640;
+	mainViewPort.Height = (float)480;
+	mainViewPort.MinDepth = 0.0f;
+	mainViewPort.MaxDepth = 1.0f;
+	mainViewPort.TopLeftX = 0;
+	mainViewPort.TopLeftY = 0;
+	gDeviceContext->RSSetViewports(1, &mainViewPort);
 }
 
 void Engine::Render()
@@ -216,75 +256,87 @@ void Engine::Render()
 #pragma endregion
 	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
 	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
-	float clearColor[] = { 1, 0.537, 0.812, 1 };
-	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
-	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-
-	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
-	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-	gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
-	gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-	gDeviceContext->IASetInputLayout(gVertexLayout);
-	UINT32 vertexSize = sizeof(float) * 8;
-	UINT32 offset = 0; //This <----, when handling multiple buffers on the same object, is equal to the length of the current buffer element in bytes. Otherwise 0.
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView, mainViewPort);
+
+	//float clearColor[] = { 1, 0, 0.5, 1 };
+	//float clearColor2[] = { 1, 0.5, 0, 1 };
+
+	//if (this->mousePickEffectOnClearColor == true)
+	//	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+	//else
+	//	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor2);
+
+	//gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+
+	//gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
+	//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+	//gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
+	//
+	//UINT32 vertexSize;
+	//UINT32 offset = 0; 
+
+<<<<<<< HEAD
+	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//																				   
+	//gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);					   
+	//																				   
+	//listOfModels = modelListObject.getModelList();			
+=======
 	
+																					   
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);					   
+																					   
+	listOfModels = modelListObject.getModelList();			
+>>>>>>> 5d2e8ea074dff0ada878bb91ecb54f5a48f7c60a
 
-	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);
 
-	listOfModels = modelListObject.getModelList();
-
-	
-
-	//bool isRoot = true;
-	//cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
-	//cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, isRoot);
-	////rootBox has 2 modelChildren, but the bbox-children of rootBox have no modelchildren. Odd that.
-	//		gDeviceContext->VSSetConstantBuffers(0, 1, &listOfModels[bufferCounter].bsWBuffer);
+	//for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
+	//{
+	//	if (cullingFrustum->seenObjects[bufferCounter]->hasBlendShape())
+	//	{
 	//		gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
 	//		gDeviceContext->IASetInputLayout(gVertexLayoutBS);
+	//		gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
 	//		vertexSize = sizeof(float) * 16;
-	//	}else{
+	//	}
+	//	else if (cullingFrustum->seenObjects[bufferCounter]->isAnimated())
+	//	{
+	//		gDeviceContext->VSSetShader(gVertexShaderSkeletal, nullptr, 0);
+	//		gDeviceContext->IASetInputLayout(gVertexLayoutSkeletal);
+	//		cullingFrustum->seenObjects[bufferCounter]->updateAnimation(gDeviceContext, dt);
+	//		gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->jointBuffer);
+	//		vertexSize = sizeof(float) * 12 + sizeof(int) * 4;
+	//	}
+	//	else
+	//	{
 	//		gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
 	//		gDeviceContext->IASetInputLayout(gVertexLayout);
-	//		vertexSize = sizeof(float) * 8;
+	//		vertexSize = sizeof(float) * 8 + sizeof(int);
 	//	}
-		
+	//
+	//	gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 
-	//struct frustumVert {
-//		float x, y, z, xn, yn, zn, u, v;
-//	};
-//	frustumVert frustumVertices[6]; //...
-	
-	bool startCollision = true;
+	//	gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
+	//	if(cullingFrustum->seenObjects[bufferCounter]->isAnimated())
+	//	{
+	//		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->animModelVertexBuffer, &vertexSize, &offset);
+	//	}
+	//	else
+	//	{
+	//		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
+	//	}
+	//	
+	//	gDeviceContext->IASetIndexBuffer(cullingFrustum->seenObjects[bufferCounter]->modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
-	cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, startCollision);
-
-	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
-	{
-
-		//gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
-		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer);
-		//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
-		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
-
-		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
-		gDeviceContext->IASetIndexBuffer(cullingFrustum->seenObjects[bufferCounter]->modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-		//gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
-<<<<<<< HEAD
-		//gDeviceContext->DrawIndexed(listOfModels[bufferCounter].modelVertices.size(), 0, 0); //Uses indexbuffer
-		gDeviceContext->DrawIndexed(listOfModels[bufferCounter].sizeOfIndexArray, 0, 0);
-=======
-		//gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0);
-		gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->modelVertices.size(), 0, 0);
->>>>>>> origin/superbranch_DEV
-	}
+	//	gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray, 0, 0);
+	//	//gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->animModelVertices.size(), 0);
+	//}
 
 	//particleSys->renderParticles();
 
@@ -306,10 +358,8 @@ void Engine::Render()
 
 
 
-void Engine::Update() 
+void Engine::Update()
 {
-	
-	
 	frameCount++;
 	if (getTime() > 1.0f)
 	{
@@ -319,18 +369,19 @@ void Engine::Update()
 	}
 	dt = getFrameTime();
 
-
+	particleSys->doShit(dt);
 	//XMFLOAT4X4 viewMatrix;
 	//XMFLOAT4X4 projectionMatrix;
 
 	//world matrix
-	static float radianRotation = 0.00;
+	//static float radianRotation = 0.00;
 	//radianRotation += 4500*dt;
-	XMMATRIX worMat = DirectX::XMMatrixRotationY(radianRotation);
+	//XMMATRIX worMat = DirectX::XMMatrixRotationY(radianRotation);
 
 	//Transpose the matrices. This is a must for DirectX 11
-	worMat = DirectX::XMMatrixTranspose(worMat);
-
+	//worMat = DirectX::XMMatrixTranspose(worMat);
+	//dataPtr->worldMatrix = worMat;
+#pragma region Camera
 	input->getKeyboardState();
 	input->GetMouseLoc();
 
@@ -374,18 +425,25 @@ void Engine::Update()
 	gDeviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 	dataPtr = (matrixBuffer*)gMappedResource.pData;
 
-	//dataPtr->worldMatrix = worMat;
+
 	dataPtr->viewMatrix = DirectX::XMMatrixTranspose(camera->getViewMatrix());
 	dataPtr->projectionMatrix = DirectX::XMMatrixTranspose(camera->getProjMatrix());
 	dataPtr->camPos = camera->getPosition();
 	dataPtr->camDir = camera->getCameraDirection();
 
 	gDeviceContext->Unmap(gConstantBuffer, NULL);
+#pragma endregion Camera
+
+#pragma region FrustumCulling
+	bool startCollision = true;
+
+	cullingFrustum->updateFrustumPos(camera->getProjMatrix(), camera->getViewMatrix());
+	cullingFrustum->QuadTreeCollision(&quadTreeRoot->rootBox, startCollision);
+#pragma endregion FrustumCulling
+
+	MousePickingObject->updateClass(cullingFrustum->seenObjects, this->mousePickEffectOnClearColor);
 
 
-	MousePickingObject->updateClass();
-
-	
 }
 
 HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
@@ -407,7 +465,7 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		D3D11_CREATE_DEVICE_DEBUG,
+		NULL,
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,
@@ -439,25 +497,53 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 void Engine::Clean() {
 
 	gVertexLayout->Release();
+	gVertexLayoutBS->Release();
+	gVertexLayoutSkeletal->Release();
 	gVertexShader->Release();
+	gVertexShaderBS->Release();
+	gVertexShaderSkeletal->Release();
 	gPixelShader->Release();
 	gGeometryShader->Release();
-	delete particleSys;
 
 	gBackbufferRTV->Release();
 	gSwapChain->Release();
-	gDevice->Release();
 	gDeviceContext->Release();
 
 	gPSTextureSampler->Release();
 
 	depthStencilView->Release();
 	gDepthStencilBuffer->Release();
-
+	gConstantBuffer->Release();
+	for (int i = 0; i < modelListObject.numberOfModels; i++)
+	{
+		if(listOfModels[i].animModelVertexBuffer != nullptr)
+			listOfModels[i].animModelVertexBuffer->Release();
+		if(listOfModels[i].modelVertexBuffer != nullptr)
+			listOfModels[i].modelVertexBuffer->Release();
+		if (listOfModels[i].jointBuffer != nullptr)
+			listOfModels[i].jointBuffer->Release();
+		if (listOfModels[i].bsWBuffer != nullptr)
+			listOfModels[i].bsWBuffer->Release();
+		if(listOfModels[i].modelTextureView[0] != nullptr)
+			listOfModels[i].modelTextureView[0]->Release();
+		if(listOfModels[i].modelTextureView[1] != nullptr)
+			listOfModels[i].modelTextureView[1]->Release();
+		listOfModels[i].modelIndexBuffer->Release();
+		listOfModels[i].modelConstantBuffer->Release();
+	}
+	delete particleSys;
 	delete camera;
 	delete input;
 	delete cullingFrustum;
 	delete quadTreeRoot;
+	delete MousePickingObject;
+
+	ID3D11Debug* debugDevice = nullptr;
+	reinterpret_cast<void*>(debugDevice);
+	gDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debugDevice));
+	debugDevice->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	debugDevice->Release();
+	gDevice->Release();
 	//delete[] loops through the new-objects in the array, and deletes them!
 }
 void Engine::InitializeCamera()
@@ -470,8 +556,8 @@ void Engine::InitializeCamera()
 
 void Engine::initializeMousePicking(HWND wndHandle)
 {
-	GModel* listOfModels = modelListObject->getModelList();
-	MousePickingObject = new MousePicking(wndHandle, this->camera, listOfModels,  this->wHEIGHT,this->wWIDTH);
+	GModel* listOfModels = modelListObject.getModelList();
+	MousePickingObject = new MousePicking(wndHandle, this->camera, this->wHEIGHT, this->wWIDTH);
 }
 
 
@@ -491,8 +577,8 @@ void Engine::InitializeQuadTree()
 
 void Engine::initializeParticles()
 {
-	particleSys = new ParticleSystem(gDevice, gDeviceContext);
-	particleSys->setShaders(gVertexShader);
+	particleSys = new ParticleSystem(gDevice, gDeviceContext, gConstantBuffer);
+	//particleSys->setShaders(gVertexShader);
 }
 
 void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
@@ -502,30 +588,29 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	InitializeModels();
 
-	SetViewport();
+	InitializeViewPort();
 
 	input->initialize(hinstance, wndHandle, wWIDTH, wHEIGHT);
 
 	CreateShaders();
 
 	CreateConstantBuffer();
-
+	
 	InitializeCamera();
 
-<<<<<<< HEAD
 	initializeMousePicking(wndHandle);
-=======
 	initializeParticles();
 
 	InitializeQuadTree();
 
 	InitializeFrustum();
+
+	shadow.initializeShadowMap(gDeviceContext, gDevice);
 }
 
 void Engine::InitializeFrustum()
 {
 	cullingFrustum = new(GFrustum);
->>>>>>> origin/superbranch_DEV
 }
 
 void Engine::renderText(std::wstring text)
@@ -561,6 +646,6 @@ double Engine::getFrameTime()
 
 	if (tickCount < 0.0f)
 		tickCount = 0.0f;
-
+	float lolis = float(tickCount) / countsPerSecond;
 	return float(tickCount) / countsPerSecond;
 }

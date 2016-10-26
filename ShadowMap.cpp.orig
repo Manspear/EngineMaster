@@ -4,49 +4,90 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 {
 	InitializeShader(device);
 	createCbuffers(device);
-<<<<<<< HEAD
-	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(640, 480, 0.1, 1000);
-=======
+	initializeMatrix(device, deviceContext);
 	
-
-
->>>>>>> 8ae7e52d632cae4e1f6ebe3b1cd0821b3a47476f
-
-
-	/*Create the shadow-buffer's texture*/
 	HRESULT hr;
-	pShadowMap = NULL;
-	D3D11_TEXTURE2D_DESC depthTexDesc;
-	depthTexDesc.Width = (float)640;
-	depthTexDesc.Height = (float)480;
-	depthTexDesc.MipLevels = 1;
-	depthTexDesc.ArraySize = 1;
-	depthTexDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-	depthTexDesc.SampleDesc.Count = 1;
-	depthTexDesc.SampleDesc.Quality = 0;
-	depthTexDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	depthTexDesc.CPUAccessFlags = 0;
-	depthTexDesc.MiscFlags = 0;
 
-	//Create the depth stencil view desc
-	D3D11_DEPTH_STENCIL_VIEW_DESC DSVdesc;
-	//DSVdesc.Format = depthTexDesc.Format; //<-- tutorial says this
-	DSVdesc.Format = DXGI_FORMAT_D32_FLOAT; //<-- comment says this
-	DSVdesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	DSVdesc.Texture2D.MipSlice = 0;
-
-	//Create the shader resource view desc
-	D3D11_SHADER_RESOURCE_VIEW_DESC SRVdesc;
-	//SRVdesc.Format = DXGI_FORMAT_R32_FLOAT; //<-- tutorial says this
-	SRVdesc.Format = DXGI_FORMAT_R32_FLOAT; //<-- comment says this
-	SRVdesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	SRVdesc.Texture2D.MipLevels = depthTexDesc.MipLevels;
-	SRVdesc.Texture2D.MostDetailedMip = 0;
+	D3D11_TEXTURE2D_DESC textDesc;
+	textDesc.Width = (float)640;
+	textDesc.Height = (float)480;
+	textDesc.MipLevels = 1;
+	textDesc.ArraySize = 1;
+	textDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	textDesc.SampleDesc.Count = 1;
+	textDesc.SampleDesc.Quality = 0;
+	textDesc.Usage = D3D11_USAGE_DEFAULT;
+	textDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	textDesc.CPUAccessFlags = 0;
+	textDesc.MiscFlags = 0;
 	
-	hr = device->CreateTexture2D(&depthTexDesc, NULL, &pShadowMap);
-	hr = device->CreateDepthStencilView(pShadowMap, &DSVdesc, &pShadowDSV);
-	hr = device->CreateShaderResourceView(pShadowMap, &SRVdesc, &pShadowSRV);
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthDesc;
+	ZeroMemory(&depthDesc, sizeof(depthDesc));
+	depthDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	depthDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthDesc.Flags = 0;
+	depthDesc.Texture2D.MipSlice = 0;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC shadDesc;
+	shadDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	shadDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shadDesc.Texture2D.MostDetailedMip = 0;
+	shadDesc.Texture2D.MipLevels = 1;
+
+	hr = device->CreateTexture2D(&textDesc, NULL, &pShadowMap);
+	hr = device->CreateDepthStencilView(pShadowMap, &depthDesc, &pShadowDSV);
+	hr = device->CreateShaderResourceView(pShadowMap, &shadDesc, &pShadowSRV);
+
+
+	ID3D11RasterizerState * allan;
+
+	D3D11_RASTERIZER_DESC derp;
+	derp.AntialiasedLineEnable = false;
+	derp.CullMode = D3D11_CULL_NONE;
+	derp.DepthBias = 0;
+	derp.DepthBiasClamp = 0.1f;
+	derp.DepthClipEnable = true;
+	derp.FillMode = D3D11_FILL_SOLID;
+	derp.FrontCounterClockwise = false;
+	derp.MultisampleEnable = false;
+	derp.ScissorEnable = false;
+	derp.SlopeScaledDepthBias = 0.0f;
+
+	device->CreateRasterizerState(&derp, &allan);
+	deviceContext->RSSetState(allan);
+
+	D3D11_TEXTURE2D_DESC textureDesc;
+	// Initialize the render target texture description.
+	ZeroMemory(&textureDesc, sizeof(textureDesc));
+	// Setup the render target texture description.
+	textureDesc.Width = (float)640;
+	textureDesc.Height = (float)480;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+	// Create the render target texture.
+	hr = device->CreateTexture2D(&textureDesc, NULL, &pRTVTex);
+
+	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+	// Setup the description of the render target view.
+	renderTargetViewDesc.Format = textureDesc.Format;
+	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.Texture2D.MipSlice = 0;
+
+	// Create the render target view.
+	hr = device->CreateRenderTargetView(pRTVTex, &renderTargetViewDesc, &pShadowRTV);
+
+	shadowViewPort.Width = (float)640;
+	shadowViewPort.Height = (float)480;
+	shadowViewPort.MinDepth = 0.0f;
+	shadowViewPort.MaxDepth = 1.0f;
+	shadowViewPort.TopLeftX = 0;
+	shadowViewPort.TopLeftY = 0;
 }
 
 ShadowMap::ShadowMap()
@@ -75,35 +116,57 @@ void ShadowMap::uninitialize()
 //(the ones that are static & basic if possible), 
 //loop through them, and calculate the depth for
 //the 1st pass
-ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext* deviceContext, GModelList modelList,
-	ID3D11Buffer* vertexBuffer, ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV, 
-	ShaderType shadTp, UINT32 vertexSize)
+ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext* deviceContext, GModelList &modelList,
+	ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV,
+	D3D11_VIEWPORT& cameraViewport)
 {
-	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
-	deviceContext->OMSetRenderTargets(0, 0, pShadowDSV);
-	//Clear the depth stencil view since last "run". Since we render our scene "one model at a time"
-	//we should maybe move this to another function. We will see.
-	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
 <<<<<<< HEAD
+	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
+	deviceContext->OMSetRenderTargets(1, &pShadowRTV, pShadowDSV);
 
-	UINT32 testVertexSize = 8 * sizeof(float) + sizeof(int);
+
+
 =======
-	UINT32 testVertexSize = 3 * sizeof(float) + sizeof(int);
->>>>>>> 8ae7e52d632cae4e1f6ebe3b1cd0821b3a47476f
-	int offset = 0;
-	GModel* model = modelList.getModelList();
+>>>>>>> 5d2e8ea074dff0ada878bb91ecb54f5a48f7c60a
+	deviceContext->RSSetViewports(1, &shadowViewPort);
+	
+	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	deviceContext->VSSetShader(vertexShaderShadow, nullptr, 0);
+	deviceContext->HSSetShader(nullptr, nullptr, 0);
+	deviceContext->DSSetShader(nullptr, nullptr, 0);
+	deviceContext->GSSetShader(nullptr, nullptr, 0);
+	deviceContext->PSSetShader(nullptr, nullptr, 0);
+
+	UINT32 testVertexSize = 8 * sizeof(float) + sizeof(int);
+	UINT32 offset = 0;
+	GModel* model = modelList.getModelList();
+
+	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
+	deviceContext->OMSetRenderTargets(0, NULL, pShadowDSV);
+	//deviceContext->OMSetRenderTargets(1, &pShadowRTV, pShadowDSV);
+
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 	for (int i = 0; i < modelList.numberOfModels; i++)
 	{
 		if (!model[i].isAnimated() && !model[i].hasBlendShape())
 		{
-			deviceContext->IASetVertexBuffers(0, 1, &model[i].modelVertexBuffer, &testVertexSize, 0);
+			deviceContext->IASetVertexBuffers(0, 1, &model[i].modelVertexBuffer, &testVertexSize, &offset);
+
 			deviceContext->IASetInputLayout(VertexlayoutShadow);
+
+			deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
+			deviceContext->VSSetConstantBuffers(1, 1, &model[i].modelConstantBuffer);
+
+			deviceContext->IASetIndexBuffer(model[i].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			deviceContext->DrawIndexed(model[i].sizeOfIndexArray, 0, 0);
 		}
 	}
 	//Sets the render target and depth buffer back to it's initial state
 	deviceContext->OMSetRenderTargets(1, &RTV, DSV);
+
+	deviceContext->RSSetViewports(1, &cameraViewport);
 
 	return pShadowSRV;
 }
@@ -226,18 +289,44 @@ void ShadowMap::createCbuffers(ID3D11Device* device)
 	device->CreateBuffer(&matrixDesc, NULL, &matrixBuffer);
 }
 
-void ShadowMap::initializeMatrix()
+void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * deviceContext)
 {
-	XMVECTOR lPosition = XMVectorSet(4.0f, 3.0f, -3.0f, 1.0f);
-	XMVECTOR lTarget = XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR lPosition = XMVectorSet(0.0f, 9.0f, 0.0f, 1.0f);
+	//XMVECTOR lDirection = XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f);
 	XMVECTOR lUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+	XMVECTOR lTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+
+	XMMATRIX ProjectionMat = XMMatrixPerspectiveFovLH(XM_PI * 0.5, 640/480, 0.1, 2000.0f);
+	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(640, 480, 0.1, 1000);
+
+	XMMATRIX viewMat = XMMatrixTranspose(XMMatrixLookAtLH(lPosition, lTarget, lUp));
 
 
-	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(480, 640, 0.1, 1000);
+	matrix_cbuffer.lightViewMatrix = XMMatrixTranspose(XMMatrixLookAtLH(lPosition, lTarget, lUp));
 
+	//matrix_cbuffer.lightViewMatrix = XMMatrixLookToLH(lPosition, lDirection, lUp);
+	matrix_cbuffer.lightProjectionMatrix = XMMatrixTranspose(ProjectionMat);
 
-	XMStoreFloat4x4(&matrix_cbuffer.lightViewMatrix, XMMatrixLookToLH(lPosition, lTarget, lUp));
-	XMStoreFloat4x4(&matrix_cbuffer.lightProjectionMatrix, orthoProjectionMat);
+	//If error, try transposing the matrices.
+
+	D3D11_BUFFER_DESC bufferDesc;
+	memset(&bufferDesc, 0, sizeof(bufferDesc));
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.ByteWidth = sizeof(matrixCbuff);
+	device->CreateBuffer(&bufferDesc, NULL, &matrixBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE mapThing;
+	matrixCbuff* dataPtr;
+	deviceContext->Map(matrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapThing);
+
+	//deviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
+
+	dataPtr = (matrixCbuff*)mapThing.pData;
+	dataPtr = &matrix_cbuffer;
+	deviceContext->Unmap(matrixBuffer, NULL);
+
 }
 
 void ShadowMap::RenderShader(ID3D11DeviceContext * deviceContext, int indexCount)

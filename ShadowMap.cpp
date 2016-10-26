@@ -1,11 +1,13 @@
 #include "ShadowMap.h"
 
-void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11Device* device)
+void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11Device* device, GCamera * camera)
 {
 	InitializeShader(device);
 	createCbuffers(device);
+	this->camera = camera;
 	initializeMatrix(device, deviceContext);
 	
+
 	HRESULT hr;
 
 	D3D11_TEXTURE2D_DESC textDesc;
@@ -39,22 +41,22 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	hr = device->CreateShaderResourceView(pShadowMap, &shadDesc, &pShadowSRV);
 
 
-	ID3D11RasterizerState * allan;
+	
 
-	D3D11_RASTERIZER_DESC derp;
-	derp.AntialiasedLineEnable = false;
-	derp.CullMode = D3D11_CULL_NONE;
-	derp.DepthBias = 0;
-	derp.DepthBiasClamp = 0.1f;
-	derp.DepthClipEnable = true;
-	derp.FillMode = D3D11_FILL_SOLID;
-	derp.FrontCounterClockwise = false;
-	derp.MultisampleEnable = false;
-	derp.ScissorEnable = false;
-	derp.SlopeScaledDepthBias = 0.0f;
+	//D3D11_RASTERIZER_DESC derp;
+	//derp.AntialiasedLineEnable = false;
+	//derp.CullMode = D3D11_CULL_NONE;
+	//derp.DepthBias = 0;
+	//derp.DepthBiasClamp = 0.1f;
+	//derp.DepthClipEnable = true;
+	//derp.FillMode = D3D11_FILL_SOLID;
+	//derp.FrontCounterClockwise = false;
+	//derp.MultisampleEnable = false;
+	//derp.ScissorEnable = false;
+	//derp.SlopeScaledDepthBias = 0.0f;
 
-	device->CreateRasterizerState(&derp, &allan);
-	deviceContext->RSSetState(allan);
+	//device->CreateRasterizerState(&derp, &allan);
+	//deviceContext->RSSetState(allan);
 
 	D3D11_TEXTURE2D_DESC textureDesc;
 	// Initialize the render target texture description.
@@ -82,12 +84,7 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	// Create the render target view.
 	hr = device->CreateRenderTargetView(pRTVTex, &renderTargetViewDesc, &pShadowRTV);
 
-	shadowViewPort.Width = (float)640;
-	shadowViewPort.Height = (float)480;
-	shadowViewPort.MinDepth = 0.0f;
-	shadowViewPort.MaxDepth = 1.0f;
-	shadowViewPort.TopLeftX = 0;
-	shadowViewPort.TopLeftY = 0;
+
 }
 
 ShadowMap::ShadowMap()
@@ -120,9 +117,14 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 	ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV,
 	D3D11_VIEWPORT& cameraViewport)
 {
-
-
-	deviceContext->RSSetViewports(1, &shadowViewPort);
+	//D3D11_VIEWPORT BAJS;
+	//BAJS.Width = (float)640;
+	//BAJS.Height = (float)480;
+	//BAJS.MinDepth = 0.0f;
+	//BAJS.MaxDepth = 1.0f;
+	//BAJS.TopLeftX = 0;
+	//BAJS.TopLeftY = 0;
+	//deviceContext->RSSetViewports(1, &BAJS);
 	
 	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
@@ -137,8 +139,8 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 	GModel* model = modelList.getModelList();
 
 	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
-	deviceContext->OMSetRenderTargets(0, NULL, pShadowDSV);
-	//deviceContext->OMSetRenderTargets(1, &pShadowRTV, pShadowDSV);
+	//deviceContext->OMSetRenderTargets(1, &RTV, pShadowDSV);
+	deviceContext->OMSetRenderTargets(1, &pShadowRTV, pShadowDSV);
 
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -285,31 +287,32 @@ void ShadowMap::createCbuffers(ID3D11Device* device)
 
 void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * deviceContext)
 {
-	XMVECTOR lPosition = XMVectorSet(0.0f, 9.0f, 0.0f, 1.0f);
+	XMVECTOR lPosition = XMVectorSet(0.0f, 20.0f, -2.0f, 1.0f);
 	//XMVECTOR lDirection = XMVectorSet(0.0f, 1.0f, 1.0f, 1.0f);
 	XMVECTOR lUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 	XMVECTOR lTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 
-	XMMATRIX ProjectionMat = XMMatrixPerspectiveFovLH(XM_PI * 0.5, 640/480, 0.1, 2000.0f);
+	XMMATRIX ProjectionMat = XMMatrixPerspectiveFovLH(XM_PI * 0.5, 640/480, 0.5, 200.0f);
 	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(640, 480, 0.1, 1000);
 
 	XMMATRIX viewMat = XMMatrixTranspose(XMMatrixLookAtLH(lPosition, lTarget, lUp));
 
+	XMMATRIX viewProj = XMMatrixMultiply(viewMat, ProjectionMat);
 
-	matrix_cbuffer.lightViewMatrix = XMMatrixTranspose(XMMatrixLookAtLH(lPosition, lTarget, lUp));
+	matrix_cbuffer.lightViewProjection = viewProj;
 
 	//matrix_cbuffer.lightViewMatrix = XMMatrixLookToLH(lPosition, lDirection, lUp);
-	matrix_cbuffer.lightProjectionMatrix = XMMatrixTranspose(ProjectionMat);
 
+	XMMATRIX neger = XMMatrixTranspose((XMMatrixMultiply(camera->getViewMatrix(), camera->getProjMatrix())));
 	//If error, try transposing the matrices.
 
-	D3D11_BUFFER_DESC bufferDesc;
-	memset(&bufferDesc, 0, sizeof(bufferDesc));
-	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	bufferDesc.ByteWidth = sizeof(matrixCbuff);
-	device->CreateBuffer(&bufferDesc, NULL, &matrixBuffer);
+	//D3D11_BUFFER_DESC bufferDesc;
+	//memset(&bufferDesc, 0, sizeof(bufferDesc));
+	//bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	//bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	//bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	//bufferDesc.ByteWidth = sizeof(matrixCbuff);
+	//device->CreateBuffer(&bufferDesc, NULL, &matrixBuffer);
 
 	D3D11_MAPPED_SUBRESOURCE mapThing;
 	matrixCbuff* dataPtr;
@@ -317,8 +320,11 @@ void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * dev
 
 	//deviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 
+
+
 	dataPtr = (matrixCbuff*)mapThing.pData;
-	dataPtr = &matrix_cbuffer;
+	dataPtr->lightViewProjection = neger;
+	
 	deviceContext->Unmap(matrixBuffer, NULL);
 
 }

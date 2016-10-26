@@ -261,91 +261,91 @@ void Engine::Render()
 
 	shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView, mainViewPort);
 
-	//float clearColor[] = { 1, 0, 0.5, 1 };
-	//float clearColor2[] = { 1, 0.5, 0, 1 };
+	float clearColor[] = { 1, 0, 0.5, 1 };
+	float clearColor2[] = { 1, 0.5, 0, 1 };
 
-	//if (this->mousePickEffectOnClearColor == true)
-	//	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
-	//else
-	//	gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor2);
+	if (this->mousePickEffectOnClearColor == true)
+		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor);
+	else
+		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor2);
 
-	//gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	//gDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	//gDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 
-	//gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
-	//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-	//gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
-	//
-	//UINT32 vertexSize;
-	//UINT32 offset = 0; 
+	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
+	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+	gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
+	
+	UINT32 vertexSize;
+	UINT32 offset = 0; 
 
-	//gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	//																				   
-	//gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);					   
-	//																				   
-	//listOfModels = modelListObject.getModelList();			
+	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+																					   
+	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);					   
+																					   
+	listOfModels = modelListObject.getModelList();			
 
 
-	//for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
-	//{
-	//	if (cullingFrustum->seenObjects[bufferCounter]->hasBlendShape())
-	//	{
-	//		gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
-	//		gDeviceContext->IASetInputLayout(gVertexLayoutBS);
-	//		gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
-	//		vertexSize = sizeof(float) * 16;
-	//	}
-	//	else if (cullingFrustum->seenObjects[bufferCounter]->isAnimated())
-	//	{
-	//		gDeviceContext->VSSetShader(gVertexShaderSkeletal, nullptr, 0);
-	//		gDeviceContext->IASetInputLayout(gVertexLayoutSkeletal);
-	//		cullingFrustum->seenObjects[bufferCounter]->updateAnimation(gDeviceContext, dt);
-	//		gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->jointBuffer);
-	//		vertexSize = sizeof(float) * 12 + sizeof(int) * 4;
-	//	}
-	//	else
-	//	{
-	//		gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-	//		gDeviceContext->IASetInputLayout(gVertexLayout);
-	//		vertexSize = sizeof(float) * 8 + sizeof(int);
-	//	}
-	//
-	//	gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
+	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
+	{
+		if (cullingFrustum->seenObjects[bufferCounter]->hasBlendShape())
+		{
+			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
+			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
+			vertexSize = sizeof(float) * 16;
+		}
+		else if (cullingFrustum->seenObjects[bufferCounter]->isAnimated())
+		{
+			gDeviceContext->VSSetShader(gVertexShaderSkeletal, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayoutSkeletal);
+			cullingFrustum->seenObjects[bufferCounter]->updateAnimation(gDeviceContext, dt);
+			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->jointBuffer);
+			vertexSize = sizeof(float) * 12 + sizeof(int) * 4;
+		}
+		else
+		{
+			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gVertexLayout);
+			vertexSize = sizeof(float) * 8 + sizeof(int);
+		}
+	
+		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 
-	//	gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
-	//	if(cullingFrustum->seenObjects[bufferCounter]->isAnimated())
-	//	{
-	//		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->animModelVertexBuffer, &vertexSize, &offset);
-	//	}
-	//	else
-	//	{
-	//		gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
-	//	}
-	//	
-	//	gDeviceContext->IASetIndexBuffer(cullingFrustum->seenObjects[bufferCounter]->modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
+		if(cullingFrustum->seenObjects[bufferCounter]->isAnimated())
+		{
+			gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->animModelVertexBuffer, &vertexSize, &offset);
+		}
+		else
+		{
+			gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->modelVertexBuffer, &vertexSize, &offset);
+		}
+		
+		gDeviceContext->IASetIndexBuffer(cullingFrustum->seenObjects[bufferCounter]->modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-	//	gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray, 0, 0);
-	//	//gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->animModelVertices.size(), 0);
-	//}
+		gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray, 0, 0);
+		//gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->animModelVertices.size(), 0);
+	}
 
-	//particleSys->renderParticles();
+	particleSys->renderParticles();
 
-	//{
-	//	//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
-	//	//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
-	//	if (!cullingFrustum->hasCollided(listOfModels[bufferCounter].bBox))
-	//		continue;
-	//	gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
+	////{
+	////	//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
+	////	//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
+	////	if (!cullingFrustum->hasCollided(listOfModels[bufferCounter].bBox))
+	////		continue;
+	////	gDeviceContext->GSSetConstantBuffers(1, 1, &listOfModels[bufferCounter].modelConstantBuffer);
 
-	//	//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
-	//	gDeviceContext->PSSetShaderResources(0, 2, listOfModels[bufferCounter].modelTextureView);
+	////	//each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
+	////	gDeviceContext->PSSetShaderResources(0, 2, listOfModels[bufferCounter].modelTextureView);
 
-	//	gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
+	////	gDeviceContext->IASetVertexBuffers(0, 1, &listOfModels[bufferCounter].modelVertexBuffer, &vertexSize, &offset);
 
-	//	gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
-	//}
+	////	gDeviceContext->Draw(listOfModels[bufferCounter].modelVertices.size(), 0);
+	////}
 }
 
 
@@ -597,7 +597,7 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	InitializeFrustum();
 
-	shadow.initializeShadowMap(gDeviceContext, gDevice);
+	shadow.initializeShadowMap(gDeviceContext, gDevice, camera);
 }
 
 void Engine::InitializeFrustum()

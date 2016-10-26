@@ -10,6 +10,7 @@
 
 #include "GModelList.h"
 
+#include "GCamera.h"
 using namespace DirectX;
 #define LIGHT_POS (4, 3, -3)
 #define LIGHT_DIR (0, 1, 1)
@@ -34,7 +35,7 @@ public:
 	};
 
 	/*Same dimensions as the viewport renderer*/
-	void initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11Device* device);
+	void initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11Device* device, GCamera * camera);
 	ShadowMap();
 	/*Remember that XMMATRIX cannot be sent between functions of classes. Use XMFLOAT4X4 instead*/
 
@@ -68,6 +69,7 @@ private:
 	This is the depth-buffer saved from the light-pass
 	In the second pass, send this as a shader resource
 	*/
+	GCamera * camera;
 	ID3D11Texture2D* pShadowMap = nullptr;
 	//This is the depthstencilview used for something...
 	/*
@@ -88,7 +90,7 @@ private:
 
 	during the fist render pass we have void pixel shader, and a null render target.
 	*/
-
+	ID3D11RasterizerState * allan;
 	//This seems to "fill" the pShadowMap texture, that then in turn "fills" the shader resource
 	ID3D11DepthStencilView* pShadowDSV = nullptr;
 
@@ -118,8 +120,7 @@ private:
 	//cbufferStructs
 	struct matrixCbuff
 	{
-		XMMATRIX lightViewMatrix;
-		XMMATRIX lightProjectionMatrix;
+		XMMATRIX lightViewProjection;
 	};
 
 	matrixCbuff matrix_cbuffer;
