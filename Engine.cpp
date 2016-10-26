@@ -260,16 +260,19 @@ void Engine::CreateDepthStencilBuffer() {
 	gDevice->CreateDepthStencilView(gDepthStencilBuffer, NULL, &depthStencilView);
 }
 
-void Engine::SetViewport()
+void Engine::SetCameraViewportAsViewport()
 {
-	D3D11_VIEWPORT vp;
-	vp.Width = (float)640;
-	vp.Height = (float)480;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	gDeviceContext->RSSetViewports(1, &vp);
+	gDeviceContext->RSSetViewports(1, &mainViewPort);
+}
+void Engine::InitializeViewPort()
+{
+	mainViewPort.Width = (float)640;
+	mainViewPort.Height = (float)480;
+	mainViewPort.MinDepth = 0.0f;
+	mainViewPort.MaxDepth = 1.0f;
+	mainViewPort.TopLeftX = 0;
+	mainViewPort.TopLeftY = 0;
+	gDeviceContext->RSSetViewports(1, &mainViewPort);
 }
 
 void Engine::Render()
@@ -356,11 +359,8 @@ void Engine::Render()
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
-
-		//printf("%d", cullingFrustum->seenObjects.size());
 		if (cullingFrustum->seenObjects[bufferCounter]->hasBlendShape())
 		{
-			
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
 			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
@@ -386,9 +386,6 @@ void Engine::Render()
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
 		if(cullingFrustum->seenObjects[bufferCounter]->isAnimated())
 		{
-			cullingFrustum->seenObjects[bufferCounter]->animModelVertices;
-			cullingFrustum->seenObjects[bufferCounter]->jointMatrices;
-			cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray;
 			gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->animModelVertexBuffer, &vertexSize, &offset);
 		}
 		else
@@ -652,7 +649,7 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 
 	InitializeModels();
 
-	SetViewport();
+	InitializeViewPort();
 
 	input->initialize(hinstance, wndHandle, wWIDTH, wHEIGHT);
 

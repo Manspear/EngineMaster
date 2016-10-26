@@ -47,9 +47,17 @@ class Engine
 private:
 	GModel* listOfModels;
 	bool mousePickEffectOnClearColor = false;
-
+	
 
 public:
+
+	enum ShaderType
+	{
+		vanilla,
+		bs,
+		skeletal
+	};
+
 	struct MyVertexStruct
 	{
 		float x, y, z, norX, norY, norZ, u, v;
@@ -84,6 +92,7 @@ public:
 	ID3D11VertexShader* gVertexShaderS = nullptr; //x
 	ID3D11PixelShader* gPixelShaderS = nullptr; //x
 
+	D3D11_VIEWPORT mainViewPort;
 
 	struct matrixBuffer {
 		XMMATRIX viewMatrix;
@@ -123,12 +132,14 @@ public:
 	//void CreateTexture(int modelCounter);
 	void CreateConstantBuffer();
 	void CreateDepthStencilBuffer();
-	void SetViewport();
+	/*Needs to be set*/
+	void SetCameraViewportAsViewport();
 	void Render();
 	void Update();
 	void Clean(); //releases all resources
 				  //void Initialize(HWND wndHandle, HINSTANCE hinstance); 
 	void Initialize(HWND wndHandle, HINSTANCE hinstance); //Initializes functions you only call once
+	void InitializeViewPort();
 	void InitializeFrustum();
 	void InitializeCamera();
 	void initializeMousePicking(HWND wndHandle);
