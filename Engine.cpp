@@ -19,7 +19,7 @@ Engine::Engine()
 
 Engine::~Engine()
 {
-
+	shadow.uninitialize();
 }
 
 void Engine::CreateShaders()
@@ -454,7 +454,7 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		D3D11_CREATE_DEVICE_DEBUG,
+		NULL,
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,

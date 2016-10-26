@@ -12,12 +12,12 @@ struct VS_OUT //Output. Must match input of pixel shader.
 };
 
 
-cbuffer matrixBuffer:register(b1) {
+cbuffer matrixBuffer:register(b0) {
 	matrix lightViewMatrix;
 	matrix lightProjectionMatrix;
 };
 
-cbuffer worldBuffer:register(b2) { 
+cbuffer worldBuffer:register(b1) { 
 	matrix worldMatrix;
 };
 

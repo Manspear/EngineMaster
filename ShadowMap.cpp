@@ -38,6 +38,24 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	hr = device->CreateDepthStencilView(pShadowMap, &depthDesc, &pShadowDSV);
 	hr = device->CreateShaderResourceView(pShadowMap, &shadDesc, &pShadowSRV);
 
+
+	ID3D11RasterizerState * allan;
+
+	D3D11_RASTERIZER_DESC derp;
+	derp.AntialiasedLineEnable = false;
+	derp.CullMode = D3D11_CULL_NONE;
+	derp.DepthBias = 0;
+	derp.DepthBiasClamp = 0.1f;
+	derp.DepthClipEnable = true;
+	derp.FillMode = D3D11_FILL_SOLID;
+	derp.FrontCounterClockwise = false;
+	derp.MultisampleEnable = false;
+	derp.ScissorEnable = false;
+	derp.SlopeScaledDepthBias = 0.0f;
+
+	device->CreateRasterizerState(&derp, &allan);
+	deviceContext->RSSetState(allan);
+
 	D3D11_TEXTURE2D_DESC textureDesc;
 	// Initialize the render target texture description.
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
@@ -103,6 +121,8 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 {
 	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
 	deviceContext->OMSetRenderTargets(1, &pShadowRTV, pShadowDSV);
+
+
 
 	deviceContext->RSSetViewports(1, &shadowViewPort);
 
@@ -259,13 +279,16 @@ void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * dev
 	XMVECTOR lUp = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 	XMVECTOR lTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 
+	XMMATRIX ProjectionMat = XMMatrixPerspectiveFovLH(XM_PI * 0.5, 640/480, 0.1, 2000.0f);
 	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(640, 480, 0.1, 1000);
 
+	XMMATRIX viewMat = XMMatrixTranspose(XMMatrixLookAtLH(lPosition, lTarget, lUp));
 
-	matrix_cbuffer.lightViewMatrix = XMMatrixLookAtLH(lPosition, lTarget, lUp);
+
+	matrix_cbuffer.lightViewMatrix = XMMatrixTranspose(XMMatrixLookAtLH(lPosition, lTarget, lUp));
 
 	//matrix_cbuffer.lightViewMatrix = XMMatrixLookToLH(lPosition, lDirection, lUp);
-	matrix_cbuffer.lightProjectionMatrix = orthoProjectionMat;
+	matrix_cbuffer.lightProjectionMatrix = XMMatrixTranspose(ProjectionMat);
 
 	//If error, try transposing the matrices.
 
