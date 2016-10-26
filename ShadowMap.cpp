@@ -4,6 +4,12 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 {
 	InitializeShader(device);
 	createCbuffers(device);
+	othoProjectionMat = XMMatrixOrthographicLH(480, 640, 0.1, 1000);
+
+	matrixCbuff matrix_cbuffer;
+	matrix_cbuffer.projectionMatrix = othoProjectionMat;
+
+
 
 	/*Create the shadow-buffer's texture*/
 	HRESULT hr;
@@ -72,7 +78,7 @@ bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, ID3D11Buffer*
 	if (shadTp == ShaderType::vanilla)
 	{
 		//Set vertexSize somewhere!
-		UINT32 vertexSize = 0;
+		UINT32 vertexSize = 8*sizeof(float);
 		int offset = 0;
 		//The firstPassShader obviously needs a HLSL file tied to it.
 		
@@ -171,9 +177,6 @@ bool ShadowMap::InitializeShader(ID3D11Device* device)
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 
 	device->CreateSamplerState(&samplerDesc, &sampleStateClamp);
-
-
-
 
 	return true;
 }
