@@ -8,6 +8,8 @@
 
 #include <directXMath.h>
 
+#include "GModelList.h"
+
 using namespace DirectX;
 #define LIGHT_POS (4, 3, -3)
 #define LIGHT_DIR (0, 1, 1)
@@ -50,10 +52,12 @@ public:
 	*/
 	bool RenderShadowed(
 		ID3D11DeviceContext* deviceContext, 
+		GModelList modelList,
 		ID3D11Buffer* vertexBuffer, //vertexBuffer: The vertices to be rendered shadowed
 		ID3D11RenderTargetView* RTV, //RTV: The non-light render target view... i.e the "normal" one
 		ShaderType shadTp, //shadTp: vanilla, bs, skeletal (an enum)
-		UINT32 vertexSize); //vertexSize: Send in the byte-size per-vertex. 
+		UINT32 vertexSize //vertexSize: Send in the byte-size per-vertex.
+		);  
 
 	ID3D11Texture2D* getDepthTexture();
 
@@ -89,6 +93,8 @@ private:
 
 	during the fist render pass we have void pixel shader, and a null render target.
 	*/
+
+	//This seems to "fill" the pShadowMap texture, that then in turn "fills" the shader resource
 	ID3D11DepthStencilView* pShadowDSV = nullptr;
 
 	//these shaders makes the lighting texture out of the shadowmap depth buffer
@@ -100,7 +106,7 @@ private:
 	ID3D11InputLayout* VertexlayoutShadow = nullptr; 
 
 	//Set this as resource l8er
-	ID3D11ShaderResourceView* pShadowResource;
+	ID3D11ShaderResourceView* pShadowSRV;
 	//samplers
 	ID3D11SamplerState* sampleStateWrap;
 	ID3D11SamplerState* sampleStateClamp;

@@ -278,11 +278,10 @@ void Engine::Render()
 	UINT32 offset = 0; 
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 																					   
 	gDeviceContext->GSSetConstantBuffers(0, 1, &gConstantBuffer);					   
 																					   
-	listOfModels = modelListObject.getModelList();									   																					  															 
+	listOfModels = modelListObject.getModelList();			
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{

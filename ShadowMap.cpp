@@ -4,12 +4,10 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 {
 	InitializeShader(device);
 	createCbuffers(device);
-	othoProjectionMat = XMMatrixOrthographicLH(480, 640, 0.1, 1000);
+	XMMATRIX orthoProjectionMat = XMMatrixOrthographicLH(480, 640, 0.1, 1000);
 
 	matrixCbuff matrix_cbuffer;
-	matrix_cbuffer.projectionMatrix = othoProjectionMat;
-
-
+	matrix_cbuffer.projectionMatrix = orthoProjectionMat;
 
 	/*Create the shadow-buffer's texture*/
 	HRESULT hr;
@@ -44,7 +42,7 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	
 	hr = device->CreateTexture2D(&depthTexDesc, NULL, &pShadowMap);
 	hr = device->CreateDepthStencilView(pShadowMap, &DSVdesc, &pShadowDSV);
-	hr = device->CreateShaderResourceView(pShadowMap, &SRVdesc, &pShadowResource);
+	hr = device->CreateShaderResourceView(pShadowMap, &SRVdesc, &pShadowSRV);
 }
 
 ShadowMap::ShadowMap()
@@ -69,24 +67,33 @@ void ShadowMap::uninitialize()
 {
 }
 
-bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, ID3D11Buffer* vertexBuffer, ID3D11RenderTargetView* RTV, ShaderType shadTp, UINT32 vertexSize)
+//Get an array containing all models in the scene 
+//(the ones that are static & basic if possible), 
+//loop through them, and calculate the depth for
+//the 1st pass
+bool ShadowMap::RenderShadowed(ID3D11DeviceContext* deviceContext, GModelList modelList,ID3D11Buffer* vertexBuffer, ID3D11RenderTargetView* RTV, ShaderType shadTp, UINT32 vertexSize)
 {
-	//Set render targets for the first pass
+	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
 	deviceContext->OMSetRenderTargets(0, 0, pShadowDSV);
 	//Clear the depth stencil view since last "run". Since we render our scene "one model at a time"
 	//we should maybe move this to another function. We will see.
 	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	UINT32 testVertexSize = 8 * sizeof(float) + sizeof(int);
+	int offset = 0;
+	GModel* model = modelList.getModelList();
 
-	if (shadTp == ShaderType::vanilla)
+	deviceContext->VSSetShader(vertexShaderShadow, nullptr, 0);
+	for (int i = 0; i < modelList.numberOfModels; i++)
 	{
-		//Set vertexSize somewhere!
-		UINT32 vertexSize = 8*sizeof(float);
-		int offset = 0;
-
-		//The firstPassShader obviously needs a HLSL file tied to it.
-		deviceContext->VSSetShader(vertexShaderShadow, nullptr, 0);
-		deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexSize, 0);
+		if (!model[i].isAnimated() && !model[i].hasBlendShape())
+		{
+			deviceContext->IASetVertexBuffers(0, 1, &model[i].modelVertexBuffer, &testVertexSize, 0);
+			deviceContext->IASetInputLayout(VertexlayoutShadow);
+		}
 	}
+
+	//deviceContext->PSSetShaderResources(0, 1, &model[i].modelTextureView[0]);
+	//deviceContext->PSSetShaderResources(1, 1, );
 
 	return false;
 }
