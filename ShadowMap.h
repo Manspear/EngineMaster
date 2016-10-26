@@ -97,6 +97,8 @@ private:
 	ID3D11PixelShader* pixelShaderShadow = nullptr;
 
 	ID3D11RenderTargetView* pShadowRTV = nullptr;
+
+	D3D11_VIEWPORT shadowViewPort;
 	ID3D11Texture2D* pRTVTex = nullptr;
 	//Holds the "vanilla" geometry, no skeletal or BS stuff
 	ID3D11InputLayout* VertexlayoutShadow = nullptr; 

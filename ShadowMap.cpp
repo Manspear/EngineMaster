@@ -63,6 +63,13 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 
 	// Create the render target view.
 	hr = device->CreateRenderTargetView(pRTVTex, &renderTargetViewDesc, &pShadowRTV);
+
+	shadowViewPort.Width = (float)640;
+	shadowViewPort.Height = (float)480;
+	shadowViewPort.MinDepth = 0.0f;
+	shadowViewPort.MaxDepth = 1.0f;
+	shadowViewPort.TopLeftX = 0;
+	shadowViewPort.TopLeftY = 0;
 }
 
 ShadowMap::ShadowMap()
@@ -96,8 +103,9 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 {
 	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
 	deviceContext->OMSetRenderTargets(1, &pShadowRTV, pShadowDSV);
-	//Clear the depth stencil view since last "run". Since we render our scene "one model at a time"
-	//we should maybe move this to another function. We will see.
+
+	deviceContext->RSSetViewports(1, &shadowViewPort);
+
 	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	UINT32 testVertexSize = 8 * sizeof(float) + sizeof(int);
@@ -110,9 +118,6 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 		if (!model[i].isAnimated() && !model[i].hasBlendShape())
 		{
 			deviceContext->IASetInputLayout(VertexlayoutShadow);
-			model[i].modelVertices;
-			model[i].IndexArray;
-			model[i].sizeOfIndexArray;
 		
 			deviceContext->IASetVertexBuffers(0, 1, &model[i].modelVertexBuffer, &testVertexSize, &offset);
 
@@ -125,8 +130,6 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 	}
 	//Sets the render target and depth buffer back to it's initial state
 	deviceContext->OMSetRenderTargets(1, &RTV, DSV);
-
-	
 
 	return pShadowSRV;
 }
