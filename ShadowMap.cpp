@@ -2,6 +2,8 @@
 
 void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11Device* device)
 {
+	InitializeShader(device);
+
 	/*Create the shadow-buffer's texture*/
 	HRESULT hr;
 	pShadowMap = NULL;
@@ -21,8 +23,6 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	//Create the depth stencil view desc
 	D3D11_DEPTH_STENCIL_VIEW_DESC DSVdesc;
 	//DSVdesc.Format = depthTexDesc.Format; //<-- tutorial says this
-
-	InitializeShader(device);
 	DSVdesc.Format = DXGI_FORMAT_D32_FLOAT; //<-- comment says this
 	DSVdesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	DSVdesc.Texture2D.MipSlice = 0;
