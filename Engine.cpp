@@ -198,7 +198,7 @@ void Engine::CreateDepthStencilBuffer() {
 	depthStencilDesc.Height = (float)480;
 	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+	depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	depthStencilDesc.SampleDesc.Count = 4;
 	depthStencilDesc.SampleDesc.Quality = 0;
 	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -206,8 +206,8 @@ void Engine::CreateDepthStencilBuffer() {
 	depthStencilDesc.CPUAccessFlags = 0;
 	depthStencilDesc.MiscFlags = 0;
 
-	gDevice->CreateTexture2D(&depthStencilDesc, NULL, &gDepthStencilBuffer);
-	gDevice->CreateDepthStencilView(gDepthStencilBuffer, NULL, &depthStencilView);
+	gDevice->CreateTexture2D(&depthStencilDesc, 0, &gDepthStencilBuffer);
+	gDevice->CreateDepthStencilView(gDepthStencilBuffer, 0, &depthStencilView);
 }
 
 void Engine::SetCameraViewportAsViewport()
@@ -258,8 +258,8 @@ void Engine::Render()
 	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
 	ID3D11ShaderResourceView* shadowMap = shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView, mainViewPort);
 	
+	InitializeViewPort();
 	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);
-	gDeviceContext->RSSetViewports(1, &mainViewPort);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -292,6 +292,7 @@ void Engine::Render()
 																					   
 	listOfModels = modelListObject.getModelList();			
 
+	gDeviceContext->PSSetShaderResources(2, 1, &shadowMap);
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
@@ -320,7 +321,6 @@ void Engine::Render()
 		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
-		gDeviceContext->PSSetShaderResources(2, 1, &shadowMap);
 		if(cullingFrustum->seenObjects[bufferCounter]->isAnimated())
 		{
 			gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->animModelVertexBuffer, &vertexSize, &offset);
@@ -334,11 +334,14 @@ void Engine::Render()
 
 		gDeviceContext->DrawIndexed(cullingFrustum->seenObjects[bufferCounter]->sizeOfIndexArray, 0, 0);
 		//gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->animModelVertices.size(), 0);
+		
 	}
+	ID3D11ShaderResourceView* pNullSRV = NULL;
+	gDeviceContext->PSSetShaderResources(2, 1, &pNullSRV);
 
 	particleSys->renderParticles();
-
-	shadow.clearDSV(gDeviceContext);
+	
+	//shadow.clearDSV(gDeviceContext);
 	////{
 	////	//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
 	////	//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)

@@ -1,6 +1,7 @@
 Texture2D txDiffuse[2]; //: register(t0); //This receives the texture
-Texture2D shadowMap : register (t2);
+Texture2D shadowMap;
 SamplerState sampAni;
+//SamplerState derp;
 
 struct PS_IN
 {
@@ -31,6 +32,7 @@ struct PS_IN
 
 float4 PS_main(PS_IN input) : SV_Target
 {
+	//float hej = shadowMap.Sample(sampAni, input.UV).x;
 	//Light Inits
 	float3 lightPoint = float3 (4, 3, -3);
 

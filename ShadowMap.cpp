@@ -40,9 +40,10 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	hr = device->CreateDepthStencilView(pShadowMap, &depthDesc, &pShadowDSV);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC shadDesc;
+	ZeroMemory(&shadDesc, sizeof(shadDesc));
 	shadDesc.Format = DXGI_FORMAT_R32_FLOAT;
 	shadDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	shadDesc.Texture2D.MostDetailedMip = 0;
+
 	shadDesc.Texture2D.MipLevels = 1;
 
 	hr = device->CreateShaderResourceView(pShadowMap, &shadDesc, &pShadowSRV);
@@ -134,7 +135,6 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 	deviceContext->RSSetViewports(1, &BAJS);
 
 	deviceContext->OMSetRenderTargets(0, NULL, pShadowDSV);
-	
 	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	deviceContext->VSSetShader(vertexShaderShadow, nullptr, 0);
@@ -280,15 +280,6 @@ void ShadowMap::createCbuffers(ID3D11Device* device)
 	matrixDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	matrixDesc.MiscFlags = 0;
 	matrixDesc.StructureByteStride = 0;
-
-	device->CreateBuffer(&matrixDesc, NULL, &matrixBuffer);
-
-	worldDesc.Usage = D3D11_USAGE_DYNAMIC;
-	worldDesc.ByteWidth = sizeof(matrixCbuff);
-	worldDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	worldDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	worldDesc.MiscFlags = 0;
-	worldDesc.StructureByteStride = 0;
 
 	device->CreateBuffer(&matrixDesc, NULL, &matrixBuffer);
 }
