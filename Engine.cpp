@@ -21,7 +21,96 @@ Engine::~Engine()
 {
 	shadow.uninitialize();
 }
+void Engine::CreateShadowShaders()
+{
+	HRESULT hr;
+	//VERTEX SHADER
+	ID3DBlob* pVS = nullptr;
+	D3DCompileFromFile(
+		L"BasicVertexShadowed.hlsl", // filename
+		nullptr,		// optional macros
+		nullptr,		// optional include files
+		"VS_main",		// entry point
+		"vs_4_0",		// shader model (target)
+		0,				// shader compile options
+		0,				// effect compile options
+		&pVS,			// double pointer to ID3DBlob		
+		nullptr			// pointer for Error Blob messages.
+						// how to use the Error blob, see here
+						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+	);
+	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShadowedShader);
 
+	//create input layout (verified using vertex shader)
+	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	//float4 lightPos : TEXCOORD1;
+	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gInputLayoutShadowed);
+	// we do not need anymore this COM object, so we release it.
+	pVS->Release();
+
+	//GEOMETRY SHADER
+	ID3DBlob* pGS = nullptr; //This may be used for error handling!
+	D3DCompileFromFile(
+		L"BasicGeometryShadowed.hlsl", //The L here specifies unicode vs. ansii... Dunno exactly.
+		nullptr,
+		nullptr,
+		"GS_main",
+		"gs_4_0",
+		0,
+		0,
+		&pGS,
+		nullptr
+	);
+	gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometryShadowedShader);
+	pGS->Release();
+
+	//PIXEL SHADER
+	ID3DBlob* pPS = nullptr;
+	D3DCompileFromFile(
+		L"BasicPixelShadowed.hlsl", // filename
+		nullptr,		// optional macros
+		nullptr,		// optional include files
+		"PS_main",		// entry point
+		"ps_5_0",		// shader model (target)
+		0,				// shader compile options
+		0,				// effect compile options
+		&pPS,			// double pointer to ID3DBlob		
+		nullptr			// pointer for Error Blob messages.
+						// how to use the Error blob, see here
+						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+	);
+
+	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShadowedShader);
+	// we do not need anymore this COM object, so we release it.
+	pPS->Release();
+
+	//Creating a Sampler for the Pixel Shader
+	D3D11_SAMPLER_DESC sampDesc;
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.MipLODBias = 0;
+	sampDesc.MaxAnisotropy = 1;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS; //Maybe this does something bad? Hmm... Keep an eye out.
+	sampDesc.BorderColor[0] = 1.f;
+	sampDesc.BorderColor[1] = 1.f;
+	sampDesc.BorderColor[2] = 0.f;
+	sampDesc.BorderColor[3] = 1.f; //Not sure why this RGB value's w value must be 1... Alpha maybe?
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = 12;
+
+	//Filter = min_mag_mip_point;
+	//AddressU = CLAMP;
+	//AddressV = CLAMP;
+
+	hr = gDevice->CreateSamplerState(&sampDesc, &gPSShadowTextureSampler);
+}
 void Engine::CreateShaders()
 {
 	//create vertex shader
@@ -116,8 +205,6 @@ void Engine::CreateShaders()
 	pVSbs->Release();
 
 #pragma region SHADOW
-
-	
 
 
 #pragma endregion
@@ -273,15 +360,13 @@ void Engine::Render()
 
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	
-
-
-
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 	gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
+	gDeviceContext->PSSetSamplers(1, 1, &gPSShadowTextureSampler);
 	
 	UINT32 vertexSize;
 	UINT32 offset = 0; 
@@ -293,11 +378,16 @@ void Engine::Render()
 	listOfModels = modelListObject.getModelList();			
 
 	gDeviceContext->PSSetShaderResources(2, 1, &shadowMap);
+	
 
 	for (int bufferCounter = 0; bufferCounter < cullingFrustum->seenObjects.size(); bufferCounter++)
 	{
 		if (cullingFrustum->seenObjects[bufferCounter]->hasBlendShape())
 		{
+			gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
+			gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+			gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
+
 			gDeviceContext->VSSetShader(gVertexShaderBS, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutBS);
 			gDeviceContext->VSSetConstantBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->bsWBuffer);
@@ -305,6 +395,10 @@ void Engine::Render()
 		}
 		else if (cullingFrustum->seenObjects[bufferCounter]->isAnimated())
 		{
+			gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
+			gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+			gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
+
 			gDeviceContext->VSSetShader(gVertexShaderSkeletal, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gVertexLayoutSkeletal);
 			cullingFrustum->seenObjects[bufferCounter]->updateAnimation(gDeviceContext, dt);
@@ -313,14 +407,32 @@ void Engine::Render()
 		}
 		else
 		{
-			gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-			gDeviceContext->IASetInputLayout(gVertexLayout);
+			/*This is the "normal" shader: */
+			//
+			//gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
+			//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
+			//gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
+			//
+			//gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
+			//gDeviceContext->IASetInputLayout(gVertexLayout);
+			//vertexSize = sizeof(float) * 8 + sizeof(int);
+			//
+			gDeviceContext->GSSetShader(gGeometryShadowedShader, nullptr, 0);
+			gDeviceContext->PSSetShader(gPixelShadowedShader, nullptr, 0);
+			gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
+
+			gDeviceContext->VSSetShader(gVertexShadowedShader, nullptr, 0);
+			gDeviceContext->IASetInputLayout(gInputLayoutShadowed);
+			//Since the last 4 elements aren't present in the geometry's vertices,
+			//maybe it'll work if you just give the "true" vertex size as input.
 			vertexSize = sizeof(float) * 8 + sizeof(int);
 		}
 	
 		gDeviceContext->GSSetConstantBuffers(1, 1, &cullingFrustum->seenObjects[bufferCounter]->modelConstantBuffer); //each model only one vertex buffer. Exceptions: Objects with separate parts, think stone golem with floating head, need one vertex buffer per separate geometry.
 
 		gDeviceContext->PSSetShaderResources(0, 2, cullingFrustum->seenObjects[bufferCounter]->modelTextureView);
+		//Setting the shadowmap
+
 		if(cullingFrustum->seenObjects[bufferCounter]->isAnimated())
 		{
 			gDeviceContext->IASetVertexBuffers(0, 1, &cullingFrustum->seenObjects[bufferCounter]->animModelVertexBuffer, &vertexSize, &offset);
@@ -593,6 +705,8 @@ void Engine::Initialize(HWND wndHandle, HINSTANCE hinstance) {
 	InitializeViewPort();
 
 	input->initialize(hinstance, wndHandle, wWIDTH, wHEIGHT);
+
+	CreateShadowShaders();
 
 	CreateShaders();
 

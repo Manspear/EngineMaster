@@ -12,7 +12,6 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	this->camera = camera;
 	initializeMatrix(device, deviceContext);
 	
-
 	HRESULT hr;
 
 	D3D11_TEXTURE2D_DESC textDesc;
@@ -47,52 +46,6 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	shadDesc.Texture2D.MipLevels = 1;
 
 	hr = device->CreateShaderResourceView(pShadowMap, &shadDesc, &pShadowSRV);
-
-
-	
-
-	//D3D11_RASTERIZER_DESC derp;
-	//derp.AntialiasedLineEnable = false;
-	//derp.CullMode = D3D11_CULL_NONE;
-	//derp.DepthBias = 0;
-	//derp.DepthBiasClamp = 0.1f;
-	//derp.DepthClipEnable = true;
-	//derp.FillMode = D3D11_FILL_SOLID;
-	//derp.FrontCounterClockwise = false;
-	//derp.MultisampleEnable = false;
-	//derp.ScissorEnable = false;
-	//derp.SlopeScaledDepthBias = 0.0f;
-
-	//device->CreateRasterizerState(&derp, &allan);
-	//deviceContext->RSSetState(allan);
-
-	//D3D11_TEXTURE2D_DESC textureDesc;
-	//// Initialize the render target texture description.
-	//ZeroMemory(&textureDesc, sizeof(textureDesc));
-	//// Setup the render target texture description.
-	//textureDesc.Width = (float)640;
-	//textureDesc.Height = (float)480;
-	//textureDesc.MipLevels = 1;
-	//textureDesc.ArraySize = 1;
-	//textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	//textureDesc.SampleDesc.Count = 1;
-	//textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	//textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	//textureDesc.CPUAccessFlags = 0;
-	//textureDesc.MiscFlags = 0;
-	//// Create the render target texture.
-	//hr = device->CreateTexture2D(&textureDesc, NULL, &pRTVTex);
-
-	//D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
-	//// Setup the description of the render target view.
-	//renderTargetViewDesc.Format = textureDesc.Format;
-	//renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	//renderTargetViewDesc.Texture2D.MipSlice = 0;
-
-	//// Create the render target view.
-	//hr = device->CreateRenderTargetView(pRTVTex, &renderTargetViewDesc, &pShadowRTV);
-
-
 }
 
 ShadowMap::ShadowMap()
@@ -169,8 +122,6 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 	}
 	//Sets the render target and depth buffer back to it's initial state
 	//deviceContext->OMSetRenderTargets(1, &RTV, DSV);
-
-	
 
 	return pShadowSRV;
 }

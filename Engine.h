@@ -82,6 +82,7 @@ public:
 	//ID3D11ShaderResourceView* gTextureView[2];
 
 	ID3D11SamplerState* gPSTextureSampler = nullptr; //x
+	ID3D11SamplerState* gPSShadowTextureSampler = nullptr;
 
 	ID3D11InputLayout* gVertexLayout = nullptr; //x
 	ID3D11InputLayout* gVertexLayoutBS = nullptr; //x
@@ -93,6 +94,11 @@ public:
 	ID3D11GeometryShader* gGeometryShader = nullptr;//x
 	ID3D11VertexShader* gVertexShaderS = nullptr; //x
 	ID3D11PixelShader* gPixelShaderS = nullptr; //x
+
+	ID3D11VertexShader* gVertexShadowedShader = nullptr; //x
+	ID3D11InputLayout* gInputLayoutShadowed = nullptr;
+	ID3D11GeometryShader* gGeometryShadowedShader = nullptr; //x
+	ID3D11PixelShader* gPixelShadowedShader = nullptr;
 
 	D3D11_VIEWPORT mainViewPort;
 
@@ -133,6 +139,7 @@ public:
 	//end delta dime stuff
 
 	void CreateShaders();
+	void CreateShadowShaders();
 	//void CreateTexture(int modelCounter);
 	void CreateConstantBuffer();
 	void CreateDepthStencilBuffer();
