@@ -1,5 +1,10 @@
 #include "ShadowMap.h"
 
+void ShadowMap::clearDSV(ID3D11DeviceContext* deviceContext)
+{
+	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
 void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11Device* device, GCamera * camera)
 {
 	InitializeShader(device);
@@ -11,8 +16,8 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	HRESULT hr;
 
 	D3D11_TEXTURE2D_DESC textDesc;
-	textDesc.Width = (float)640;
-	textDesc.Height = (float)480;
+	textDesc.Width = 640;
+	textDesc.Height = 640;
 	textDesc.MipLevels = 1;
 	textDesc.ArraySize = 1;
 	textDesc.Format = DXGI_FORMAT_R32_TYPELESS;
@@ -23,6 +28,8 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	textDesc.CPUAccessFlags = 0;
 	textDesc.MiscFlags = 0;
 	
+	hr = device->CreateTexture2D(&textDesc, NULL, &pShadowMap);
+	
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthDesc;
 	ZeroMemory(&depthDesc, sizeof(depthDesc));
 	depthDesc.Format = DXGI_FORMAT_D32_FLOAT;
@@ -30,14 +37,14 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	depthDesc.Flags = 0;
 	depthDesc.Texture2D.MipSlice = 0;
 
+	hr = device->CreateDepthStencilView(pShadowMap, &depthDesc, &pShadowDSV);
+
 	D3D11_SHADER_RESOURCE_VIEW_DESC shadDesc;
 	shadDesc.Format = DXGI_FORMAT_R32_FLOAT;
 	shadDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	shadDesc.Texture2D.MostDetailedMip = 0;
 	shadDesc.Texture2D.MipLevels = 1;
 
-	hr = device->CreateTexture2D(&textDesc, NULL, &pShadowMap);
-	hr = device->CreateDepthStencilView(pShadowMap, &depthDesc, &pShadowDSV);
 	hr = device->CreateShaderResourceView(pShadowMap, &shadDesc, &pShadowSRV);
 
 
@@ -58,31 +65,31 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 	//device->CreateRasterizerState(&derp, &allan);
 	//deviceContext->RSSetState(allan);
 
-	D3D11_TEXTURE2D_DESC textureDesc;
-	// Initialize the render target texture description.
-	ZeroMemory(&textureDesc, sizeof(textureDesc));
-	// Setup the render target texture description.
-	textureDesc.Width = (float)640;
-	textureDesc.Height = (float)480;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
-	// Create the render target texture.
-	hr = device->CreateTexture2D(&textureDesc, NULL, &pRTVTex);
+	//D3D11_TEXTURE2D_DESC textureDesc;
+	//// Initialize the render target texture description.
+	//ZeroMemory(&textureDesc, sizeof(textureDesc));
+	//// Setup the render target texture description.
+	//textureDesc.Width = (float)640;
+	//textureDesc.Height = (float)480;
+	//textureDesc.MipLevels = 1;
+	//textureDesc.ArraySize = 1;
+	//textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	//textureDesc.SampleDesc.Count = 1;
+	//textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	//textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	//textureDesc.CPUAccessFlags = 0;
+	//textureDesc.MiscFlags = 0;
+	//// Create the render target texture.
+	//hr = device->CreateTexture2D(&textureDesc, NULL, &pRTVTex);
 
-	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
-	// Setup the description of the render target view.
-	renderTargetViewDesc.Format = textureDesc.Format;
-	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	renderTargetViewDesc.Texture2D.MipSlice = 0;
+	//D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+	//// Setup the description of the render target view.
+	//renderTargetViewDesc.Format = textureDesc.Format;
+	//renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	//renderTargetViewDesc.Texture2D.MipSlice = 0;
 
-	// Create the render target view.
-	hr = device->CreateRenderTargetView(pRTVTex, &renderTargetViewDesc, &pShadowRTV);
+	//// Create the render target view.
+	//hr = device->CreateRenderTargetView(pRTVTex, &renderTargetViewDesc, &pShadowRTV);
 
 
 }
@@ -117,14 +124,16 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 	ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV,
 	D3D11_VIEWPORT& cameraViewport)
 {
-	//D3D11_VIEWPORT BAJS;
-	//BAJS.Width = (float)640;
-	//BAJS.Height = (float)480;
-	//BAJS.MinDepth = 0.0f;
-	//BAJS.MaxDepth = 1.0f;
-	//BAJS.TopLeftX = 0;
-	//BAJS.TopLeftY = 0;
-	//deviceContext->RSSetViewports(1, &BAJS);
+	D3D11_VIEWPORT BAJS;
+	BAJS.Width = (float)640;
+	BAJS.Height = (float)640;
+	BAJS.MinDepth = 0.0f;
+	BAJS.MaxDepth = 1.0f;
+	BAJS.TopLeftX = 0;
+	BAJS.TopLeftY = 0;
+	deviceContext->RSSetViewports(1, &BAJS);
+
+	deviceContext->OMSetRenderTargets(0, NULL, pShadowDSV);
 	
 	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
@@ -140,7 +149,6 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 
 	//Set render targets for the first pass. This sets up our DSV to fill up our resource for later use.
 	//deviceContext->OMSetRenderTargets(1, &RTV, pShadowDSV);
-	deviceContext->OMSetRenderTargets(1, &pShadowRTV, pShadowDSV);
 
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -160,9 +168,9 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 		}
 	}
 	//Sets the render target and depth buffer back to it's initial state
-	deviceContext->OMSetRenderTargets(1, &RTV, DSV);
+	//deviceContext->OMSetRenderTargets(1, &RTV, DSV);
 
-	deviceContext->RSSetViewports(1, &cameraViewport);
+	
 
 	return pShadowSRV;
 }

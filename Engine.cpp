@@ -320,10 +320,12 @@ void Engine::Render()
 #pragma endregion
 	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
 	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
+	ID3D11ShaderResourceView* shadowMap = shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView, mainViewPort);
+	
+	gDeviceContext->OMSetRenderTargets(1, &gBackbufferRTV, depthStencilView);
+	gDeviceContext->RSSetViewports(1, &mainViewPort);
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	ID3D11ShaderResourceView* shadowMap = shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView, mainViewPort);
 
 	float clearColor[] = { 1, 0, 0.5, 1 };
 	float clearColor2[] = { 1, 0.5, 0, 1 };
@@ -334,6 +336,9 @@ void Engine::Render()
 		gDeviceContext->ClearRenderTargetView(gBackbufferRTV, clearColor2);
 
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	
+
+
 
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
@@ -424,6 +429,7 @@ void Engine::Render()
 
 	particleSys->renderParticles();
 
+	shadow.clearDSV(gDeviceContext);
 	////{
 	////	//if (!cullingFrustum->isCollision(listOfModels[bufferCounter].modelBBox))
 	////	//	continue; //skips one loop iteration, not sending vertexbuffers to the shader. (if the frustum doesn't contain the mesh)
@@ -549,7 +555,7 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		NULL,
+		D3D11_CREATE_DEVICE_DEBUG,
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,

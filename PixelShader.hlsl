@@ -1,5 +1,5 @@
 Texture2D txDiffuse[2]; //: register(t0); //This receives the texture
-
+Texture2D shadowMap : register (t2);
 SamplerState sampAni: register(s0)
 {
 	Filter = MIN_MAG_MIP_LINEAR;
