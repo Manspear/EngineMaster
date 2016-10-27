@@ -2,7 +2,7 @@ struct GSINPUT {
 	float4 Pos : SV_POSITION;
 	float3 normal : NORMAL;
 	float2 UV : TEXCOORD;
-	float4 lightPos : TEXCOORD0;
+	float4 lightPos : TEXCOORD1;
 };
 
 struct GSOutput
@@ -11,7 +11,7 @@ struct GSOutput
 	float3 normal : NORMAL;
 	float2 UV  : TEXCOORD;
 	float4 worldPosition : WORLDSPACE;
-	float4 lightPos : TEXCOORD0;
+	float4 lightPos : TEXCOORD1;
 
 	float3 tangent : TANGENT;
 	float3 biTanget : BITANGENT;
@@ -38,7 +38,7 @@ cbuffer worldBuffer:register(b1) { //Gotten from the GModel class.
 cbuffer lightBuffer:register(b2)
 {
 	matrix lightViewMat;
-	matrix lightProjectionMat
+	matrix lightProjectionMat;
 };
 
 [maxvertexcount(3)] //returns a maximum of x vertices
@@ -78,7 +78,7 @@ void GS_main(triangle GSINPUT input[3] : SV_POSITION, inout TriangleStream< GSOu
 
 		element.worldPosition = mul(input[i].Pos, worldMatrix);
 
-		element.lightPos *= mul(worldMatrix, mul(lightViewMat, lightProjectionMat));
+		element.lightPos = mul(element.lightPos, mul(worldMatrix, mul(lightViewMat, lightProjectionMat)));
 
 		element.tangent = tangent;
 		element.biTanget = biTangent;

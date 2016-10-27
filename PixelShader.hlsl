@@ -1,4 +1,5 @@
 Texture2D txDiffuse[2]; //: register(t0); //This receives the texture
+
 SamplerState sampAni;
 
 struct PS_IN
