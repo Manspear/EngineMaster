@@ -94,6 +94,11 @@ public:
 	ID3D11VertexShader* gVertexShaderS = nullptr; //x
 	ID3D11PixelShader* gPixelShaderS = nullptr; //x
 
+	ID3D11VertexShader* gVertexShadowedShader = nullptr; //x
+	ID3D11InputLayout* gInputLayoutShadowed = nullptr;
+	ID3D11GeometryShader* gGeometryShadowedShader = nullptr; //x
+	ID3D11PixelShader* gPixelShadowedShader = nullptr;
+
 	D3D11_VIEWPORT mainViewPort;
 
 	struct matrixBuffer {
@@ -133,6 +138,7 @@ public:
 	//end delta dime stuff
 
 	void CreateShaders();
+	void CreateShadowShaders();
 	//void CreateTexture(int modelCounter);
 	void CreateConstantBuffer();
 	void CreateDepthStencilBuffer();

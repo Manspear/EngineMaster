@@ -11,6 +11,7 @@ struct GSOutput
 	float3 normal : NORMAL;
 	float2 UV  : TEXCOORD;
 	float4 worldPosition : WORLDSPACE;
+
 	float4 lightPos : TEXCOORD1;
 
 	float3 tangent : TANGENT;
@@ -78,6 +79,7 @@ void GS_main(triangle GSINPUT input[3] : SV_POSITION, inout TriangleStream< GSOu
 
 		element.worldPosition = mul(input[i].Pos, worldMatrix);
 
+		//Gets the vertex values stored in lightPos to be projected onto the light's view-plane. 
 		element.lightPos = mul(element.lightPos, mul(worldMatrix, mul(lightViewMat, lightProjectionMat)));
 
 		element.tangent = tangent;
