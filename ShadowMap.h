@@ -41,7 +41,7 @@ public:
 
 	bool initialize(ID3D11Device* device, HWND handle);
 	void uninitialize();
-
+	ID3D11Buffer * getLightCbuffer();
 	/*
 	This is the first pass, the "shadow pass" of the render, 
 	where the depth of the z-buffer is stored in the private
@@ -60,6 +60,7 @@ public:
 
 	ID3D11Texture2D* getDepthTexture();
 
+	ID3D11Buffer* lvmatrixBuffer;
 private:
 	bool InitializeShader(ID3D11Device* device);
 	void RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
@@ -112,15 +113,21 @@ private:
 	ID3D11SamplerState* sampleStateClamp;
 
 	//cbuffers
-	ID3D11Buffer* matrixBuffer;
 	ID3D11Buffer* wMatBuffer;
 	ID3D11Buffer* lightBuffer;  //hardcode instead
 	ID3D11Buffer* lightBuffer2; //hardcode instead
+	ID3D11Buffer* matrixBuffer;
 
 	//cbufferStructs
 	struct matrixCbuff
 	{
 		XMMATRIX lightViewProjection;
+	};
+
+	struct lvMatrixCbuff
+	{
+		XMMATRIX lightView;
+		XMMATRIX lightProj;
 	};
 
 	matrixCbuff matrix_cbuffer;

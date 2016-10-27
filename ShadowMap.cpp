@@ -1,4 +1,5 @@
 #include "ShadowMap.h"
+#define JOHAN 1337
 
 void ShadowMap::clearDSV(ID3D11DeviceContext* deviceContext)
 {
@@ -222,8 +223,8 @@ bool ShadowMap::InitializeShader(ID3D11Device* device)
 void ShadowMap::createCbuffers(ID3D11Device* device)
 {
 	D3D11_BUFFER_DESC matrixDesc;
-	D3D11_BUFFER_DESC worldDesc;
-	D3D11_BUFFER_DESC lightDesc;
+	D3D11_BUFFER_DESC lvmMatrixDesc;
+
 
 	matrixDesc.Usage = D3D11_USAGE_DYNAMIC;
 	matrixDesc.ByteWidth = sizeof(matrixCbuff);
@@ -233,6 +234,15 @@ void ShadowMap::createCbuffers(ID3D11Device* device)
 	matrixDesc.StructureByteStride = 0;
 
 	device->CreateBuffer(&matrixDesc, NULL, &matrixBuffer);
+
+	lvmMatrixDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lvmMatrixDesc.ByteWidth = sizeof(lvMatrixCbuff);
+	lvmMatrixDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lvmMatrixDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lvmMatrixDesc.MiscFlags = 0;
+	lvmMatrixDesc.StructureByteStride = 0;
+
+	device->CreateBuffer(&lvmMatrixDesc, NULL, &lvmatrixBuffer);
 }
 
 void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * deviceContext)
@@ -271,12 +281,29 @@ void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * dev
 	//deviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
 
 
-
 	dataPtr = (matrixCbuff*)mapThing.pData;
 	dataPtr->lightViewProjection = viewProj;
 	
 	deviceContext->Unmap(matrixBuffer, NULL);
 
+	
+	D3D11_MAPPED_SUBRESOURCE mapThing2;
+	lvMatrixCbuff* dataPtr2;
+	deviceContext->Map(lvmatrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapThing2);
+
+	//deviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
+
+
+	dataPtr2 = (lvMatrixCbuff*)mapThing2.pData;
+	dataPtr2->lightView = XMMatrixTranspose(viewMat);
+	dataPtr2->lightProj = XMMatrixTranspose(ProjectionMat);
+	deviceContext->Unmap(lvmatrixBuffer, NULL);
+
+}
+
+ID3D11Buffer * ShadowMap::getLightCbuffer()
+{
+	return matrixBuffer;
 }
 
 void ShadowMap::RenderShader(ID3D11DeviceContext * deviceContext, int indexCount)

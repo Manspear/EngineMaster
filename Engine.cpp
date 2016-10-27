@@ -423,6 +423,9 @@ void Engine::Render()
 
 			gDeviceContext->VSSetShader(gVertexShadowedShader, nullptr, 0);
 			gDeviceContext->IASetInputLayout(gInputLayoutShadowed);
+			
+			gDeviceContext->GSSetConstantBuffers(2, 1, &shadow.lvmatrixBuffer);
+
 			//Since the last 4 elements aren't present in the geometry's vertices,
 			//maybe it'll work if you just give the "true" vertex size as input.
 			vertexSize = sizeof(float) * 8 + sizeof(int);
@@ -448,6 +451,7 @@ void Engine::Render()
 		//gDeviceContext->Draw(cullingFrustum->seenObjects[bufferCounter]->animModelVertices.size(), 0);
 		
 	}
+
 	ID3D11ShaderResourceView* pNullSRV = NULL;
 	gDeviceContext->PSSetShaderResources(2, 1, &pNullSRV);
 

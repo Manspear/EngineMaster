@@ -17,6 +17,7 @@ struct GSOutput
 	float4 camDir :WORLDSPACE2;
 };
 
+
 cbuffer matrixBuffer:register(b0) {
 	//register b0 says that this buffer takes up slot 0 in the 
 	//"buffer array" belonging to the Vertex Shader. So if more
