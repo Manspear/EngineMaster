@@ -33,7 +33,7 @@ public:
 		bs,
 		skeletal
 	};
-
+	void clearDSV(ID3D11DeviceContext* deviceContext);
 	/*Same dimensions as the viewport renderer*/
 	void initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11Device* device, GCamera * camera);
 	ShadowMap();
