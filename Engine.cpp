@@ -259,7 +259,7 @@ void Engine::Render()
 
 	gDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView, mainViewPort);
+	ID3D11ShaderResourceView* shadowMap = shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView, mainViewPort);
 
 	float clearColor[] = { 1, 0, 0.5, 1 };
 	float clearColor2[] = { 1, 0.5, 0, 1 };
