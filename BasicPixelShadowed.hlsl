@@ -1,4 +1,4 @@
-Texture2D txDiffuse[2]; //: register(t0); //This receives the texture
+Texture2D txDiffuse[2]; //This receives the texture
 
 Texture2D shadowMap;
 
@@ -20,7 +20,7 @@ struct PS_IN
 {
 	float4 Pos : SV_Position;
 	float3 normal : normal;
-	float2 UV : TEXCOORD;
+	float2 UV : TEXCOORD0;
 	float4 pixelPosition : WORLDSPACE;
 
 	float4 lightPosition : TEXCOORD1;

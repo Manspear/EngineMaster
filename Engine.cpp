@@ -23,6 +23,7 @@ Engine::~Engine()
 }
 void Engine::CreateShadowShaders()
 {
+	HRESULT hr;
 	//VERTEX SHADER
 	ID3DBlob* pVS = nullptr;
 	D3DCompileFromFile(
@@ -45,7 +46,7 @@ void Engine::CreateShadowShaders()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD1", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "TEXCOORD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	//float4 lightPos : TEXCOORD1;
 	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gInputLayoutShadowed);
@@ -87,6 +88,28 @@ void Engine::CreateShadowShaders()
 	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShadowedShader);
 	// we do not need anymore this COM object, so we release it.
 	pPS->Release();
+
+	//Creating a Sampler for the Pixel Shader
+	D3D11_SAMPLER_DESC sampDesc;
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.MipLODBias = 0;
+	sampDesc.MaxAnisotropy = 1;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS; //Maybe this does something bad? Hmm... Keep an eye out.
+	sampDesc.BorderColor[0] = 1.f;
+	sampDesc.BorderColor[1] = 1.f;
+	sampDesc.BorderColor[2] = 0.f;
+	sampDesc.BorderColor[3] = 1.f; //Not sure why this RGB value's w value must be 1... Alpha maybe?
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = 12;
+
+	//Filter = min_mag_mip_point;
+	//AddressU = CLAMP;
+	//AddressV = CLAMP;
+
+	hr = gDevice->CreateSamplerState(&sampDesc, &gPSShadowTextureSampler);
 }
 void Engine::CreateShaders()
 {
@@ -337,15 +360,13 @@ void Engine::Render()
 
 	gDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	
-
-
-
 	gDeviceContext->HSSetShader(nullptr, nullptr, 0);
 	gDeviceContext->DSSetShader(nullptr, nullptr, 0);
 
 	gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
 	gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
 	gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
+	gDeviceContext->PSSetSamplers(1, 1, &gPSShadowTextureSampler);
 	
 	UINT32 vertexSize;
 	UINT32 offset = 0; 

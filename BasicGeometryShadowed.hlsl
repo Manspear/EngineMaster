@@ -1,7 +1,7 @@
 struct GSINPUT {
 	float4 Pos : SV_POSITION;
 	float3 normal : NORMAL;
-	float2 UV : TEXCOORD;
+	float2 UV : TEXCOORD0;
 	float4 lightPos : TEXCOORD1;
 };
 

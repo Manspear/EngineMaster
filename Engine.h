@@ -82,6 +82,7 @@ public:
 	//ID3D11ShaderResourceView* gTextureView[2];
 
 	ID3D11SamplerState* gPSTextureSampler = nullptr; //x
+	ID3D11SamplerState* gPSShadowTextureSampler = nullptr;
 
 	ID3D11InputLayout* gVertexLayout = nullptr; //x
 	ID3D11InputLayout* gVertexLayoutBS = nullptr; //x
