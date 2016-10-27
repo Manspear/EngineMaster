@@ -9,7 +9,7 @@ SamplerState sampAni: register(s0)
 	AdressV = Wrap;
 };
 
-SamplerState sampShadow: register(s1) //Where is this set?
+SamplerState sampShadow: register(s1)
 {
 	Filter = min_mag_mip_point;
 	AddressU = CLAMP;
@@ -44,7 +44,6 @@ struct PS_IN
 //These pixels have already went through the rasterizers depth-culling, and are therefore 
 //the ones that will be seen on the screen, since depth-culling removes pixels based on depth value. 
 
-//ARGH! Input limit 8 exceeded!
 
 float4 PS_main(PS_IN input) : SV_Target
 {
@@ -77,7 +76,7 @@ float4 PS_main(PS_IN input) : SV_Target
 	float3 lightPoint = float3 (4, 3, -3);
 	
 	//Why is the lightposition a vector pointing at the light position? It's weird. 
-	float3 lightPos = normalize(lightPoint - input.pixelPosition); //Vector from pixelPosition to camera(is correct)
+	float3 lightPos = normalize(lightPoint - (input.pixelPosition).xyz); //Vector from pixelPosition to camera(is correct)
 	float4 ambientLightColor = { 0.3, 0.3, 0.3, 0 };
 	float4 diffuseColor = float4(1, 1, 1, 1);
 	float specShadow = 1.0;
@@ -109,8 +108,8 @@ float4 PS_main(PS_IN input) : SV_Target
 	//float specShadow = saturate(4 * diffuseColor);
 	
 	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower) * specShadow; //sl = Specular Lighting
-	float3 diffuse = saturate(diffuseColor * lightIntensity) * textureColor;
-	float3 ambient = (ambientLightColor * textureColor);
+	float3 diffuse = saturate((diffuseColor).xyz * lightIntensity) * textureColor;
+	float3 ambient = (ambientLightColor).xyz * textureColor;
 	
 	//lightCalc
 	//angle of ray vs object determines the amount of reflected light. 

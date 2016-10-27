@@ -1,5 +1,4 @@
 #include "ShadowMap.h"
-#define JOHAN 1337
 
 void ShadowMap::clearDSV(ID3D11DeviceContext* deviceContext)
 {

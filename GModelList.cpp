@@ -15,7 +15,7 @@ void GModelList::initializeModels(ID3D11Device* gDevice, ID3D11DeviceContext * g
 	this->numberOfModels = 2; //VKTIGT
 	this->modelList = new GModel[this->numberOfModels];
 
-	this->modelList[0].load(".\\Objects/plane.fbx", gDevice, gDeviceContext, L"./images/SexyPic.jpg", L"./Images/normal_map.jpg");
+	this->modelList[0].load(".\\Objects/plane.fbx", gDevice, gDeviceContext, L"./images/Untitled.jpg", NULL);
 	//this->modelList[0].load(".\\Objects/box2.fbx", gDevice, gDeviceContext); 
 	this->modelList[1].load(".\\Objects/itsBoxxyTextured.fbx", gDevice, gDeviceContext, L"./images/Pokemon.png", L"./Images/normal_map.jpg");
 	//this->modelList[1].load(".\\Objects/itsBoxxyTextured.fbx", gDevice, gDeviceContext, L"./images/Chesterfield_texture.jpg", NULL);
