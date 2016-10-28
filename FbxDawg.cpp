@@ -530,11 +530,10 @@ void FbxDawg::getJointData(FbxMesh* currMesh, FbxScene* Fbx_Scene)
 		isAnimated = false;
 	}
 
-	
-
 	for (unsigned int deformerIndex = 0; deformerIndex < deformerCount; ++deformerIndex)
 	{
 		FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(currMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
+
 		if (!currSkin)
 			continue;
 

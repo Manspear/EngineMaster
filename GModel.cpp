@@ -37,13 +37,15 @@ void GModel::updateJointMatrices(std::vector<FbxDawg::sKeyFrame> inputList, ID3D
 	finalTMatrices[0] = XMMatrixMultiply(tMatrices[0], invBPose);//invBPose * tMatrices[0];
 	//tMatrices[0] = XMMatrixMultiply(tMatrices[0], invBPose);
 																 //finalTMatrices[0] = tMatrices[0];
-
 	for (int i = 1; i < inputList.size(); i++)
 	{
 		//if no child ever has an uncalculated parent, this works
 		int parentIndex = modelLoader.skeleton.joints[i].parentJointIndex;
+		//This child (with bindpose) * it's parent's final transform matrix. This to move the child into it's parent's space.
 		tMatrices[i] =  tMatrices[i] * tMatrices[parentIndex];
 		XMMATRIX invBPose = XMLoadFloat4x4(&modelLoader.skeleton.joints[i].globalBindPoseInverse);
+		//Inverse bindpose to remove the bindpose from the final matrix.
+		//Otherwise the bindpose-values will ruin the final result by moving the joints and additional "bindpose"-transform.
 		finalTMatrices[i] = invBPose * tMatrices[i];
 		//finalTMatrices[i] = finalTMatrices[i] * invertZ;
 	}
@@ -430,7 +432,7 @@ void GModel::loadBlendShape(const char* fbxFilePath, ID3D11Device* gDevice, ID3D
 	}
 	else {
 		noOfTextures = 2;
-		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]);
+		hr = DirectX::CreateWICTextureFromFile(gDevice, normalPath, NULL, &modelTextureView[1]); //normalMap
 
 	}
 #pragma endregion 
@@ -474,7 +476,6 @@ void GModel::loadAnimMesh(const char* fbxFilePath, ID3D11Device* gDevice, ID3D11
 	pivotPoint = modelLoader.pivotValue;
 	//Note: Doing this vvvvvv may cause problems according to Martin, since it's vector = vector
 	this->animModelVertices = modelLoader.animModelVertexList;
-	
 
 	this->modelTextureFilepath = modelLoader.textureFilepath;
 #pragma region VertexBuffer
@@ -612,25 +613,6 @@ void GModel::updateAnimation(ID3D11DeviceContext * gDeviceContext, double dt)
 	
 	//first find the closest keyframe on each joint
 	//keyList is used to fill the matrixList
-
-	//std::vector<FbxDawg::sKeyFrame> keyList;
-
-	//keyList.resize(modelLoader.skeleton.joints.size());
-	//for (int i = 0; i < modelLoader.skeleton.joints.size(); i++)
-	//{
-	//	float targetTime = abs(std::fmod(animationTime, modelLoader.skeleton.joints[i].animLayer[0].keyFrame.back().keyTime));
-	//	float timeCompare = FBXSDK_FLOAT_MAX;
-	//	for (int j = 0; j < modelLoader.skeleton.joints[i].animLayer[0].keyFrame.size(); j++)
-	//	{
-	//		float currKeyTime = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j].keyTime;
-	//		float diff = abs(targetTime - currKeyTime);
-	//		if (diff < timeCompare)
-	//		{
-	//			timeCompare = diff;
-	//			keyList[i] = modelLoader.skeleton.joints[i].animLayer[0].keyFrame[j];
-	//		}	
-	//	}
-	//}
 
 	std::vector<FbxDawg::sKeyFrame> keyList;
 	keyList.resize(modelLoader.skeleton.joints.size());

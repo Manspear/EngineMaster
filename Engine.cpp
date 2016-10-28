@@ -165,7 +165,7 @@ void Engine::CreateShaders()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA , 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "INFLUENCES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	gDevice->CreateInputLayout(inputDescSkeletal, ARRAYSIZE(inputDescSkeletal), pSVS->GetBufferPointer(), pSVS->GetBufferSize(), &gVertexLayoutSkeletal);
@@ -408,15 +408,6 @@ void Engine::Render()
 		else
 		{
 			/*This is the "normal" shader: */
-			//
-			//gDeviceContext->GSSetShader(gGeometryShader, nullptr, 0);
-			//gDeviceContext->PSSetShader(gPixelShader, nullptr, 0);
-			//gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);
-			//
-			//gDeviceContext->VSSetShader(gVertexShader, nullptr, 0);
-			//gDeviceContext->IASetInputLayout(gVertexLayout);
-			//vertexSize = sizeof(float) * 8 + sizeof(int);
-			//
 			gDeviceContext->GSSetShader(gGeometryShadowedShader, nullptr, 0);
 			gDeviceContext->PSSetShader(gPixelShadowedShader, nullptr, 0);
 			gDeviceContext->PSSetSamplers(0, 1, &gPSTextureSampler);

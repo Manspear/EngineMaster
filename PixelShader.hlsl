@@ -54,9 +54,10 @@ float4 PS_main(PS_IN input) : SV_Target
 	float3 v = normalize(input.camPos - input.pixelPosition);
 	
 	//Normal
-	bumpMap = float3 (txDiffuse[1].Sample(sampAni, input.UV).xyz);
-	bumpMap = (bumpMap * 2.0f) - 1.0f;
-	input.normal = (bumpMap.x * input.tangent) + (bumpMap.y * input.biTangent) + (bumpMap.z * input.normal);
+	bumpMap = float3 (txDiffuse[1].Sample(sampAni, input.UV).xyz); // get the color value of this pixel on the normal map
+	bumpMap = (bumpMap * 2.0f) - 1.0f; //Not really neccesay i think. 
+
+	input.normal = (bumpMap.x * input.tangent) + (bumpMap.y * input.biTangent) + (bumpMap.z * input.normal);  //this decides how the pixel normal is affected by the nomalMap xyz=rgb
 	input.normal = normalize(input.normal);
 	
 	float lightIntensity = dot(input.normal, lightPos);
@@ -68,6 +69,7 @@ float4 PS_main(PS_IN input) : SV_Target
 	v = normalize(input.camPos - input.pixelPosition); 
 
 	float3 sl = specular * pow(max(dot(r, v), 0.0f), shinypower) * specShadow; //sl = Specular Lighting
+    //Saturate converts 255-point color values to values between 0 to 1
 	float3 diffuse = saturate(diffuseColor * lightIntensity) * textureColor;
 	float3 ambient = (ambientLightColor * textureColor);
 

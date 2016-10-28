@@ -50,8 +50,10 @@ float4 PS_main(PS_IN input) : SV_Target
 	float bias = 0.00012;
 	
 	//PErspective divide to get the texture coords and shadowMap into the same space. NDC.
+    //NDC is visualized as a "2d-ized" perspective thing
 	input.lightPosition.xy /= input.lightPosition.w;
 	
+    //Gets the lightPosition (in NDC space) into UV space 
 	float2 smTex = float2(0.5f*input.lightPosition.x + 0.5f, -0.5f * input.lightPosition.y + 0.5f);
 	
 	//Pixel depth for shadowing

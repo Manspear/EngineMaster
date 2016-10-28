@@ -127,14 +127,14 @@ bool MousePicking::calculateCurrentRay()
 	MousePicking::getCursorPosition(this->MousePos); //ViewportSpace
 
 
-	this->currentRay.x = (((2.0f * MousePos.x) / screenWidth) - 1) / this->projectionMatrix._11; //ViewSpace
+	this->currentRay.x = (((2.0f * MousePos.x) / screenWidth) - 1) / this->projectionMatrix._11; //får oss till ViewSpace
 	this->currentRay.y = -(((2.0f * MousePos.y) / screenHeight) - 1) / this->projectionMatrix._22;
 	this->currentRay.z = 1.0f;    //we set 1 since the ray goes "into" the screen
 
 
 
-	this->rayOrigin = XMVector3TransformCoord(SimpleMath::Vector4(0, 0, 0, 0), this->viewMatrix.Invert()); //World space
-	this->currentRay = XMVector3TransformNormal(this->currentRay, this->viewMatrix.Invert());
+	this->rayOrigin = XMVector3TransformCoord(SimpleMath::Vector4(0, 0, 0, 0), this->viewMatrix.Invert()); //get ray origin
+	this->currentRay = XMVector3TransformNormal(this->currentRay, this->viewMatrix.Invert()); //gets ray into worldspace
 	this->currentRay = XMVector3Normalize(this->currentRay);
 
 
@@ -232,7 +232,7 @@ float MousePicking::checkRayIntersectionAgainstObject(std::vector<AnimVertexStru
 		SimpleMath::Vector4 tri1V3 = { modelVertices[IndexArray[(i * 3) + 2]].x, modelVertices[IndexArray[(i * 3) + 2]].y, modelVertices[IndexArray[(i * 3) + 2]].z, 1 };
 
 		//Transform the vertices to world space
-		tri1V1 = XMVector3TransformCoord(tri1V1, worldMatrix);
+		tri1V1 = XMVector3TransformCoord(tri1V1, worldMatrix);//get triangle into world. having ray in object space would be more optimized
 		tri1V2 = XMVector3TransformCoord(tri1V2, worldMatrix);
 		tri1V3 = XMVector3TransformCoord(tri1V3, worldMatrix);
 
@@ -240,7 +240,7 @@ float MousePicking::checkRayIntersectionAgainstObject(std::vector<AnimVertexStru
 
 		SimpleMath::Vector4 U = { 0.0f, 0.0f, 0.0f, 0.0f }; //Find the normal using U, V coordinates (two edges)
 		SimpleMath::Vector4 V = { 0.0f, 0.0f, 0.0f, 0.0f };
-		SimpleMath::Vector4 faceNormal = { 0.0f, 0.0f, 0.0f, 0.0f };
+		SimpleMath::Vector4 faceNormal = { 0.0f, 0.0f, 0.0f, 0.0f }; //find the normal of the triangle
 
 		U = tri1V2 - tri1V1;
 		V = tri1V3 - tri1V1;
