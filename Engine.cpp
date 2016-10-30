@@ -314,35 +314,6 @@ void Engine::InitializeViewPort()
 
 void Engine::Render()
 {
-#pragma region //EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM
-	//>>>EXPLANATION OF DEPTH-BUFFER AND IT'S RELATIONSHIP WITH VIEW-FRUSTUM<<<
-	//The depth buffer clears itself with a value between 0 and 1. If it clears to 1
-	//it has a depth-value corresponding to the Far Plane of the view-frustum. 
-	//If it clears to 0, it has a depth-value corresponding to the Near-Plane  
-	//of the view-frustum.
-	//You want to clear the depth-buffer to 1, because you use the depth value 
-	//that you've cleared to as comparison to the depth-value of objects. 
-	//The check goes like this:
-	//if(storedDepth > objectDepth){ storedDepth = objectDepth } (it compares objects in the order they are processed)
-	//So the cleared-to-value is used as a basis. Usually getting replaced pretty quickly
-	//with the object-depth.
-	//
-	//So now to the not-so-intuitive part:
-	//You should think that when the depth-value is 0.5 that it's situated halfway 
-	//between the view-frustum's nearplane and farplane, but it's not. The reasoning
-	//here is that we are more concerned about object-flickering that occurs close
-	//to the camera, since it's more noticeable to the viewer.
-	//So the depth-values are therefore distributed more generously near the Near-Plane, than the far-plane.
-	//The exact distribution I am unaware of though.
-
-	//>>>SMALL EXPLANATIN OF STENCIL BUFFER INC<<<
-	//Stencil buffer is used when doing shadow volumes. It stores values used to determine is something is inside of a shadow volume.
-	//The values it holds are both positive and negative, where negative values represent 
-	//the shadow volume that is behind the last object that it hits, and positive values 
-	//represent the shadow-volume before it hits it's "object-that-will-get-shadow-on-it".
-#pragma endregion
-	//vertex shaders, 1 för animation, 1 för ej animation, 1 för specialeffekter
-	//Specialeffekter: 1 egen vertex shader, 1 egen geometry-shader, 1 egen pixel shader (om annan ljussättning krävs)
 	ID3D11ShaderResourceView* shadowMap = shadow.RenderFirstPassShadowed(gDeviceContext, modelListObject, gBackbufferRTV, depthStencilView, mainViewPort);
 	
 	InitializeViewPort();

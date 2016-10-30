@@ -50,12 +50,7 @@ void ShadowMap::initializeShadowMap(ID3D11DeviceContext* deviceContext, ID3D11De
 
 ShadowMap::ShadowMap()
 {
-	/*lightViewport.Width = (float)640;
-	lightViewport.Height = (float)480;
-	lightViewport.MinDepth = 0.0f;
-	lightViewport.MaxDepth = 1.0f;
-	lightViewport.TopLeftX = 0;
-	lightViewport.TopLeftY = 0;*/
+
 }
 
 bool ShadowMap::initialize(ID3D11Device * device, HWND handle)
@@ -260,25 +255,9 @@ void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * dev
 
 	matrix_cbuffer.lightViewProjection = viewProj;
 
-	//matrix_cbuffer.lightViewMatrix = XMMatrixLookToLH(lPosition, lDirection, lUp);
-
-	//XMMATRIX neger = XMMatrixTranspose((XMMatrixMultiply(camera->getViewMatrix(), camera->getProjMatrix())));
-	//If error, try transposing the matrices.
-
-	//D3D11_BUFFER_DESC bufferDesc;
-	//memset(&bufferDesc, 0, sizeof(bufferDesc));
-	//bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	//bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	//bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	//bufferDesc.ByteWidth = sizeof(matrixCbuff);
-	//device->CreateBuffer(&bufferDesc, NULL, &matrixBuffer);
-
 	D3D11_MAPPED_SUBRESOURCE mapThing;
 	matrixCbuff* dataPtr;
 	deviceContext->Map(matrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapThing);
-
-	//deviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
-
 
 	dataPtr = (matrixCbuff*)mapThing.pData;
 	dataPtr->lightViewProjection = viewProj;
@@ -290,14 +269,10 @@ void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * dev
 	lvMatrixCbuff* dataPtr2;
 	deviceContext->Map(lvmatrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapThing2);
 
-	//deviceContext->Map(gConstantBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &gMappedResource);
-
-
 	dataPtr2 = (lvMatrixCbuff*)mapThing2.pData;
 	dataPtr2->lightView = XMMatrixTranspose(viewMat);
 	dataPtr2->lightProj = XMMatrixTranspose(ProjectionMat);
 	deviceContext->Unmap(lvmatrixBuffer, NULL);
-
 }
 
 ID3D11Buffer * ShadowMap::getLightCbuffer()

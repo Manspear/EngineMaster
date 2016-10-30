@@ -1,27 +1,5 @@
 #include "FbxDawg.h"
 
-//How to organize code for readability:
-
-//
-//In h-files:
-//- Public before private.
-//- Everything only used within the function, should be in private.
-//- Have attributes at the top.
-//-	Have comments above each function explaining clearly what the parameters and return values are used for.
-//	Those comments must be written as /** text **/ and placed above the function. This way the comment
-//	will be displayed when hovering pointer over function-name.
-//- Organize functions alphabetically, or by frequency of use.
-//- Organize attributes by type, alphabetically, or frequency of use.
-//- Have the destructors and constructors at the bottom.
-//- Come to an agreement on naming standards of functions, booleans, classes, structs, and variables.
-//- Come to an agreement on how to write out {}.
-//- Generally have short, to-the-point names of functions, variables, and classes.
-
-//In cpp-files:
-//- Have the functions appear in the same order as in the header.
-//- Have functions be the maximum length of one "screen-height"
-//- If some code is within an if-statement: consider making it a function.
-//- Have comments describing parts of the code, and what it's used for.
 
 FbxDawg::FbxDawg()
 {
@@ -34,9 +12,6 @@ FbxDawg::~FbxDawg()
 
 }
 
-
-
-
 void FbxDawg::loadModels(const char* filePath)
 {
 
@@ -48,16 +23,12 @@ void FbxDawg::loadModels(const char* filePath)
 	ios->SetBoolProp(IMP_FBX_MATERIAL, true);
 	ios->SetBoolProp(IMP_FBX_TEXTURE, true);
 
-
 	FbxScene* Fbx_Scene = FbxScene::Create(SDK_Manager, "myScene"); //FbxScene contains all the nodes, materials, textures, poses, characters
-
 
 	FbxImporter * Fbx_Importer = FbxImporter::Create(SDK_Manager, ""); //FbxImporter is to import an FBX file into SDK objects.
 
 	Fbx_Importer->Initialize(filePath, -1, SDK_Manager->GetIOSettings());// eller ios istället för SDK_M
 	Fbx_Importer->Import(Fbx_Scene);
-
-
 
 	FbxNode* FBXRootNode = Fbx_Scene->GetRootNode(); // FbxCamera, FbxLight, FbxMesh, etc... elements organized in a hierarchical tree. Root is the mother and by FbxNode::GetChild() we work our way down
 

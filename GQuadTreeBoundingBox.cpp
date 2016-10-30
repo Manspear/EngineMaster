@@ -34,10 +34,7 @@ void GQuadTreeBoundingBox::CreateBBox(XMFLOAT3 minPoint, XMFLOAT3 maxPoint)
 void GQuadTreeBoundingBox::splitBox(int divisionCounter, GModelList& modelList)
 {
 	hasSplit = true;
-	//thanks to the way the vertices in
-	//GBoundingBox::CreateBBox(minPoint, maxPoint)
-	//are saved, maxPoint is saved at position [0]
-	//and minPoint at position [7]
+
 	XMFLOAT3 minValue = vertices.BBoxPoint[7]; 
 	XMFLOAT3 maxValue = vertices.BBoxPoint[0];
 
@@ -123,16 +120,6 @@ void GQuadTreeBoundingBox::fillBox(GModelList & modelList)
 	//adding objects: 
 	GModel* tempModelList = modelList.getModelList();
 	for (int z = 0; z < modelList.numberOfModels; z++) {
-		//INSERT COLLISION DETECTION HERE!!!! Between all modelboxes 
-		//and this box. Add the 
-		//colliding models to this bbox's modelChildren-vector.
-		//Hmm... How to define the "inside" of a box?
-		//By making "planes" for every box by doing cross-product?
-		//In that case how to I make the "d-value" appear?
-		//By inserting a point that I know will be in the plane. Of course.
-		//That point simply being one of the vectors used to calculate the
-		//cross product.
-
 		//Will do a AABB vs AABB intersection-test. It is simple, and cheap, and works for this engine.
 		//It is done by comparing the two bboxes' max and min values. If ANY min > max, then they don't intersect.
 		XMFLOAT3 modelMax = tempModelList[z].bBox.vertices.BBoxPoint[0]; //the model bbox's MAX-point.

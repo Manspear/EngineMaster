@@ -19,11 +19,9 @@ public:
 
 	Plane fPlanes[6];
 	std::vector<GModel*> seenObjects;
-	//DirectX::BoundingFrustum frustum;
+
 	DirectX::XMFLOAT3* cornerList;
-	//static DirectX::XMVECTOR HomogenousPoints[6];
-	//bool GFrustum::isCollision(const DirectX::BoundingBox& modelBBox);//<- updates frustum position, and checks for intersection
-	
+
 	bool quadTreeCollided(GQuadTreeBoundingBox * modelBox);
 
 	bool hasCollided(GBoundingBox* modelBox);
