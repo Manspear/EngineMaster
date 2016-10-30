@@ -63,6 +63,22 @@ bool ShadowMap::initialize(ID3D11Device * device, HWND handle)
 
 void ShadowMap::uninitialize()
 {
+	pShadowMap->Release();
+	allan->Release();
+	pShadowDSV->Release();
+	vertexShaderShadow->Release();
+	pixelShaderShadow->Release();
+	pShadowRTV->Release();
+	pRTVTex->Release();
+	VertexlayoutShadow->Release();
+	pShadowSRV->Release();
+	sampleStateClamp->Release();
+	sampleStateClamp->Release();
+
+	wMatBuffer->Release();
+	lightBuffer->Release();
+	lightBuffer2->Release();
+	matrixBuffer->Release();
 }
 
 //Get an array containing all models in the scene 

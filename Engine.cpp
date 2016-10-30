@@ -576,6 +576,8 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 
 void Engine::Clean() {
 
+	shadow.uninitialize();
+
 	gVertexLayout->Release();
 	gVertexLayoutBS->Release();
 	gVertexLayoutSkeletal->Release();
