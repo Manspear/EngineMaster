@@ -19,7 +19,7 @@ Engine::Engine()
 
 Engine::~Engine()
 {
-	shadow.uninitialize();
+	//shadow.uninitialize();
 }
 void Engine::CreateShadowShaders()
 {
@@ -625,8 +625,11 @@ void Engine::Clean() {
 	delete quadTreeRoot;
 	delete MousePickingObject;
 
+
+
 	ID3D11Debug* debugDevice = nullptr;
-	reinterpret_cast<void*>(debugDevice);
+
+	//reinterpret_cast<void*>(debugDevice);
 	//gDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debugDevice));
 	gDevice->QueryInterface(IID_PPV_ARGS(&debugDevice));
 	debugDevice->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);

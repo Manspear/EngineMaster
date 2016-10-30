@@ -70,6 +70,7 @@ void ShadowMap::uninitialize()
 	VertexlayoutShadow->Release();
 	pShadowSRV->Release();
 
+	lvmatrixBuffer->Release();
 	matrixBuffer->Release();
 }
 
