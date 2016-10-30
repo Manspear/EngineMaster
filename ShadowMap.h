@@ -91,31 +91,23 @@ private:
 
 	during the fist render pass we have void pixel shader, and a null render target.
 	*/
-	ID3D11RasterizerState * allan;
 	//This seems to "fill" the pShadowMap texture, that then in turn "fills" the shader resource
 	ID3D11DepthStencilView* pShadowDSV = nullptr;
 
 	//these shaders makes the lighting texture out of the shadowmap depth buffer
 	ID3D11VertexShader* vertexShaderShadow = nullptr;
-	ID3D11PixelShader* pixelShaderShadow = nullptr;
-
-	ID3D11RenderTargetView* pShadowRTV = nullptr;
+	//ID3D11PixelShader* pixelShaderShadow = nullptr;
 
 	D3D11_VIEWPORT shadowViewPort;
-	ID3D11Texture2D* pRTVTex = nullptr;
+
 	//Holds the "vanilla" geometry, no skeletal or BS stuff
 	ID3D11InputLayout* VertexlayoutShadow = nullptr; 
 
 	//Set this as resource l8er
 	ID3D11ShaderResourceView* pShadowSRV;
-	//samplers
-	ID3D11SamplerState* sampleStateWrap;
-	ID3D11SamplerState* sampleStateClamp;
 
 	//cbuffers
-	ID3D11Buffer* wMatBuffer;
-	ID3D11Buffer* lightBuffer;  //hardcode instead
-	ID3D11Buffer* lightBuffer2; //hardcode instead
+
 	ID3D11Buffer* matrixBuffer;
 
 	//cbufferStructs

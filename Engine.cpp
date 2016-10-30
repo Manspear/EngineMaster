@@ -575,9 +575,6 @@ HRESULT Engine::CreateDirect3DContext(HWND wndHandle)
 }
 
 void Engine::Clean() {
-
-	shadow.uninitialize();
-
 	gVertexLayout->Release();
 	gVertexLayoutBS->Release();
 	gVertexLayoutSkeletal->Release();
@@ -613,6 +610,8 @@ void Engine::Clean() {
 		listOfModels[i].modelIndexBuffer->Release();
 		listOfModels[i].modelConstantBuffer->Release();
 	}
+	shadow.uninitialize();
+
 	delete particleSys;
 	delete camera;
 	delete input;

@@ -64,20 +64,12 @@ bool ShadowMap::initialize(ID3D11Device * device, HWND handle)
 void ShadowMap::uninitialize()
 {
 	pShadowMap->Release();
-	allan->Release();
 	pShadowDSV->Release();
 	vertexShaderShadow->Release();
-	pixelShaderShadow->Release();
-	pShadowRTV->Release();
-	pRTVTex->Release();
+
 	VertexlayoutShadow->Release();
 	pShadowSRV->Release();
-	sampleStateClamp->Release();
-	sampleStateClamp->Release();
 
-	wMatBuffer->Release();
-	lightBuffer->Release();
-	lightBuffer2->Release();
 	matrixBuffer->Release();
 }
 
@@ -174,52 +166,25 @@ bool ShadowMap::InitializeShader(ID3D11Device* device)
 	// we do not need anymore this COM object, so we release it.
 	pVSS->Release();
 
-	//create pixel shader
-	ID3DBlob* pPSS = nullptr;
-	D3DCompileFromFile(
-		L"ShadowPixel.hlsl", // filename
-		nullptr,		// optional macros
-		nullptr,		// optional include files
-		"PS_main",		// entry point
-		"ps_4_0",		// shader model (target)
-		0,				// shader compile options
-		0,				// effect compile options
-		&pPSS,			// double pointer to ID3DBlob		
-		nullptr			// pointer for Error Blob messages.
-						// how to use the Error blob, see here
-						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
-	);
+	////create pixel shader
+	//ID3DBlob* pPSS = nullptr;
+	//D3DCompileFromFile(
+	//	L"ShadowPixel.hlsl", // filename
+	//	nullptr,		// optional macros
+	//	nullptr,		// optional include files
+	//	"PS_main",		// entry point
+	//	"ps_4_0",		// shader model (target)
+	//	0,				// shader compile options
+	//	0,				// effect compile options
+	//	&pPSS,			// double pointer to ID3DBlob		
+	//	nullptr			// pointer for Error Blob messages.
+	//					// how to use the Error blob, see here
+	//					// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+	//);
 
-	device->CreatePixelShader(pPSS->GetBufferPointer(), pPSS->GetBufferSize(), nullptr, &pixelShaderShadow);
-	// we do not need anymore this COM object, so we release it.
-	pPSS->Release();
-
-
-	//create samplers
-	D3D11_SAMPLER_DESC samplerDesc;
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	samplerDesc.BorderColor[0] = 0;
-	samplerDesc.BorderColor[1] = 0;
-	samplerDesc.BorderColor[2] = 0;
-	samplerDesc.BorderColor[3] = 0;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	device->CreateSamplerState(&samplerDesc, &sampleStateWrap);
-
-
-	// create the clamp texture
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-
-	device->CreateSamplerState(&samplerDesc, &sampleStateClamp);
+	//device->CreatePixelShader(pPSS->GetBufferPointer(), pPSS->GetBufferSize(), nullptr, &pixelShaderShadow);
+	//// we do not need anymore this COM object, so we release it.
+	//pPSS->Release();
 
 	return true;
 }
