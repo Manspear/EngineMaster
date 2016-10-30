@@ -627,7 +627,8 @@ void Engine::Clean() {
 
 	ID3D11Debug* debugDevice = nullptr;
 	reinterpret_cast<void*>(debugDevice);
-	gDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debugDevice));
+	//gDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debugDevice));
+	gDevice->QueryInterface(IID_PPV_ARGS(&debugDevice));
 	debugDevice->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 	debugDevice->Release();
 	gDevice->Release();
