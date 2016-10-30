@@ -583,6 +583,12 @@ void Engine::Clean() {
 	gVertexShaderSkeletal->Release();
 	gPixelShader->Release();
 	gGeometryShader->Release();
+	//SHADOW STUFF
+	gPSShadowTextureSampler->Release();
+	gVertexShadowedShader->Release();
+	gInputLayoutShadowed->Release();
+	gGeometryShadowedShader->Release();
+	gPixelShadowedShader->Release();
 
 	gBackbufferRTV->Release();
 	gSwapChain->Release();
