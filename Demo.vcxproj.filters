@@ -116,9 +116,6 @@
     <FxCompile Include="ShadowVertex.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="ShadowPixel.hlsl">
-      <Filter>Source Files\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="BasicGeometryShadowed.hlsl">
       <Filter>Source Files\Shaders</Filter>
     </FxCompile>

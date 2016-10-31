@@ -73,6 +73,7 @@ void GS_main(triangle GSINPUT input[3] : SV_POSITION, inout TriangleStream< GSOu
 			element.tangent = tangent;
 			element.biTanget = biTangent;
 		
+            //Backface Culling
 			if (dot(camPos - element.worldPosition, normal) > 0)
 				output.Append(element);
 		}

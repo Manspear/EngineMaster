@@ -81,13 +81,14 @@ void GS_main(triangle GSINPUT input[3] : SV_POSITION, inout TriangleStream< GSOu
 
 		//Gets the vertex values stored in lightPos to be projected onto the light's view-plane. 
 		matrix lightviewProj = mul(lightViewMat, lightProjectionMat);
-		float4 lightWorldPos = mul(input[i].lightPos, worldMatrix);
+        float4 modelWorldPos = mul(input[i].lightPos, worldMatrix); // lightPos samma som Pos som float4 än så länge
 
-		element.lightPos = mul(lightWorldPos, lightviewProj);
+        element.lightPos = mul(modelWorldPos, lightviewProj);
 
 		element.tangent = tangent;
 		element.biTanget = biTangent;
 
+        //backface
 		if (dot(camPos - element.worldPosition.xyz, normal) > 0)
 			output.Append(element);
 	}

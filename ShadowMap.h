@@ -60,7 +60,7 @@ public:
 
 	ID3D11Texture2D* getDepthTexture();
 
-	ID3D11Buffer* lvmatrixBuffer;
+	ID3D11Buffer* lightViewProjMatrixBuffer;
 private:
 	bool InitializeShader(ID3D11Device* device);
 	void RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
@@ -108,7 +108,7 @@ private:
 
 	//cbuffers
 
-	ID3D11Buffer* matrixBuffer;
+	ID3D11Buffer* lightViewMatrixBuffer;
 
 	//cbufferStructs
 	struct matrixCbuff

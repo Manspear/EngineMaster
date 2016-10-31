@@ -70,8 +70,8 @@ void ShadowMap::uninitialize()
 	VertexlayoutShadow->Release();
 	pShadowSRV->Release();
 
-	lvmatrixBuffer->Release();
-	matrixBuffer->Release();
+	lightViewProjMatrixBuffer->Release();
+	lightViewMatrixBuffer->Release();
 }
 
 //Get an array containing all models in the scene 
@@ -82,14 +82,14 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 	ID3D11RenderTargetView* RTV, ID3D11DepthStencilView* DSV,
 	D3D11_VIEWPORT& cameraViewport)
 {
-	D3D11_VIEWPORT BAJS;
-	BAJS.Width = (float)640;
-	BAJS.Height = (float)640;
-	BAJS.MinDepth = 0.0f;
-	BAJS.MaxDepth = 1.0f;
-	BAJS.TopLeftX = 0;
-	BAJS.TopLeftY = 0;
-	deviceContext->RSSetViewports(1, &BAJS);
+	D3D11_VIEWPORT lightViewport;
+	lightViewport.Width = (float)640;
+	lightViewport.Height = (float)640;
+	lightViewport.MinDepth = 0.0f;
+	lightViewport.MaxDepth = 1.0f;
+	lightViewport.TopLeftX = 0;
+	lightViewport.TopLeftY = 0;
+	deviceContext->RSSetViewports(1, &lightViewport);
 
 	deviceContext->OMSetRenderTargets(0, NULL, pShadowDSV);
 	deviceContext->ClearDepthStencilView(pShadowDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -117,7 +117,7 @@ ID3D11ShaderResourceView* ShadowMap::RenderFirstPassShadowed(ID3D11DeviceContext
 
 			deviceContext->IASetInputLayout(VertexlayoutShadow);
 
-			deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
+			deviceContext->VSSetConstantBuffers(0, 1, &lightViewMatrixBuffer);
 			deviceContext->VSSetConstantBuffers(1, 1, &model[i].modelConstantBuffer);
 
 			deviceContext->IASetIndexBuffer(model[i].modelIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -167,26 +167,6 @@ bool ShadowMap::InitializeShader(ID3D11Device* device)
 	// we do not need anymore this COM object, so we release it.
 	pVSS->Release();
 
-	////create pixel shader
-	//ID3DBlob* pPSS = nullptr;
-	//D3DCompileFromFile(
-	//	L"ShadowPixel.hlsl", // filename
-	//	nullptr,		// optional macros
-	//	nullptr,		// optional include files
-	//	"PS_main",		// entry point
-	//	"ps_4_0",		// shader model (target)
-	//	0,				// shader compile options
-	//	0,				// effect compile options
-	//	&pPSS,			// double pointer to ID3DBlob		
-	//	nullptr			// pointer for Error Blob messages.
-	//					// how to use the Error blob, see here
-	//					// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
-	//);
-
-	//device->CreatePixelShader(pPSS->GetBufferPointer(), pPSS->GetBufferSize(), nullptr, &pixelShaderShadow);
-	//// we do not need anymore this COM object, so we release it.
-	//pPSS->Release();
-
 	return true;
 }
 
@@ -209,7 +189,7 @@ void ShadowMap::createCbuffers(ID3D11Device* device)
 	matrixDesc.MiscFlags = 0;
 	matrixDesc.StructureByteStride = 0;
 
-	device->CreateBuffer(&matrixDesc, NULL, &matrixBuffer);
+	device->CreateBuffer(&matrixDesc, NULL, &lightViewMatrixBuffer);
 
 	lvmMatrixDesc.Usage = D3D11_USAGE_DYNAMIC;
 	lvmMatrixDesc.ByteWidth = sizeof(lvMatrixCbuff);
@@ -218,7 +198,7 @@ void ShadowMap::createCbuffers(ID3D11Device* device)
 	lvmMatrixDesc.MiscFlags = 0;
 	lvmMatrixDesc.StructureByteStride = 0;
 
-	device->CreateBuffer(&lvmMatrixDesc, NULL, &lvmatrixBuffer);
+	device->CreateBuffer(&lvmMatrixDesc, NULL, &lightViewProjMatrixBuffer);
 }
 
 void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * deviceContext)
@@ -239,27 +219,27 @@ void ShadowMap::initializeMatrix(ID3D11Device* device, ID3D11DeviceContext * dev
 
 	D3D11_MAPPED_SUBRESOURCE mapThing;
 	matrixCbuff* dataPtr;
-	deviceContext->Map(matrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapThing);
+	deviceContext->Map(lightViewMatrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapThing);
 
 	dataPtr = (matrixCbuff*)mapThing.pData;
 	dataPtr->lightViewProjection = viewProj;
 	
-	deviceContext->Unmap(matrixBuffer, NULL);
+	deviceContext->Unmap(lightViewMatrixBuffer, NULL);
 
 	
 	D3D11_MAPPED_SUBRESOURCE mapThing2;
 	lvMatrixCbuff* dataPtr2;
-	deviceContext->Map(lvmatrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapThing2);
+	deviceContext->Map(lightViewProjMatrixBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapThing2);
 
 	dataPtr2 = (lvMatrixCbuff*)mapThing2.pData;
 	dataPtr2->lightView = XMMatrixTranspose(viewMat);
 	dataPtr2->lightProj = XMMatrixTranspose(ProjectionMat);
-	deviceContext->Unmap(lvmatrixBuffer, NULL);
+	deviceContext->Unmap(lightViewProjMatrixBuffer, NULL);
 }
 
 ID3D11Buffer * ShadowMap::getLightCbuffer()
 {
-	return matrixBuffer;
+	return lightViewMatrixBuffer;
 }
 
 void ShadowMap::RenderShader(ID3D11DeviceContext * deviceContext, int indexCount)
