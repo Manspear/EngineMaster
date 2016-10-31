@@ -56,21 +56,25 @@ float4 PS_main(PS_IN input) : SV_Target
     //Gets the lightPosition (in NDC space) into UV space 
 	float2 smTex = float2(0.5f*input.lightPosition.x + 0.5f, -0.5f * input.lightPosition.y + 0.5f);
 	
-	//Pixel depth for shadowing
+	//Pixel depth for shadowing. 
+    //The lightposition is in NDC space, where no perspective exists, everything is straight & good.
+    //This means that the z-value (once normalized) can effectively be used in comparison with
+    //the depth-buffer / shadow buffer 
 	float depth = input.lightPosition.z / input.lightPosition.w;
 	
 	//Now do point sampling. We assume that width == height
 	float dx = 1.0f / 640.f;
 	float s0 = (shadowMap.Sample(sampShadow, smTex).r + bias < depth) ? 0.0f : 1.0f;
-	float s1 = (shadowMap.Sample(sampShadow, smTex + float2(dx, 0.0f)).r + bias < depth) ? 0.0f : 1.0f;
-	float s2 = (shadowMap.Sample(sampShadow, smTex + float2(0.0f, dx)).r + bias < depth) ? 0.0f : 1.0f;
-	float s3 = (shadowMap.Sample(sampShadow, smTex + float2(dx, dx)).r + bias < depth) ? 0.0f : 1.0f;
+	//float s1 = (shadowMap.Sample(sampShadow, smTex + float2(dx, 0.0f)).r + bias < depth) ? 0.0f : 1.0f;
+	//float s2 = (shadowMap.Sample(sampShadow, smTex + float2(0.0f, dx)).r + bias < depth) ? 0.0f : 1.0f;
+	//float s3 = (shadowMap.Sample(sampShadow, smTex + float2(dx, dx)).r + bias < depth) ? 0.0f : 1.0f;
 	
 	//Transform the shadowmap uv to texel space
 	float2 texelPos = smTex * 640.f;
 	float2 lerps = frac(texelPos);
 	
-	float shadowCoeff = lerp(lerp(s0, s1, lerps.x), lerp(s2, s3, lerps.x), lerps.y);
+	//float shadowCoeff = lerp(lerp(s0, s1, lerps.x), lerp(s2, s3, lerps.x), lerps.y);
+    float shadowCoeff = s0;
 	//This is the final color, when shadowCoeff is combined with the calculated color
 	float3 litColor;
 	
