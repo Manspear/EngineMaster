@@ -14,7 +14,7 @@
 #include "Engine.h"
 
 using namespace DirectX;
-//Didn't know how to put WndProc and initWindow in Engine. VS complained too much.
+//Didn't know how to put WndProc and initWindow in Engine. VS complained too much
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -65,7 +65,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	if (wndHandle)
 	{
+		//console
+		AllocConsole();
+		freopen("CONOUT$", "wb", stdout);
 		HRESULT CreateDirect3DContext(HWND wndHandle); //need to type engine.h
+
 
 		EngineClass.Initialize(wndHandle, hInstance);
 

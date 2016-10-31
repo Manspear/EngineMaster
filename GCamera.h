@@ -24,17 +24,22 @@ public:
 
 	//FUNCTIONS
 
+
+
 	//VEIW
-	
-	void move(XMFLOAT3 direction);
-	void rotate(XMVECTOR axis, float degrees);
-	void setPosition(XMVECTOR& newPosition);
-	const XMVECTOR& getPosition() const { return cPosition; }
-	void setTarget(XMVECTOR nTarget);
+	void reset();
+	void moveForward(float speed);
+	void moveStrafe(float speed);
+	void move(XMFLOAT4 direction);
+	void rotate(int rotAx, float degrees);
+	void setPosition(XMFLOAT4& newPosition);
+	const XMFLOAT4 getPosition();
 	const XMVECTOR& getTarget() const { return cTarget; }
 	const XMVECTOR getUp(); //returns camera up vector
 	const XMVECTOR getLookAtTarget(); //returns camera look at target vector
 	const XMMATRIX getViewMatrix();
+	XMFLOAT4 getCameraDirection();
+
 
 	//PROJECTION
 	void setFrustAngle(float Angle);
@@ -63,7 +68,8 @@ public:
 
 private:
 	void initViewMatrix();
-
+	XMVECTOR FtoV(XMFLOAT4& flo);
+	XMFLOAT4 VtoF(XMVECTOR& vec);
 	
 
 

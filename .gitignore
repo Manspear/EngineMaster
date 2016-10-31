@@ -6,10 +6,10 @@
 *.user
 *.userosscache
 *.sln.docstates
-
+*.VC.db
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
-
+*.db
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -279,4 +279,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-Demo.vcxproj
+
+#D3DDemo.VC.db
+D3DDemo.VC.db
